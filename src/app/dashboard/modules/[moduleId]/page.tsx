@@ -12,6 +12,8 @@ import { MapVisualization } from "@/components/modules/MapVisualization";
 import { HeatmapOverlay } from "@/components/modules/HeatmapOverlay";
 import { ShipTracker } from "@/components/modules/ShipTracker";
 import { PlasticFlowMap } from "@/components/modules/PlasticFlowMap";
+import { OceanDebrisMap } from "@/components/modules/OceanDebrisMap";
+import { AirQualityMap } from "@/components/modules/AirQualityMap";
 import { HotspotDetailDrawer } from "@/components/modules/HotspotDetailDrawer";
 import { ActionCard } from "@/components/modules/ActionCard";
 import { Icon } from "@/components/ui/icons";
@@ -72,6 +74,8 @@ function getValueRangeConfig(moduleId: string) {
       return { label: "Plastic Volume", unit: "kg", min: 0, max: 5000, step: 100 };
     case "port-emissions":
       return { label: "CO₂ Emissions", unit: "t", min: 0, max: 1000, step: 50 };
+    case "air-quality":
+      return { label: "Air Quality Index", unit: "AQI", min: 0, max: 300, step: 10 };
     default:
       return undefined;
   }
@@ -94,7 +98,7 @@ export default function ModuleDetailPage() {
     }
     // Fallback to static city data
     const fallbackCity = fallbackCities.find((c) => c.id === selectedCitySlug);
-    return fallbackCity?.coordinates || { lat: 52.3676, lng: 4.9041 }; // Amsterdam default
+    return fallbackCity?.coordinates || { lat: 41.3851, lng: 2.1734 }; // Barcelona default
   }, [selectedCity, selectedCitySlug]);
 
   // Fetch hotspots from Convex for the selected city and module
@@ -260,8 +264,8 @@ export default function ModuleDetailPage() {
       <ModuleActionBar
         module={module as Module}
         hotspots={exportableHotspots}
-        cityId={selectedCityId || "amsterdam"}
-        cityName={selectedCity?.name || "Amsterdam"}
+        cityId={selectedCityId || "barcelona"}
+        cityName={selectedCity?.name || "Barcelona"}
         currentView="map"
         isFilterOpen={isFilterPanelOpen}
         onFilterToggle={() => setIsFilterPanelOpen(true)}
@@ -304,6 +308,14 @@ export default function ModuleDetailPage() {
 
           {moduleId === "coastal-plastic" && (
             <PlasticFlowMap key={selectedCitySlug} cityId={selectedCitySlug} height={560} className="mb-6" />
+          )}
+
+          {moduleId === "ocean-plastic" && (
+            <OceanDebrisMap key={selectedCitySlug} cityId={selectedCitySlug} height={560} className="mb-6" />
+          )}
+
+          {moduleId === "air-quality" && (
+            <AirQualityMap key={selectedCitySlug} cityId={selectedCitySlug} height={560} className="mb-6" />
           )}
 
           {/* Standard hotspot map for all modules */}

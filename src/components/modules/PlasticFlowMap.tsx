@@ -60,29 +60,36 @@ function generateCurrents(cityLat: number, cityLng: number): CurrentVector[] {
   return currents;
 }
 
-// Generate accumulation zones
+// Generate accumulation zones - Barcelona beaches and coastline
 function generateAccumulationZones(cityLat: number, cityLng: number): AccumulationZone[] {
   return [
     {
       id: "az1",
-      position: { lat: cityLat + 0.025, lng: cityLng + 0.05 },
+      position: { lat: cityLat - 0.010, lng: cityLng + 0.019 },
       intensity: 0.95,
-      label: "Marina Beach",
-      plasticAmount: "2,400 kg/week",
+      label: "Platja de la Barceloneta",
+      plasticAmount: "380 kg/week",
     },
     {
       id: "az2",
-      position: { lat: cityLat + 0.005, lng: cityLng + 0.055 },
-      intensity: 0.75,
-      label: "River Delta",
-      plasticAmount: "1,800 kg/week",
+      position: { lat: cityLat + 0.030, lng: cityLng + 0.056 },
+      intensity: 0.98,
+      label: "Desembocadura del Besòs",
+      plasticAmount: "520 kg/week",
     },
     {
       id: "az3",
-      position: { lat: cityLat - 0.015, lng: cityLng + 0.04 },
-      intensity: 0.5,
-      label: "Tourist Beach",
-      plasticAmount: "600 kg/week",
+      position: { lat: cityLat, lng: cityLng + 0.032 },
+      intensity: 0.70,
+      label: "Port Olímpic Marina",
+      plasticAmount: "245 kg/week",
+    },
+    {
+      id: "az4",
+      position: { lat: cityLat + 0.010, lng: cityLng + 0.042 },
+      intensity: 0.45,
+      label: "Platja del Bogatell",
+      plasticAmount: "165 kg/week",
     },
   ];
 }
@@ -94,7 +101,7 @@ interface PlasticFlowMapProps {
 }
 
 export function PlasticFlowMap({
-  cityId = "amsterdam",
+  cityId = "barcelona",
   className = "",
   height = 500,
 }: PlasticFlowMapProps) {
@@ -464,7 +471,7 @@ export function PlasticFlowMap({
             </div>
             <div>
               <p className="text-2xl font-bold text-red-500">
-                4.8K
+                1.3K
               </p>
               <p className="text-xs text-[var(--foreground-muted)]">kg/week forecast</p>
             </div>

@@ -39,7 +39,7 @@ export default function DashboardLayout({
   useEffect(() => {
     setIsHydrated(true);
   }, []);
-  const selectedCity = cities.find(c => c.id === (isHydrated ? defaultCity : "amsterdam")) || cities[0];
+  const selectedCity = cities.find(c => c.id === (isHydrated ? defaultCity : "barcelona")) || cities[0];
 
   // Extract current module from pathname
   const moduleMatch = pathname.match(/\/dashboard\/modules\/([^/]+)/);

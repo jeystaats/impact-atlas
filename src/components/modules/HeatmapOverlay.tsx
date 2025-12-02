@@ -18,18 +18,26 @@ interface HeatPoint {
   temperature: number; // degrees above baseline
 }
 
+// Barcelona heat island clusters data
+const BARCELONA_HEAT_CLUSTERS = [
+  { offsetLat: 0.006, offsetLng: -0.008, intensity: 0.95, temp: 5.8, label: "Eixample District" },
+  { offsetLat: -0.030, offsetLng: -0.048, intensity: 0.92, temp: 6.4, label: "Zona Franca Industrial" },
+  { offsetLat: 0.002, offsetLng: -0.003, intensity: 0.75, temp: 4.2, label: "Plaça Catalunya" },
+  { offsetLat: 0.018, offsetLng: 0.014, intensity: 0.70, temp: 4.5, label: "Glòries" },
+  { offsetLat: -0.006, offsetLng: -0.033, intensity: 0.55, temp: 3.1, label: "Sants Station" },
+];
+
 // Generate realistic heat island data
 function generateHeatData(cityLat: number, cityLng: number): HeatPoint[] {
   const points: HeatPoint[] = [];
 
-  // Create clusters of heat (urban heat islands)
-  const clusters = [
-    { lat: cityLat + 0.005, lng: cityLng + 0.01, intensity: 0.95, temp: 5.2 }, // Downtown
-    { lat: cityLat + 0.02, lng: cityLng + 0.015, intensity: 0.8, temp: 4.1 }, // Industrial
-    { lat: cityLat - 0.01, lng: cityLng - 0.02, intensity: 0.6, temp: 2.8 }, // Shopping
-    { lat: cityLat + 0.015, lng: cityLng + 0.03, intensity: 0.4, temp: 1.5 }, // Residential
-    { lat: cityLat - 0.025, lng: cityLng + 0.005, intensity: 0.7, temp: 3.5 }, // Transit hub
-  ];
+  // Create clusters of heat (urban heat islands) - Barcelona-specific
+  const clusters = BARCELONA_HEAT_CLUSTERS.map(cluster => ({
+    lat: cityLat + cluster.offsetLat,
+    lng: cityLng + cluster.offsetLng,
+    intensity: cluster.intensity,
+    temp: cluster.temp,
+  }));
 
   // Add core points
   clusters.forEach((cluster) => {
@@ -76,7 +84,7 @@ interface HeatmapOverlayProps {
 }
 
 export function HeatmapOverlay({
-  cityId = "amsterdam",
+  cityId = "barcelona",
   className = "",
   height = 500,
   showControls = true,
@@ -154,13 +162,13 @@ export function HeatmapOverlay({
     },
   };
 
-  // Hot spots labels
+  // Hot spots labels - Barcelona locations
   const hotSpots = heatData
     .filter((p) => p.intensity > 0.7)
     .slice(0, 5)
     .map((point, index) => ({
       ...point,
-      label: ["Downtown Core", "Industrial Zone", "Transit Hub", "Commercial Area", "Parking Complex"][index] || "Heat Island",
+      label: BARCELONA_HEAT_CLUSTERS[index]?.label || "Heat Island",
     }));
 
   if (!MAPBOX_TOKEN) {

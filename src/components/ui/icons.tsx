@@ -63,6 +63,7 @@ import {
   Bell,
   BellRing,
   Minimize2,
+  Wind,
   type LucideProps,
 } from "lucide-react";
 
@@ -131,6 +132,7 @@ export const Icons = {
   bell: Bell,
   bellRing: BellRing,
   minimize: Minimize2,
+  wind: Wind,
 };
 
 export type IconName = keyof typeof Icons;
@@ -158,6 +160,7 @@ export function ModuleIcon({ moduleId, className, style }: ModuleIconProps) {
     "port-emissions": "ship",
     "biodiversity": "leaf",
     "restoration": "sprout",
+    "air-quality": "wind",
   };
 
   const iconName = iconMap[moduleId] || "globe";

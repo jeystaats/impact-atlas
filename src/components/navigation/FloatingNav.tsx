@@ -5,10 +5,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
 const navLinks = [
-  { name: "Vision", href: "#vision" },
-  { name: "Modules", href: "#modules" },
-  { name: "Process", href: "#process" },
-  { name: "Impact", href: "#impact" },
+  { name: "About", href: "/about" },
+  { name: "How It Works", href: "/how-it-works" },
+  { name: "Team", href: "/team" },
+  { name: "Impact", href: "/impact" },
 ];
 
 export default function FloatingNav() {

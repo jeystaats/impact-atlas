@@ -25,7 +25,7 @@ interface CombinedHotspot extends HotspotData {
 }
 
 export function CityOverviewMap({
-  cityId = "amsterdam",
+  cityId = "barcelona",
   className = "",
   height = 400,
 }: CityOverviewMapProps) {

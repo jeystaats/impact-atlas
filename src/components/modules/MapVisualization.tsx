@@ -117,7 +117,7 @@ export function MapVisualization({
   onHotspotClick,
   onViewDetails,
   selectedHotspot,
-  center = { lat: 52.3676, lng: 4.9041 }, // Amsterdam default
+  center = { lat: 41.3851, lng: 2.1734 }, // Barcelona default
   zoom = 12,
   geoJsonData,
   showLayerControls = true,
@@ -192,6 +192,26 @@ export function MapVisualization({
   // ==========================================================================
   // EFFECTS
   // ==========================================================================
+
+  // Auto-fit bounds to hotspots on initial load
+  useEffect(() => {
+    if (hotspots.length > 0 && mapRef.current) {
+      const lngs = hotspots.map((h) => h.lng);
+      const lats = hotspots.map((h) => h.lat);
+      const bounds: [[number, number], [number, number]] = [
+        [Math.min(...lngs) - 0.01, Math.min(...lats) - 0.01],
+        [Math.max(...lngs) + 0.01, Math.max(...lats) + 0.01],
+      ];
+
+      // Slight delay to ensure map is ready
+      setTimeout(() => {
+        mapRef.current?.fitBounds(bounds, {
+          padding: 60,
+          duration: 1000,
+        });
+      }, 100);
+    }
+  }, [hotspots]);
 
   // Fly to selected hotspot
   useEffect(() => {

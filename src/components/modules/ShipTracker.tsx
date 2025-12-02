@@ -29,58 +29,64 @@ interface EmissionPlume {
   points: Array<{ lat: number; lng: number; intensity: number }>;
 }
 
-// Generate mock vessel data
+// Generate mock vessel data - Barcelona Port specific
 function generateVessels(cityLat: number, cityLng: number): Vessel[] {
+  // Barcelona Port is south of city center, adjust positions accordingly
+  const portLat = cityLat - 0.015;
+  const portLng = cityLng + 0.010;
+
   const vessels: Vessel[] = [
     {
       id: "v1",
-      name: "MSC Aurora",
+      name: "MSC Barcelona",
       type: "cargo",
-      position: { lat: cityLat + 0.025, lng: cityLng + 0.02 },
+      position: { lat: portLat - 0.005, lng: portLng + 0.005 },
       heading: 225,
       speed: 0,
-      emissions: 85,
+      emissions: 42,
       status: "docked",
+      destination: "Moll de Barcelona",
     },
     {
       id: "v2",
-      name: "Ever Forward",
+      name: "Maersk Valencia",
       type: "cargo",
-      position: { lat: cityLat + 0.03, lng: cityLng + 0.035 },
+      position: { lat: portLat + 0.015, lng: portLng + 0.025 },
       heading: 180,
       speed: 8,
-      emissions: 120,
+      emissions: 85,
       status: "moving",
-      destination: "Container Terminal A",
+      destination: "Terminal A Container",
       eta: "14:30",
     },
     {
       id: "v3",
-      name: "Carnival Spirit",
+      name: "Costa Mediterranea",
       type: "cruise",
-      position: { lat: cityLat + 0.015, lng: cityLng + 0.025 },
+      position: { lat: portLat - 0.002, lng: portLng + 0.012 },
       heading: 270,
       speed: 0,
       emissions: 320,
       status: "docked",
+      destination: "WTC Cruise Terminal",
     },
     {
       id: "v4",
-      name: "Nordic Voyager",
+      name: "Baleària Sicilia",
       type: "tanker",
-      position: { lat: cityLat + 0.04, lng: cityLng - 0.01 },
+      position: { lat: portLat - 0.010, lng: portLng },
       heading: 135,
-      speed: 6,
-      emissions: 95,
+      speed: 12,
+      emissions: 18,
       status: "moving",
-      destination: "Fuel Depot",
+      destination: "Moll Adossat",
       eta: "15:45",
     },
     {
       id: "v5",
-      name: "Ocean Pride",
+      name: "CMA CGM Riviera",
       type: "cargo",
-      position: { lat: cityLat + 0.02, lng: cityLng + 0.045 },
+      position: { lat: portLat + 0.020, lng: portLng + 0.035 },
       heading: 90,
       speed: 0,
       emissions: 45,
@@ -88,9 +94,9 @@ function generateVessels(cityLat: number, cityLng: number): Vessel[] {
     },
     {
       id: "v6",
-      name: "Stella Maris",
+      name: "Nova Mar",
       type: "fishing",
-      position: { lat: cityLat - 0.01, lng: cityLng + 0.03 },
+      position: { lat: portLat + 0.005, lng: portLng + 0.045 },
       heading: 45,
       speed: 4,
       emissions: 8,
@@ -98,15 +104,26 @@ function generateVessels(cityLat: number, cityLng: number): Vessel[] {
     },
     {
       id: "v7",
-      name: "Blue Horizon",
-      type: "cargo",
-      position: { lat: cityLat + 0.035, lng: cityLng + 0.015 },
+      name: "MSC Fantasia",
+      type: "cruise",
+      position: { lat: portLat + 0.025, lng: portLng + 0.015 },
       heading: 200,
       speed: 10,
-      emissions: 110,
+      emissions: 280,
       status: "moving",
-      destination: "Container Terminal B",
-      eta: "13:00",
+      destination: "Port Vell Cruise Terminal",
+      eta: "16:00",
+    },
+    {
+      id: "v8",
+      name: "Grimaldi Lines Roma",
+      type: "cargo",
+      position: { lat: portLat - 0.018, lng: portLng - 0.008 },
+      heading: 160,
+      speed: 0,
+      emissions: 35,
+      status: "docked",
+      destination: "ZAL Port Logistics",
     },
   ];
   return vessels;
@@ -150,7 +167,7 @@ interface ShipTrackerProps {
 }
 
 export function ShipTracker({
-  cityId = "amsterdam",
+  cityId = "barcelona",
   className = "",
   height = 500,
 }: ShipTrackerProps) {

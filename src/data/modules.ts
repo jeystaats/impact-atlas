@@ -79,6 +79,19 @@ export const modules: Module[] = [
     quickWinsCount: 11,
     status: "active",
   },
+  {
+    id: "air-quality",
+    title: "Air Quality & Pollution Monitor",
+    description: "Real-time air quality monitoring with pollutant tracking, health risk assessment, and emission source identification.",
+    icon: "wind",
+    color: "#06B6D4",
+    metrics: [
+      { label: "AQI Now", value: 78, trend: "down", trendValue: "-12" },
+      { label: "PM2.5 Hotspots", value: 14, trend: "down", trendValue: "-3" },
+    ],
+    quickWinsCount: 8,
+    status: "active",
+  },
 ];
 
 export const dataSources: DataSource[] = [
@@ -161,6 +174,7 @@ export const cityModuleStats: Record<string, Record<string, { hotspots: number; 
     "port-emissions": { hotspots: 12, quickWins: 9 },
     "biodiversity": { hotspots: 15, quickWins: 15 },
     "restoration": { hotspots: 18, quickWins: 11 },
+    "air-quality": { hotspots: 11, quickWins: 7 },
   },
   copenhagen: {
     "urban-heat": { hotspots: 15, quickWins: 8 },
@@ -169,6 +183,7 @@ export const cityModuleStats: Record<string, Record<string, { hotspots: number; 
     "port-emissions": { hotspots: 8, quickWins: 7 },
     "biodiversity": { hotspots: 12, quickWins: 12 },
     "restoration": { hotspots: 14, quickWins: 8 },
+    "air-quality": { hotspots: 8, quickWins: 5 },
   },
   singapore: {
     "urban-heat": { hotspots: 35, quickWins: 18 },
@@ -177,6 +192,7 @@ export const cityModuleStats: Record<string, Record<string, { hotspots: number; 
     "port-emissions": { hotspots: 22, quickWins: 15 },
     "biodiversity": { hotspots: 18, quickWins: 14 },
     "restoration": { hotspots: 12, quickWins: 8 },
+    "air-quality": { hotspots: 18, quickWins: 10 },
   },
   barcelona: {
     "urban-heat": { hotspots: 28, quickWins: 14 },
@@ -185,6 +201,7 @@ export const cityModuleStats: Record<string, Record<string, { hotspots: number; 
     "port-emissions": { hotspots: 15, quickWins: 11 },
     "biodiversity": { hotspots: 14, quickWins: 13 },
     "restoration": { hotspots: 16, quickWins: 10 },
+    "air-quality": { hotspots: 14, quickWins: 8 },
   },
   melbourne: {
     "urban-heat": { hotspots: 32, quickWins: 20 },
@@ -193,12 +210,13 @@ export const cityModuleStats: Record<string, Record<string, { hotspots: number; 
     "port-emissions": { hotspots: 19, quickWins: 14 },
     "biodiversity": { hotspots: 25, quickWins: 22 },
     "restoration": { hotspots: 28, quickWins: 12 },
+    "air-quality": { hotspots: 16, quickWins: 9 },
   },
 };
 
 // Get modules with city-specific stats (for fallback use)
 export function getModulesForCity(citySlug: string): Module[] {
-  const cityStats = cityModuleStats[citySlug] || cityModuleStats.amsterdam;
+  const cityStats = cityModuleStats[citySlug] || cityModuleStats.barcelona;
 
   return modules.map((module) => {
     const stats = cityStats[module.id] || { hotspots: 0, quickWins: 0 };

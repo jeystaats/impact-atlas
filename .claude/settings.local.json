@@ -26,7 +26,14 @@
       "Bash(xargs kill:*)",
       "Bash(npx next build:*)",
       "Bash(TURBOPACK=0 npm run build:*)",
-      "Bash(timeout 5 npx convex logs:*)"
+      "Bash(timeout 5 npx convex logs:*)",
+      "Bash(CONVEX_DEPLOYMENT=courteous-lemur-144 npx convex run:*)",
+      "Bash(jq -r \".[] | \"\"\\(.name): \\(.stats.totalHotspots // 0) hotspots, \\(.stats.totalQuickWins // 0) quick wins\"\"\")",
+      "Bash(for mod in urban-heat coastal-plastic ocean-plastic port-emissions biodiversity restoration)",
+      "Bash(do echo -n \"$mod: \")",
+      "Bash(done)",
+      "WebFetch(domain:www.staats.dev)",
+      "WebFetch(domain:www.linkedin.com)"
     ],
     "deny": [],
     "ask": []
