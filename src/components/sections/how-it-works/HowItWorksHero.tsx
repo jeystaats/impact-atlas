@@ -10,8 +10,8 @@ export default function HowItWorksHero() {
   return (
     <section
       ref={sectionRef}
-      className="ld-section relative overflow-hidden"
-      style={{ minHeight: "70vh" }}
+      className="ld-section relative overflow-hidden pt-24"
+      style={{ minHeight: "100vh" }}
     >
       {/* Background */}
       <div className="absolute inset-0">

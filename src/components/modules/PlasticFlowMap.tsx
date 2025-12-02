@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import Map, { Source, Layer, Marker, NavigationControl } from "react-map-gl/mapbox";
+import Map, { Source, Layer, Marker, NavigationControl, MapRef } from "react-map-gl/mapbox";
 import { motion, AnimatePresence } from "framer-motion";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { cities } from "@/data/modules";
@@ -110,6 +110,7 @@ export function PlasticFlowMap({
   const [showPrediction, setShowPrediction] = useState(true);
   const [predictionDays, setPredictionDays] = useState(7);
   const animationRef = useRef<number | undefined>(undefined);
+  const mapRef = useRef<MapRef>(null);
   const { mapStyleUrl } = useMapStyle();
 
   const city = cities.find((c) => c.id === cityId) || cities[0];
@@ -123,6 +124,29 @@ export function PlasticFlowMap({
     () => generateAccumulationZones(city.coordinates.lat, city.coordinates.lng),
     [city]
   );
+
+  // Auto-fit bounds to accumulation zones on initial load
+  useEffect(() => {
+    if (accumulationZones.length > 0 && mapRef.current) {
+      const lngs = accumulationZones.map((z) => z.position.lng);
+      const lats = accumulationZones.map((z) => z.position.lat);
+      // Include city center for context
+      lngs.push(city.coordinates.lng);
+      lats.push(city.coordinates.lat);
+
+      const bounds: [[number, number], [number, number]] = [
+        [Math.min(...lngs) - 0.02, Math.min(...lats) - 0.02],
+        [Math.max(...lngs) + 0.02, Math.max(...lats) + 0.02],
+      ];
+
+      setTimeout(() => {
+        mapRef.current?.fitBounds(bounds, {
+          padding: 50,
+          duration: 1000,
+        });
+      }, 100);
+    }
+  }, [accumulationZones, city]);
 
   // Get current vector at a position
   const getCurrentAt = useCallback(

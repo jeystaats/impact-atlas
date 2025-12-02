@@ -20,8 +20,8 @@ const teamMembers = [
     id: "jesper",
     name: "Jesper Lindvall",
     role: "Product Lead",
-    bio: "Product Manager at EUIS. Translating complex environmental data into user-centered solutions.",
-    expertise: ["Product Management", "UX", "Data Products"],
+    bio: "Product Manager at EUIS. Translating complex environmental data into actionable solutions.",
+    expertise: ["Product Management", "Data Products", "Strategy"],
     imagePath: "/team/jesper.jpeg",
     color: "--ld-bio",
     linkedin: "",
@@ -35,7 +35,7 @@ const teamMembers = [
     expertise: ["React/Next.js", "Design Systems", "Data Viz", "AI"],
     imagePath: "/team/jasper.png",
     color: "--ld-ocean",
-    linkedin: "https://www.linkedin.com/in/jasperstaats/",
+    linkedin: "",
     website: "https://www.staats.dev/",
   },
 ];
@@ -53,7 +53,7 @@ export default function TeamMembersSection() {
     >
       <div className="ld-section-content relative z-10">
         {/* Team Grid */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto items-stretch">
           {teamMembers.map((member, i) => (
             <motion.div
               key={member.id}
@@ -62,11 +62,11 @@ export default function TeamMembersSection() {
               transition={{ duration: 0.6, delay: 0.2 + i * 0.15 }}
               onMouseEnter={() => setHoveredMember(member.id)}
               onMouseLeave={() => setHoveredMember(null)}
-              className="group"
+              className="group h-full"
             >
               {/* Card */}
               <div
-                className="relative rounded-2xl overflow-hidden transition-all duration-500"
+                className="relative rounded-2xl overflow-hidden transition-all duration-500 h-full flex flex-col"
                 style={{
                   background: "var(--ld-navy-deep)",
                   border: hoveredMember === member.id
@@ -103,7 +103,7 @@ export default function TeamMembersSection() {
                 </div>
 
                 {/* Content */}
-                <div className="p-6">
+                <div className="p-6 flex-1 flex flex-col">
                   {/* Role badge */}
                   <div
                     className="inline-block px-3 py-1 rounded-full text-xs font-medium mb-3"
@@ -132,7 +132,7 @@ export default function TeamMembersSection() {
                   </p>
 
                   {/* Expertise tags */}
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  <div className="flex flex-wrap gap-2 mb-4 mt-auto">
                     {member.expertise.map((skill) => (
                       <span
                         key={skill}

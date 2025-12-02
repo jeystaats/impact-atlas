@@ -10,8 +10,8 @@ export default function AboutHeroSection() {
   return (
     <section
       ref={sectionRef}
-      className="ld-section relative overflow-hidden"
-      style={{ minHeight: "90vh" }}
+      className="ld-section relative overflow-hidden pt-24"
+      style={{ minHeight: "100vh" }}
     >
       {/* Animated globe background */}
       <div className="absolute inset-0">
