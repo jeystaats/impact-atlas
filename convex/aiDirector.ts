@@ -459,8 +459,11 @@ export const generateCityData = action({
     country: v.string(),
     coordinates: v.object({ lat: v.number(), lng: v.number() }),
     population: v.number(),
+    // User preferences
+    temperatureUnit: v.optional(v.union(v.literal("celsius"), v.literal("fahrenheit"))),
   },
   handler: async (ctx, args): Promise<{ success: boolean; error?: string }> => {
+    const tempUnit = args.temperatureUnit || "celsius";
     // Create onboarding record first - always do this so the UI can show progress
     const onboardingId = await ctx.runMutation(internal.aiDirector.createOnboarding, {
       cityId: args.cityId,
@@ -515,7 +518,8 @@ export const generateCityData = action({
             args.coordinates,
             args.population,
             moduleSlug,
-            moduleConfig
+            moduleConfig,
+            tempUnit
           );
 
           // Insert hotspots
@@ -637,7 +641,8 @@ async function generateHotspotsWithAI(
   coordinates: { lat: number; lng: number },
   population: number,
   moduleSlug: string,
-  moduleConfig: { name: string; systemPrompt: string }
+  moduleConfig: { name: string; systemPrompt: string },
+  temperatureUnit: "celsius" | "fahrenheit" = "celsius"
 ): Promise<Array<{
   name: string;
   description: string;
@@ -669,6 +674,17 @@ async function generateHotspotsWithAI(
 City info:
 - Population: ${population.toLocaleString()}
 - Coordinates: ${coordinates.lat.toFixed(4)}, ${coordinates.lng.toFixed(4)}
+- Temperature unit preference: ${temperatureUnit === "fahrenheit" ? "Fahrenheit (°F)" : "Celsius (°C)"}
+
+Module context for ${moduleConfig.name}:
+${moduleSlug === "urban-heat" ? `- Focus on heat islands, lack of tree cover, industrial zones
+- Use ${temperatureUnit === "fahrenheit" ? "°F" : "°C"} for temperature differences
+- Typical range: ${temperatureUnit === "fahrenheit" ? "+3.6°F to +14.4°F" : "+2°C to +8°C"} above baseline` : ""}
+${moduleSlug === "coastal-plastic" ? "- Focus on beaches, harbors, river mouths\n- Measure plastic accumulation in kg/week\n- Consider tourism, fishing, urban runoff sources" : ""}
+${moduleSlug === "ocean-plastic" ? "- Focus on offshore areas, current patterns\n- Measure debris density in items/km²\n- Track movement patterns and sources" : ""}
+${moduleSlug === "port-emissions" ? "- Focus on terminals, berths, anchorages\n- Measure emissions in tons CO₂/day\n- Consider vessel types and idling patterns" : ""}
+${moduleSlug === "biodiversity" ? "- Focus on parks, green spaces, corridors\n- Use biodiversity score scale (1-10)\n- Consider habitat connectivity and species" : ""}
+${moduleSlug === "restoration" ? "- Focus on brownfields, degraded areas, vacant lots\n- Use restoration potential score (1-10)\n- Consider remediation needs and community impact" : ""}
 
 Use REAL neighborhood names, streets, and landmarks from ${cityName}.
 Generate realistic severity levels (mix of low, medium, high, with 1-2 critical if appropriate).
@@ -696,7 +712,24 @@ Return JSON only.`,
 
   try {
     const parsed = JSON.parse(content);
-    return parsed.hotspots || [];
+    const hotspots = parsed.hotspots || [];
+
+    // Validate and sanitize each hotspot
+    return hotspots
+      .filter((h: Record<string, unknown>) => h.name) // Must have a name
+      .map((h: Record<string, unknown>) => ({
+        name: String(h.name || "Unknown Hotspot"),
+        description: String(h.description || `${moduleConfig.name} hotspot detected in ${cityName}`),
+        neighborhood: String(h.neighborhood || "City Center"),
+        address: h.address ? String(h.address) : undefined,
+        latOffset: Number(h.latOffset) || (Math.random() - 0.5) * 0.04,
+        lngOffset: Number(h.lngOffset) || (Math.random() - 0.5) * 0.04,
+        severity: (["low", "medium", "high", "critical"].includes(String(h.severity))
+          ? String(h.severity)
+          : "medium") as "low" | "medium" | "high" | "critical",
+        displayValue: String(h.displayValue || ""),
+        metrics: Array.isArray(h.metrics) ? h.metrics : [],
+      }));
   } catch {
     console.error("Failed to parse hotspots JSON:", content);
     return [];
@@ -737,8 +770,16 @@ async function generateQuickWinsWithAI(
           role: "user",
           content: `Generate 3-4 practical quick wins for ${moduleConfig.name.toLowerCase()} improvements in ${cityName}, ${country}.
 
+Module context for ${moduleConfig.name}:
+${moduleSlug === "urban-heat" ? "- Focus on tree planting, cool roofs, shade structures, parking lot greening\n- Prioritize low-income and underserved neighborhoods\n- Consider existing green spaces that can be enhanced" : ""}
+${moduleSlug === "coastal-plastic" ? "- Focus on beach cleanups, trash traps, waste bin placement, awareness campaigns\n- Partner with schools, NGOs, local businesses\n- Address both visible litter and microplastics" : ""}
+${moduleSlug === "ocean-plastic" ? "- Focus on monitoring stations, citizen science, data collection\n- Partner with research institutions and volunteers\n- Establish tracking and classification protocols" : ""}
+${moduleSlug === "port-emissions" ? "- Focus on shore power, speed reduction zones, electric equipment\n- Work with port authority and shipping companies\n- Prioritize high-traffic berths and terminals" : ""}
+${moduleSlug === "biodiversity" ? "- Focus on native plants, pollinator corridors, green roofs, wildlife habitats\n- Connect isolated green spaces\n- Remove invasive species and add nesting sites" : ""}
+${moduleSlug === "restoration" ? "- Focus on community gardens, native meadows, stream restoration\n- Prioritize sites with high visibility and community engagement\n- Consider soil remediation where needed" : ""}
+
 Each quick win should:
-- Reference specific locations in ${cityName}
+- Reference specific locations and neighborhoods in ${cityName}
 - Be achievable in 1-6 months
 - Have clear, measurable outcomes
 - Include 3-5 implementation steps
@@ -767,7 +808,25 @@ Return JSON with a "quickWins" array.`,
 
   try {
     const parsed = JSON.parse(content);
-    return parsed.quickWins || [];
+    const quickWins = parsed.quickWins || [];
+
+    // Validate and sanitize each quick win
+    return quickWins
+      .filter((qw: Record<string, unknown>) => qw.title) // Must have a title
+      .map((qw: Record<string, unknown>) => ({
+        title: String(qw.title || "Untitled Quick Win"),
+        description: String(qw.description || `${moduleConfig.name} improvement opportunity in ${cityName}`),
+        impact: (["low", "medium", "high"].includes(String(qw.impact))
+          ? String(qw.impact)
+          : "medium"),
+        effort: (["low", "medium", "high"].includes(String(qw.effort))
+          ? String(qw.effort)
+          : "medium"),
+        estimatedDays: typeof qw.estimatedDays === "number" ? qw.estimatedDays : 30,
+        co2ReductionTons: typeof qw.co2ReductionTons === "number" ? qw.co2ReductionTons : undefined,
+        tags: Array.isArray(qw.tags) ? qw.tags.map(String) : [moduleSlug],
+        steps: Array.isArray(qw.steps) ? qw.steps.map(String) : undefined,
+      }));
   } catch {
     console.error("Failed to parse quick wins JSON:", content);
     return [];

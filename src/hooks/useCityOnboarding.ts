@@ -5,6 +5,7 @@ import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { useNotificationStore } from "@/stores/useNotificationStore";
+import { usePreferencesStore } from "@/stores/usePreferencesStore";
 
 interface NewCityData {
   slug: string;
@@ -44,6 +45,9 @@ export function useCityOnboarding() {
 
   // Notification store for background progress toasts
   const { addNotification, updateNotification, dismissToast } = useNotificationStore();
+
+  // User preferences - get temperature unit for AI generation
+  const { temperatureUnit } = usePreferencesStore();
   const progressToastId = useRef<string | null>(null);
   const lastModuleStatus = useRef<Record<string, string>>({});
 
@@ -200,12 +204,14 @@ export function useCityOnboarding() {
         });
 
         // Trigger AI data generation (runs in background)
+        // Pass user preferences so AI generates data in preferred format
         generateCityData({
           cityId,
           cityName: cityData.name,
           country: cityData.country,
           coordinates: cityData.coordinates,
           population: cityData.population || 500000,
+          temperatureUnit, // Pass user's temperature preference for urban heat data
         }).catch((error) => {
           console.error("Error generating city data:", error);
         });
@@ -216,7 +222,7 @@ export function useCityOnboarding() {
         throw error;
       }
     },
-    [createCity, generateCityData]
+    [createCity, generateCityData, temperatureUnit]
   );
 
   // Close the onboarding modal

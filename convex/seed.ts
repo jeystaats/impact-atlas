@@ -4,6 +4,7 @@ import { v } from "convex/values";
 import { citiesSeedData } from "./seed/cities";
 import { modulesSeedData } from "./seed/modules";
 import { quickWinsSeedData } from "./seed/quickWins";
+import { barcelonaHotspots, barcelonaQuickWins } from "./seed/barcelonaData";
 
 /**
  * Seed cities into the database
@@ -386,6 +387,150 @@ export const runFullSeed = action({
 
     console.log("Full seed completed!");
     return { success: true };
+  },
+});
+
+/**
+ * Seed comprehensive Barcelona data for all modules
+ */
+export const seedBarcelonaComplete = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const now = Date.now();
+
+    // Get Barcelona city
+    const city = await ctx.db
+      .query("cities")
+      .withIndex("by_slug", (q) => q.eq("slug", "barcelona"))
+      .unique();
+
+    if (!city) {
+      throw new Error("Barcelona city not found. Run seedCities first.");
+    }
+
+    // Get all modules
+    const modules = await ctx.db.query("modules").collect();
+    const moduleSlugToId: Record<string, string> = {};
+    for (const module of modules) {
+      moduleSlugToId[module.slug] = module._id;
+    }
+
+    let hotspotsSeeded = 0;
+    let quickWinsSeeded = 0;
+
+    // Seed hotspots for each module
+    for (const [moduleSlug, hotspots] of Object.entries(barcelonaHotspots)) {
+      const moduleId = moduleSlugToId[moduleSlug];
+      if (!moduleId) {
+        console.log(`Module ${moduleSlug} not found, skipping...`);
+        continue;
+      }
+
+      for (const hotspot of hotspots) {
+        // Check if similar hotspot exists
+        const existing = await ctx.db
+          .query("hotspots")
+          .withIndex("by_city_module", (q) =>
+            q.eq("cityId", city._id).eq("moduleId", moduleId as any)
+          )
+          .filter((q) => q.eq(q.field("name"), hotspot.name))
+          .first();
+
+        if (existing) {
+          continue;
+        }
+
+        await ctx.db.insert("hotspots", {
+          cityId: city._id,
+          moduleId: moduleId as any,
+          name: hotspot.name,
+          description: hotspot.description,
+          coordinates: {
+            lat: city.coordinates.lat + hotspot.offset.lat,
+            lng: city.coordinates.lng + hotspot.offset.lng,
+          },
+          neighborhood: hotspot.neighborhood,
+          severity: hotspot.severity,
+          status: "active",
+          metrics: hotspot.metrics,
+          displayValue: hotspot.displayValue,
+          detectedAt: now - 7 * 24 * 60 * 60 * 1000,
+          lastUpdated: now,
+          createdAt: now,
+        });
+
+        hotspotsSeeded++;
+      }
+    }
+
+    // Seed quick wins for Barcelona
+    for (const [moduleSlug, quickWins] of Object.entries(barcelonaQuickWins)) {
+      const moduleId = moduleSlugToId[moduleSlug];
+      if (!moduleId) {
+        console.log(`Module ${moduleSlug} not found for quick wins, skipping...`);
+        continue;
+      }
+
+      for (let i = 0; i < quickWins.length; i++) {
+        const quickWin = quickWins[i];
+
+        // Check if exists
+        const existing = await ctx.db
+          .query("quickWins")
+          .withIndex("by_city", (q) => q.eq("cityId", city._id))
+          .filter((q) => q.eq(q.field("title"), quickWin.title))
+          .first();
+
+        if (existing) {
+          continue;
+        }
+
+        await ctx.db.insert("quickWins", {
+          cityId: city._id,
+          moduleId: moduleId as any,
+          title: quickWin.title,
+          description: quickWin.description,
+          impact: quickWin.impact,
+          effort: quickWin.effort,
+          estimatedDays: quickWin.estimatedDays,
+          co2ReductionTons: quickWin.co2ReductionTons,
+          tags: [...quickWin.tags, "barcelona"],
+          steps: quickWin.steps,
+          sortOrder: i,
+          isActive: true,
+          createdAt: now,
+          updatedAt: now,
+        });
+
+        quickWinsSeeded++;
+      }
+    }
+
+    console.log(`Seeded Barcelona: ${hotspotsSeeded} hotspots, ${quickWinsSeeded} quick wins`);
+    return { hotspotsSeeded, quickWinsSeeded };
+  },
+});
+
+/**
+ * Run Barcelona-focused seed
+ */
+export const runBarcelonaSeed = action({
+  args: {},
+  handler: async (ctx): Promise<{ success: boolean; hotspotsSeeded: number; quickWinsSeeded: number }> => {
+    console.log("Starting Barcelona seed...");
+
+    // Ensure base data exists
+    await ctx.runMutation(internal.seed.seedCities, {});
+    await ctx.runMutation(internal.seed.seedModules, {});
+
+    // Seed Barcelona comprehensive data
+    const result = await ctx.runMutation(internal.seed.seedBarcelonaComplete, {});
+
+    // Update city stats
+    await ctx.runMutation(internal.seed.updateCityStats, {});
+
+    console.log("Barcelona seed completed!");
+    return { success: true, ...result };
   },
 });
 

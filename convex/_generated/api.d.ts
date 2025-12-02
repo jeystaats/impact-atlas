@@ -22,6 +22,7 @@ import type * as modules from "../modules.js";
 import type * as quickWins from "../quickWins.js";
 import type * as satelliteData from "../satelliteData.js";
 import type * as seed from "../seed.js";
+import type * as seed_barcelonaData from "../seed/barcelonaData.js";
 import type * as seed_cities from "../seed/cities.js";
 import type * as seed_modules from "../seed/modules.js";
 import type * as seed_quickWins from "../seed/quickWins.js";
@@ -49,6 +50,7 @@ declare const fullApi: ApiFromModules<{
   quickWins: typeof quickWins;
   satelliteData: typeof satelliteData;
   seed: typeof seed;
+  "seed/barcelonaData": typeof seed_barcelonaData;
   "seed/cities": typeof seed_cities;
   "seed/modules": typeof seed_modules;
   "seed/quickWins": typeof seed_quickWins;
