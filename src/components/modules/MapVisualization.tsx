@@ -426,7 +426,7 @@ export function MapVisualization({
   // ==========================================================================
 
   return (
-    <div className="relative h-full min-h-[400px] rounded-xl overflow-hidden">
+    <div className="relative h-full min-h-[400px] rounded-b-xl [&_.mapboxgl-canvas-container]:rounded-b-xl [&_.mapboxgl-canvas]:rounded-b-xl">
       <Map
         ref={mapRef}
         mapboxAccessToken={mapboxToken}
@@ -595,8 +595,9 @@ export function MapVisualization({
               anchor="bottom"
               onClose={() => setPopupInfo(null)}
               closeButton={true}
-              className="z-50 [&_.mapboxgl-popup-content]:p-0 [&_.mapboxgl-popup-content]:bg-white [&_.mapboxgl-popup-content]:rounded-xl [&_.mapboxgl-popup-content]:shadow-xl [&_.mapboxgl-popup-content]:border [&_.mapboxgl-popup-content]:border-[var(--border)] [&_.mapboxgl-popup-close-button]:top-2 [&_.mapboxgl-popup-close-button]:right-2 [&_.mapboxgl-popup-close-button]:w-6 [&_.mapboxgl-popup-close-button]:h-6 [&_.mapboxgl-popup-close-button]:flex [&_.mapboxgl-popup-close-button]:items-center [&_.mapboxgl-popup-close-button]:justify-center [&_.mapboxgl-popup-close-button]:rounded-full [&_.mapboxgl-popup-close-button]:bg-[var(--background-secondary)] [&_.mapboxgl-popup-close-button]:text-[var(--foreground-muted)] [&_.mapboxgl-popup-close-button]:hover:bg-[var(--background)] [&_.mapboxgl-popup-close-button]:hover:text-[var(--foreground)]"
-              offset={20}
+              maxWidth="340px"
+              className="z-50 [&_.mapboxgl-popup-content]:p-0 [&_.mapboxgl-popup-content]:bg-white [&_.mapboxgl-popup-content]:rounded-xl [&_.mapboxgl-popup-content]:shadow-xl [&_.mapboxgl-popup-content]:border [&_.mapboxgl-popup-content]:border-[var(--border)] [&_.mapboxgl-popup-content]:overflow-visible [&_.mapboxgl-popup-close-button]:top-2 [&_.mapboxgl-popup-close-button]:right-2 [&_.mapboxgl-popup-close-button]:w-6 [&_.mapboxgl-popup-close-button]:h-6 [&_.mapboxgl-popup-close-button]:flex [&_.mapboxgl-popup-close-button]:items-center [&_.mapboxgl-popup-close-button]:justify-center [&_.mapboxgl-popup-close-button]:rounded-full [&_.mapboxgl-popup-close-button]:bg-[var(--background-secondary)] [&_.mapboxgl-popup-close-button]:text-[var(--foreground-muted)] [&_.mapboxgl-popup-close-button]:hover:bg-[var(--background)] [&_.mapboxgl-popup-close-button]:hover:text-[var(--foreground)]"
+              offset={25}
             >
               <div className="p-4">
                 <MapPopup

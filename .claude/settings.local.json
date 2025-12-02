@@ -21,7 +21,9 @@
       "Bash(NEXT_TURBO=0 npm run build:*)",
       "Bash(npx eslint:*)",
       "Bash(npm run lint:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)"
     ],
     "deny": [],
     "ask": []

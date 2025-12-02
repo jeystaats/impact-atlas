@@ -81,7 +81,7 @@ export default function ModuleDetailPage() {
           )}
 
           {/* Standard hotspot map for all modules */}
-          <div className="rounded-xl border border-[var(--border)] overflow-hidden bg-[var(--background-tertiary)]">
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--background-tertiary)]">
             <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
               <h2 className="font-semibold text-[var(--foreground)]">Hotspot Map</h2>
               <div className="flex items-center gap-2 text-sm text-[var(--foreground-muted)]">
@@ -89,7 +89,7 @@ export default function ModuleDetailPage() {
                 Live data
               </div>
             </div>
-            <div className="h-[500px]">
+            <div className="h-[500px] relative">
               <MapVisualization
                 moduleId={moduleId}
                 hotspots={hotspots}

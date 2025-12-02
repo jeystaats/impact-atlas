@@ -4,6 +4,7 @@ import { ReactNode, useEffect, useRef } from "react";
 import { ConvexReactClient, useMutation, useConvexAuth } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { useAuth, useUser } from "@clerk/nextjs";
+import { toast } from "sonner";
 import { api } from "../../../convex/_generated/api";
 
 const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
@@ -40,6 +41,9 @@ function UserSync() {
         // Reset flag on error so it can retry
         hasSynced.current = false;
         console.error("Failed to sync user to Convex:", error);
+        toast.error("Failed to sync your profile", {
+          description: "Some features may not work correctly. Please refresh the page.",
+        });
       });
     }
 

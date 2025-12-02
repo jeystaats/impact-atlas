@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Icon } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
@@ -59,15 +59,19 @@ export function CitySearchInput({
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Normalize existing cities
-  const normalizedExisting: NormalizedCity[] = existingCities.map((c) => ({
-    slug: c.slug,
-    name: c.name,
-    country: c.country,
-    population: c.population,
-    coordinates: c.coordinates,
-    isNew: false,
-  }));
+  // Normalize existing cities - memoized to prevent infinite re-renders
+  const normalizedExisting: NormalizedCity[] = useMemo(
+    () =>
+      existingCities.map((c) => ({
+        slug: c.slug,
+        name: c.name,
+        country: c.country,
+        population: c.population,
+        coordinates: c.coordinates,
+        isNew: false,
+      })),
+    [existingCities]
+  );
 
   const currentCity = normalizedExisting.find((c) => c.slug === selectedCity) || normalizedExisting[0];
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Space_Grotesk, Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
+import { Toaster } from "sonner";
 import { ConvexClientProvider } from "@/components/providers/ConvexClientProvider";
 import "./globals.css";
 
@@ -63,6 +64,21 @@ export default function RootLayout({
           className={`${spaceGrotesk.variable} ${inter.variable} antialiased bg-ink`}
         >
           <ConvexClientProvider>{children}</ConvexClientProvider>
+          <Toaster
+            position="bottom-right"
+            toastOptions={{
+              style: {
+                background: "var(--background-tertiary)",
+                border: "1px solid var(--border)",
+                color: "var(--foreground)",
+              },
+              classNames: {
+                success: "!border-emerald-500/50",
+                error: "!border-red-500/50",
+                info: "!border-teal-500/50",
+              },
+            }}
+          />
         </body>
       </html>
     </ClerkProvider>

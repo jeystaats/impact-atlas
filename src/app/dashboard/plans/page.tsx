@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import { Icon, ModuleIcon } from "@/components/ui/icons";
 import {
   Plus,
@@ -752,26 +753,56 @@ export default function ActionPlansPage() {
   }, [convexPlans, localPlans]);
 
   const handleStatusChange = async (id: string, newStatus: PlanStatus, convexId?: Id<"actionPlans">) => {
+    const plan = plans.find(p => p.id === id);
+    const statusLabels: Record<PlanStatus, string> = {
+      draft: "Draft",
+      active: "Active",
+      completed: "Completed",
+    };
+
     // If we have a Convex ID, update via Convex
     if (convexId) {
       try {
         await updateStatus({ planId: convexId, status: newStatus });
+        if (newStatus === "completed") {
+          toast.success("Plan completed!", {
+            description: plan?.title,
+            icon: "🎉",
+          });
+        } else {
+          toast.success(`Status updated to ${statusLabels[newStatus]}`, {
+            description: plan?.title,
+          });
+        }
       } catch (error) {
         console.error("Failed to update plan status:", error);
+        toast.error("Failed to update plan status", {
+          description: "Please try again.",
+        });
       }
     } else {
       // Fallback: update local state
       setLocalPlans((prev) =>
-        prev.map((plan) =>
-          plan.id === id
+        prev.map((p) =>
+          p.id === id
             ? {
-                ...plan,
+                ...p,
                 status: newStatus,
-                progress: newStatus === "completed" ? 100 : plan.progress,
+                progress: newStatus === "completed" ? 100 : p.progress,
               }
-            : plan
+            : p
         )
       );
+      if (newStatus === "completed") {
+        toast.success("Plan completed!", {
+          description: plan?.title,
+          icon: "🎉",
+        });
+      } else {
+        toast.success(`Status updated to ${statusLabels[newStatus]}`, {
+          description: plan?.title,
+        });
+      }
     }
   };
 

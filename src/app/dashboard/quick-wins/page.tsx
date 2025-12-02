@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import { Icon, ModuleIcon, IconName } from "@/components/ui/icons";
 import { AIGeneratedBadge, isAIGenerated } from "@/components/ui/AIGeneratedBadge";
 import { modules as fallbackModules } from "@/data/modules";
@@ -216,15 +217,35 @@ export default function QuickWinsPage() {
       try {
         if (isCompleted) {
           await uncompleteQuickWin({ quickWinId: win.convexId });
+          toast.success("Quick win unmarked", {
+            description: win.title,
+          });
         } else {
           await completeQuickWin({ quickWinId: win.convexId });
+          toast.success("Quick win completed!", {
+            description: win.title,
+            icon: "🎉",
+          });
         }
       } catch (error) {
         console.error("Failed to toggle completion:", error);
+        toast.error("Failed to update quick win", {
+          description: "Please try again.",
+        });
       }
     } else {
       // Use progress store for fallback data (persists to localStorage)
       toggleQuickWin(win.id);
+      if (isCompleted) {
+        toast.success("Quick win unmarked", {
+          description: win.title,
+        });
+      } else {
+        toast.success("Quick win completed!", {
+          description: win.title,
+          icon: "🎉",
+        });
+      }
     }
   };
 
