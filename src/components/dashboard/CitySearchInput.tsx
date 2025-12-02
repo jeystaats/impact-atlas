@@ -205,12 +205,12 @@ export function CitySearchInput({
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Backdrop */}
+            {/* Fullscreen Modal Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40"
+              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
               onClick={() => {
                 setIsOpen(false);
                 setSearch("");
@@ -218,139 +218,158 @@ export function CitySearchInput({
               }}
             />
 
-            {/* Dropdown */}
+            {/* Fullscreen Modal */}
             <motion.div
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.2 }}
-              className="absolute top-full left-0 mt-2 w-96 p-3 rounded-xl bg-[var(--background-tertiary)] border border-[var(--border)] shadow-xl z-50"
+              className="fixed inset-4 sm:inset-8 md:inset-12 lg:inset-16 z-50 flex flex-col rounded-2xl bg-[var(--background-secondary)] border border-[var(--border)] shadow-2xl overflow-hidden"
             >
-              {/* Search input */}
-              <div className="relative mb-3">
-                <Icon
-                  name="search"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--foreground-muted)]"
-                />
-                <input
-                  ref={inputRef}
-                  type="text"
-                  placeholder="Search any city worldwide..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-[var(--background-secondary)] border border-[var(--border)] text-sm text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-muted)]"
-                />
-                {isSearching && (
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                    <motion.div
-                      className="w-4 h-4 border-2 border-[var(--accent)] border-t-transparent rounded-full"
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                    />
-                  </div>
-                )}
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-4 sm:p-6 border-b border-[var(--border)]">
+                <div>
+                  <h2 className="text-lg sm:text-xl font-semibold text-[var(--foreground)]">Select City</h2>
+                  <p className="text-sm text-[var(--foreground-muted)]">Choose a city or search worldwide</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    setSearch("");
+                    setMapboxResults([]);
+                  }}
+                  className="p-2 rounded-lg hover:bg-[var(--background-tertiary)] transition-colors"
+                >
+                  <Icon name="x" className="w-5 h-5 text-[var(--foreground-muted)]" />
+                </button>
               </div>
 
-              <div className="max-h-80 overflow-y-auto space-y-2">
-                {/* Existing cities section */}
-                {filteredExisting.length > 0 && (
-                  <div>
-                    <p className="text-xs font-medium text-[var(--foreground-muted)] uppercase tracking-wider px-2 mb-2">
-                      Your Cities
-                    </p>
-                    <div className="space-y-1">
-                      {filteredExisting.map((city) => (
-                        <button
-                          key={city.slug}
-                          onClick={() => handleSelect(city)}
-                          className={cn(
-                            "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left",
-                            city.slug === selectedCity
-                              ? "bg-[var(--accent-bg)] text-[var(--accent-dark)]"
-                              : "hover:bg-[var(--background-secondary)] text-[var(--foreground)]"
-                          )}
-                        >
-                          <div
+              {/* Modal Content */}
+              <div className="flex-1 overflow-hidden flex flex-col">
+                {/* Search input */}
+                <div className="relative mb-4">
+                  <Icon
+                    name="search"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--foreground-muted)]"
+                  />
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    placeholder="Search any city worldwide..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full pl-12 pr-4 py-3 sm:py-4 rounded-xl bg-[var(--background-tertiary)] border border-[var(--border)] text-base text-[var(--foreground)] placeholder:text-[var(--foreground-muted)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent-muted)]"
+                  />
+                  {isSearching && (
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                      <motion.div
+                        className="w-5 h-5 border-2 border-[var(--accent)] border-t-transparent rounded-full"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Scrollable city list */}
+                <div className="flex-1 overflow-y-auto space-y-4">
+                  {/* Existing cities section */}
+                  {filteredExisting.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-[var(--foreground-muted)] uppercase tracking-wider mb-3">
+                        Your Cities
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {filteredExisting.map((city) => (
+                          <button
+                            key={city.slug}
+                            onClick={() => handleSelect(city)}
                             className={cn(
-                              "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
+                              "flex items-center gap-3 p-4 rounded-xl transition-all text-left border",
                               city.slug === selectedCity
-                                ? "bg-[var(--accent)] text-white"
-                                : "bg-[var(--background-secondary)]"
+                                ? "bg-[var(--accent-bg)] border-[var(--accent)] text-[var(--accent-dark)] ring-2 ring-[var(--accent-muted)]"
+                                : "bg-[var(--background-tertiary)] border-[var(--border)] hover:border-[var(--accent-muted)] text-[var(--foreground)]"
                             )}
                           >
-                            <Icon name="mapPin" className="w-4 h-4" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{city.name}</p>
-                            <p className="text-xs text-[var(--foreground-muted)]">{city.country}</p>
-                          </div>
-                          {city.population > 0 && (
-                            <div className="text-right shrink-0">
-                              <p className="text-xs font-medium tabular-nums">
-                                {formatNumber(city.population)}
-                              </p>
+                            <div
+                              className={cn(
+                                "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
+                                city.slug === selectedCity
+                                  ? "bg-[var(--accent)] text-white"
+                                  : "bg-[var(--background-secondary)]"
+                              )}
+                            >
+                              <Icon name="mapPin" className="w-5 h-5" />
                             </div>
-                          )}
-                        </button>
-                      ))}
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium truncate">{city.name}</p>
+                              <p className="text-sm text-[var(--foreground-muted)]">{city.country}</p>
+                            </div>
+                            {city.slug === selectedCity && (
+                              <Icon name="check" className="w-5 h-5 text-[var(--accent)] shrink-0" />
+                            )}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* New cities from Mapbox */}
-                {mapboxResults.length > 0 && (
-                  <div className="pt-2 border-t border-[var(--border)]">
-                    <p className="text-xs font-medium text-[var(--foreground-muted)] uppercase tracking-wider px-2 mb-2 flex items-center gap-2">
-                      <Icon name="plus" className="w-3 h-3" />
-                      Add New City
-                    </p>
-                    <div className="space-y-1">
-                      {mapboxResults.map((city) => (
-                        <button
-                          key={`${city.slug}-${city.country}`}
-                          onClick={() => handleSelect(city)}
-                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left hover:bg-[var(--accent-bg)] group"
-                        >
-                          <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-[var(--accent-muted)] group-hover:bg-[var(--accent)] transition-colors">
-                            <Icon name="plus" className="w-4 h-4 text-[var(--accent-dark)] group-hover:text-white" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate text-[var(--foreground)]">
-                              {city.name}
-                            </p>
-                            <p className="text-xs text-[var(--foreground-muted)]">{city.country}</p>
-                          </div>
-                          <div className="shrink-0">
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--accent-bg)] text-[var(--accent)] font-medium">
+                  {/* New cities from Mapbox */}
+                  {mapboxResults.length > 0 && (
+                    <div className="pt-4 border-t border-[var(--border)]">
+                      <p className="text-xs font-medium text-[var(--foreground-muted)] uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <Icon name="plus" className="w-3 h-3" />
+                        Add New City
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {mapboxResults.map((city) => (
+                          <button
+                            key={`${city.slug}-${city.country}`}
+                            onClick={() => handleSelect(city)}
+                            className="flex items-center gap-3 p-4 rounded-xl transition-all text-left bg-[var(--background-tertiary)] border border-dashed border-[var(--border)] hover:border-[var(--accent)] hover:bg-[var(--accent-bg)] group"
+                          >
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-[var(--accent-muted)] group-hover:bg-[var(--accent)] transition-colors">
+                              <Icon name="plus" className="w-5 h-5 text-[var(--accent-dark)] group-hover:text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium truncate text-[var(--foreground)]">
+                                {city.name}
+                              </p>
+                              <p className="text-sm text-[var(--foreground-muted)]">{city.country}</p>
+                            </div>
+                            <span className="text-xs px-2 py-1 rounded-full bg-[var(--accent-bg)] text-[var(--accent)] font-medium shrink-0">
                               Load data
                             </span>
-                          </div>
-                        </button>
-                      ))}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Empty state */}
-                {search.length >= 2 && !isSearching && filteredExisting.length === 0 && mapboxResults.length === 0 && (
-                  <div className="text-center py-8">
-                    <Icon name="mapPin" className="w-8 h-8 text-[var(--foreground-muted)] mx-auto mb-2" />
-                    <p className="text-sm text-[var(--foreground-muted)]">No cities found</p>
-                    <p className="text-xs text-[var(--foreground-muted)] mt-1">
-                      Try a different search term
-                    </p>
-                  </div>
-                )}
+                  {/* Empty state */}
+                  {search.length >= 2 && !isSearching && filteredExisting.length === 0 && mapboxResults.length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-16">
+                      <Icon name="mapPin" className="w-12 h-12 text-[var(--foreground-muted)] mb-4" />
+                      <p className="text-lg font-medium text-[var(--foreground-muted)]">No cities found</p>
+                      <p className="text-sm text-[var(--foreground-muted)] mt-1">
+                        Try a different search term
+                      </p>
+                    </div>
+                  )}
 
-                {/* Hint when not searching */}
-                {search.length < 2 && filteredExisting.length === 0 && (
-                  <div className="text-center py-8">
-                    <Icon name="search" className="w-8 h-8 text-[var(--foreground-muted)] mx-auto mb-2" />
-                    <p className="text-sm text-[var(--foreground-muted)]">
-                      Type at least 2 characters to search
-                    </p>
-                  </div>
-                )}
+                  {/* Hint when not searching */}
+                  {search.length < 2 && filteredExisting.length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-16">
+                      <Icon name="search" className="w-12 h-12 text-[var(--foreground-muted)] mb-4" />
+                      <p className="text-lg font-medium text-[var(--foreground-muted)]">
+                        Search for a city
+                      </p>
+                      <p className="text-sm text-[var(--foreground-muted)] mt-1">
+                        Type at least 2 characters to search worldwide
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </motion.div>
           </>

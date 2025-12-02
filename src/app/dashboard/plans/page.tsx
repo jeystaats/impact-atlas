@@ -19,6 +19,7 @@ import { useSelectedCity } from "@/hooks/useSelectedCity";
 import { modules as fallbackModules } from "@/data/modules";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useUIStore } from "@/stores/useUIStore";
+import { ActionPlanModal } from "@/components/dashboard/ActionPlanModal";
 
 // Types
 type PlanStatus = "draft" | "active" | "completed";
@@ -307,10 +308,12 @@ function StatusDropdown({
 function ActionPlanCard({
   plan,
   onStatusChange,
+  onEdit,
   index,
 }: {
   plan: NormalizedActionPlan;
   onStatusChange: (id: string, status: PlanStatus, convexId?: Id<"actionPlans">) => void;
+  onEdit: (plan: NormalizedActionPlan) => void;
   index: number;
 }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -340,7 +343,10 @@ function ActionPlanCard({
         }}
       />
 
-      <div className="relative p-6 rounded-xl bg-[var(--background-tertiary)] border border-[var(--border)] hover:border-[var(--stone)] transition-all duration-300">
+      <div
+        onClick={() => onEdit(plan)}
+        className="relative p-6 rounded-xl bg-[var(--background-tertiary)] border border-[var(--border)] hover:border-[var(--stone)] transition-all duration-300 cursor-pointer"
+      >
         {/* Header */}
         <div className="flex items-start justify-between gap-4 mb-4">
           <div className="flex-1 min-w-0">
@@ -437,7 +443,7 @@ function ActionPlanCard({
 }
 
 // Create New Plan Card
-function CreatePlanCard() {
+function CreatePlanCard({ onClick }: { onClick: () => void }) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -445,6 +451,7 @@ function CreatePlanCard() {
       variants={itemVariants}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
+      onClick={onClick}
       className="relative cursor-pointer"
     >
       <motion.div
@@ -695,11 +702,26 @@ function FilterTabs({
   );
 }
 
+// Edit plan type for modal
+interface EditPlanData {
+  id: Id<"actionPlans">;
+  title: string;
+  description?: string;
+  priority: "low" | "medium" | "high";
+  targetDate?: number;
+  quickWinIds: Id<"quickWins">[];
+  notes?: string;
+}
+
 // Main Page Component
 export default function ActionPlansPage() {
   const { selectedCityId } = useSelectedCity();
   const { actionPlansFilters, setActionPlansFilter } = useUIStore();
   const [isHydrated, setIsHydrated] = useState(false);
+
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editPlan, setEditPlan] = useState<EditPlanData | undefined>(undefined);
 
   useEffect(() => {
     setIsHydrated(true);
@@ -714,6 +736,28 @@ export default function ActionPlansPage() {
 
   // Local state for optimistic updates (when using mock data)
   const [localPlans, setLocalPlans] = useState<NormalizedActionPlan[]>(mockActionPlans);
+
+  // Open modal for creating new plan
+  const handleCreatePlan = () => {
+    setEditPlan(undefined);
+    setIsModalOpen(true);
+  };
+
+  // Open modal for editing existing plan
+  const handleEditPlan = (plan: NormalizedActionPlan) => {
+    if (plan.convexId) {
+      setEditPlan({
+        id: plan.convexId,
+        title: plan.title,
+        description: plan.description,
+        priority: plan.priority,
+        targetDate: plan.dueDate ? new Date(plan.dueDate).getTime() : undefined,
+        quickWinIds: [], // Will be loaded in modal
+        notes: undefined,
+      });
+      setIsModalOpen(true);
+    }
+  };
 
   // Normalize Convex plans to component format
   const plans: NormalizedActionPlan[] = useMemo(() => {
@@ -846,6 +890,7 @@ export default function ActionPlansPage() {
           transition={{ delay: 0.2 }}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
+          onClick={handleCreatePlan}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--accent)] text-white font-medium shadow-lg self-start lg:self-auto"
           style={{
             boxShadow: "0 4px 20px var(--teal-glow)",
@@ -876,13 +921,14 @@ export default function ActionPlansPage() {
           animate="visible"
           className="grid md:grid-cols-2 xl:grid-cols-3 gap-6"
         >
-          <CreatePlanCard />
+          <CreatePlanCard onClick={handleCreatePlan} />
           <AnimatePresence mode="popLayout">
             {filteredPlans.map((plan, index) => (
               <ActionPlanCard
                 key={plan.id}
                 plan={plan}
                 onStatusChange={handleStatusChange}
+                onEdit={handleEditPlan}
                 index={index}
               />
             ))}
@@ -936,6 +982,16 @@ export default function ActionPlansPage() {
           </div>
         </div>
       </motion.div>
+
+      {/* Action Plan Modal */}
+      <ActionPlanModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditPlan(undefined);
+        }}
+        editPlan={editPlan}
+      />
     </div>
   );
 }

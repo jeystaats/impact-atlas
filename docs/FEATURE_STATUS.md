@@ -278,7 +278,7 @@
 
 ### Missing
 - [ ] Modal/Dialog
-- [ ] Toast notifications
+- [x] Toast notifications (Sonner)
 - [ ] Dropdown menu (standalone)
 - [ ] Date picker
 - [ ] Error boundaries (global)
@@ -312,4 +312,3 @@
 2. Settings persistence to database
 3. Real-time activity feed
 4. Export functionality (PDF/CSV)
-5. Toast notifications for actions

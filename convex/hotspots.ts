@@ -82,6 +82,47 @@ export const listByCityModule = query({
 });
 
 /**
+ * List hotspots for a city and module by slug
+ * Useful when moduleId is not available (e.g., from URL params)
+ */
+export const listByCityAndModuleSlug = query({
+  args: {
+    cityId: v.optional(v.id("cities")),
+    moduleSlug: v.string(),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    // If no cityId provided, return empty array
+    if (!args.cityId) {
+      return [];
+    }
+
+    // Find the module by slug
+    const module = await ctx.db
+      .query("modules")
+      .withIndex("by_slug", (q) => q.eq("slug", args.moduleSlug))
+      .unique();
+
+    if (!module) {
+      return [];
+    }
+
+    const hotspots = await ctx.db
+      .query("hotspots")
+      .withIndex("by_city_module", (q) =>
+        q.eq("cityId", args.cityId!).eq("moduleId", module._id)
+      )
+      .collect();
+
+    if (args.limit && hotspots.length > args.limit) {
+      return hotspots.slice(0, args.limit);
+    }
+
+    return hotspots;
+  },
+});
+
+/**
  * Get a hotspot by ID
  */
 export const getById = query({

@@ -23,7 +23,8 @@
       "Bash(npm run lint:*)",
       "Bash(git reset:*)",
       "Bash(lsof:*)",
-      "Bash(xargs kill:*)"
+      "Bash(xargs kill:*)",
+      "Bash(npx next build:*)"
     ],
     "deny": [],
     "ask": []

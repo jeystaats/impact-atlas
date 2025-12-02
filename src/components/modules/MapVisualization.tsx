@@ -584,21 +584,29 @@ export function MapVisualization({
           )}
         </AnimatePresence>
 
-        {/* ================================================================
-            DETAILED POPUP
-            ================================================================ */}
-        <AnimatePresence>
-          {popupInfo && (
-            <Popup
-              longitude={popupInfo.lng}
-              latitude={popupInfo.lat}
-              anchor="bottom"
-              onClose={() => setPopupInfo(null)}
-              closeButton={true}
-              maxWidth="340px"
-              className="z-50 [&_.mapboxgl-popup-content]:p-0 [&_.mapboxgl-popup-content]:bg-white [&_.mapboxgl-popup-content]:rounded-xl [&_.mapboxgl-popup-content]:shadow-xl [&_.mapboxgl-popup-content]:border [&_.mapboxgl-popup-content]:border-[var(--border)] [&_.mapboxgl-popup-content]:overflow-visible [&_.mapboxgl-popup-close-button]:top-2 [&_.mapboxgl-popup-close-button]:right-2 [&_.mapboxgl-popup-close-button]:w-6 [&_.mapboxgl-popup-close-button]:h-6 [&_.mapboxgl-popup-close-button]:flex [&_.mapboxgl-popup-close-button]:items-center [&_.mapboxgl-popup-close-button]:justify-center [&_.mapboxgl-popup-close-button]:rounded-full [&_.mapboxgl-popup-close-button]:bg-[var(--background-secondary)] [&_.mapboxgl-popup-close-button]:text-[var(--foreground-muted)] [&_.mapboxgl-popup-close-button]:hover:bg-[var(--background)] [&_.mapboxgl-popup-close-button]:hover:text-[var(--foreground)]"
-              offset={25}
-            >
+      </Map>
+
+      {/* ================================================================
+          HOTSPOT INFO CARD - Positioned at bottom of map, outside Map component
+          ================================================================ */}
+      <AnimatePresence>
+        {popupInfo && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            className="absolute bottom-4 left-4 right-4 z-50 max-w-md"
+          >
+            <div className="bg-white rounded-xl shadow-2xl border border-[var(--border)] overflow-hidden">
+              {/* Close button */}
+              <button
+                onClick={() => setPopupInfo(null)}
+                className="absolute top-3 right-3 w-7 h-7 rounded-full bg-[var(--background-secondary)] flex items-center justify-center text-[var(--foreground-muted)] hover:bg-[var(--background)] hover:text-[var(--foreground)] transition-colors z-10"
+              >
+                <Icon name="x" className="w-4 h-4" />
+              </button>
+
               <div className="p-4">
                 <MapPopup
                   hotspot={popupInfo}
@@ -606,10 +614,10 @@ export function MapVisualization({
                   onClose={() => setPopupInfo(null)}
                 />
               </div>
-            </Popup>
-          )}
-        </AnimatePresence>
-      </Map>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ====================================================================
           MAP CONTROLS OVERLAY
@@ -627,13 +635,24 @@ export function MapVisualization({
       )}
 
       {/* ====================================================================
-          LEGEND
+          LEGEND - Hide when popup is showing to avoid overlap
           ==================================================================== */}
-      <MapLegend
-        title="Severity"
-        items={legendItems}
-        className="absolute bottom-4 left-4"
-      />
+      <AnimatePresence>
+        {!popupInfo && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+          >
+            <MapLegend
+              title="Severity"
+              items={legendItems}
+              className="absolute bottom-4 left-4"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ====================================================================
           HOTSPOT COUNT BADGE

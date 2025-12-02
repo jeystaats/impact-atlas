@@ -59,6 +59,7 @@ import {
   ChevronUp,
   CircleDot,
   Hexagon,
+  Trash2,
   type LucideProps,
 } from "lucide-react";
 
@@ -123,6 +124,7 @@ export const Icons = {
   clock: Clock,
   circleDot: CircleDot,
   hexagon: Hexagon,
+  trash: Trash2,
 };
 
 export type IconName = keyof typeof Icons;

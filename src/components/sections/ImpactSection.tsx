@@ -117,47 +117,55 @@ function FloatingParticle({
   );
 }
 
-// Connection lines SVG component
+// Connection lines SVG component - connects to the module icon positions
 function ConnectionLines({ showOrdered }: { showOrdered: boolean }) {
   // Create connections between module icons (forming a hexagonal network)
   const connections = [
     { from: 0, to: 1 }, { from: 1, to: 2 }, { from: 2, to: 3 },
     { from: 3, to: 4 }, { from: 4, to: 5 }, { from: 5, to: 0 },
-    // Cross connections
+    // Cross connections through center
     { from: 0, to: 3 }, { from: 1, to: 4 }, { from: 2, to: 5 },
   ];
 
+  // Use the same radius as the module icons when ordered (35)
+  const orderedRadius = 35;
+
+  // Calculate position for each icon index
+  const getIconPosition = (index: number) => {
+    const angle = (index / moduleIcons.length) * Math.PI * 2;
+    return {
+      x: 50 + Math.cos(angle) * orderedRadius,
+      y: 50 + Math.sin(angle) * orderedRadius,
+    };
+  };
+
   return (
-    <svg className="absolute inset-0 w-full h-full pointer-events-none">
+    <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 1 }}>
       {connections.map((conn, i) => {
-        const fromAngle = (conn.from / moduleIcons.length) * Math.PI * 2;
-        const toAngle = (conn.to / moduleIcons.length) * Math.PI * 2;
-        const radius = 35;
-        const fromX = 50 + Math.cos(fromAngle) * radius;
-        const fromY = 50 + Math.sin(fromAngle) * radius;
-        const toX = 50 + Math.cos(toAngle) * radius;
-        const toY = 50 + Math.sin(toAngle) * radius;
+        const fromPos = getIconPosition(conn.from);
+        const toPos = getIconPosition(conn.to);
 
         return (
           <motion.line
             key={i}
-            x1={`${fromX}%`}
-            y1={`${fromY}%`}
-            x2={`${toX}%`}
-            y2={`${toY}%`}
+            x1={`${fromPos.x}%`}
+            y1={`${fromPos.y}%`}
+            x2={`${toPos.x}%`}
+            y2={`${toPos.y}%`}
             stroke="var(--ld-teal)"
-            strokeWidth={1}
+            strokeWidth={1.5}
+            strokeLinecap="round"
             initial={{ opacity: 0, pathLength: 0 }}
             animate={showOrdered ? {
-              opacity: 0.4,
+              opacity: 0.5,
               pathLength: 1,
             } : {
               opacity: 0,
               pathLength: 0,
             }}
             transition={{
-              duration: 0.8,
-              delay: showOrdered ? 0.3 + i * 0.08 : 0,
+              duration: 0.6,
+              delay: showOrdered ? 0.5 + i * 0.06 : 0,
               ease: "easeOut",
             }}
           />

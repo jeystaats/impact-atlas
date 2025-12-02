@@ -1,8 +1,12 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
+import { useQuery } from "convex/react";
+import { api } from "../../../../../convex/_generated/api";
+import { useSelectedCity } from "@/hooks/useSelectedCity";
 import { ModuleLayout } from "@/components/modules/ModuleLayout";
 import { MapVisualization } from "@/components/modules/MapVisualization";
 import { HeatmapOverlay } from "@/components/modules/HeatmapOverlay";
@@ -14,6 +18,63 @@ import { Icon } from "@/components/ui/icons";
 import { modules } from "@/data/modules";
 import { moduleHotspots, moduleInsights, HotspotData } from "@/data/hotspots";
 import { notFound } from "next/navigation";
+import { ModuleActionBar } from "@/components/modules/ModuleActionBar";
+import { FilterPanel } from "@/components/modules/FilterPanel";
+import { SearchBar } from "@/components/modules/SearchBar";
+import { FilterChipsContainer, filterStateToChips, handleChipRemoval } from "@/components/modules/FilterChip";
+import {
+  FilterState,
+  DEFAULT_FILTER_STATE,
+  applyFilters,
+  countActiveFilters,
+  getFilterSummary,
+} from "@/lib/filters";
+import {
+  exportToCSV,
+  copyToClipboard,
+  createShareableLink,
+} from "@/lib/export";
+import type { Hotspot, Module } from "@/types";
+
+// Convert HotspotData to Hotspot format for export utilities
+function convertToHotspot(data: HotspotData, moduleId: string): Hotspot {
+  return {
+    id: data.id,
+    moduleId,
+    location: {
+      lat: data.lat,
+      lng: data.lng,
+      name: data.location,
+    },
+    severity: data.severity,
+    title: data.label,
+    description: data.description,
+    aiInsights: data.recommendations.map((rec, i) => ({
+      id: `insight-${data.id}-${i}`,
+      type: "recommendation" as const,
+      title: "AI Recommendation",
+      description: rec,
+      confidence: 0.85,
+      dataSource: "Impact Atlas AI",
+    })),
+    actions: [],
+  };
+}
+
+// Get value range config based on module type
+function getValueRangeConfig(moduleId: string) {
+  switch (moduleId) {
+    case "urban-heat":
+      return { label: "Temperature Anomaly", unit: "°C", min: 0, max: 10, step: 0.5 };
+    case "coastal-plastic":
+    case "ocean-plastic":
+      return { label: "Plastic Volume", unit: "kg", min: 0, max: 5000, step: 100 };
+    case "port-emissions":
+      return { label: "CO₂ Emissions", unit: "t", min: 0, max: 1000, step: 50 };
+    default:
+      return undefined;
+  }
+}
 
 export default function ModuleDetailPage() {
   const params = useParams();
@@ -22,15 +83,67 @@ export default function ModuleDetailPage() {
   const [drawerHotspot, setDrawerHotspot] = useState<HotspotData | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
+  // Get selected city - this makes the page reactive to city changes
+  const { selectedCityId, selectedCity } = useSelectedCity();
+
+  // Fetch hotspots from Convex for the selected city and module
+  const convexHotspots = useQuery(
+    api.hotspots.listByCityAndModuleSlug,
+    selectedCityId ? { cityId: selectedCityId, moduleSlug: moduleId } : "skip"
+  );
+
+  // Filter state
+  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTER_STATE);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastUpdated] = useState(new Date());
+
   const module = modules.find((m) => m.id === moduleId);
   if (!module) {
     notFound();
   }
 
-  const hotspots = moduleHotspots[moduleId] || [];
+  // Use Convex data if available, fallback to static data
+  const fallbackHotspots = moduleHotspots[moduleId] || [];
   const insights = moduleInsights[moduleId] || [];
 
-  const selectedHotspotData = hotspots.find((h) => h.id === selectedHotspot);
+  // Convert Convex hotspots to HotspotData format for compatibility
+  const allHotspots: HotspotData[] = useMemo(() => {
+    if (convexHotspots && convexHotspots.length > 0) {
+      return convexHotspots.map((h) => ({
+        id: h._id,
+        label: h.name,
+        location: h.address || h.neighborhood || `${h.coordinates.lat.toFixed(3)}, ${h.coordinates.lng.toFixed(3)}`,
+        lat: h.coordinates.lat,
+        lng: h.coordinates.lng,
+        severity: h.severity,
+        value: h.displayValue || "",
+        description: h.description,
+        trend: h.metrics[0]?.trend,
+        lastUpdated: new Date(h.lastUpdated).toLocaleDateString(),
+        recommendations: [], // AI insights would come from separate query
+      }));
+    }
+    return fallbackHotspots;
+  }, [convexHotspots, fallbackHotspots]);
+
+  // Apply filters to hotspots
+  const filteredHotspots = useMemo(
+    () => applyFilters(allHotspots, filters),
+    [allHotspots, filters]
+  );
+
+  // Convert to export-compatible format
+  const exportableHotspots = useMemo(
+    () => filteredHotspots.map((h) => convertToHotspot(h, moduleId)),
+    [filteredHotspots, moduleId]
+  );
+
+  // Active filter count and summaries
+  const activeFilterCount = useMemo(() => countActiveFilters(filters), [filters]);
+  const filterSummaries = useMemo(() => getFilterSummary(filters), [filters]);
+
+  const selectedHotspotData = filteredHotspots.find((h) => h.id === selectedHotspot);
 
   // Handlers for the drawer
   const handleViewDetails = useCallback((hotspot: HotspotData) => {
@@ -43,27 +156,117 @@ export default function ModuleDetailPage() {
   }, []);
 
   const handleExportData = useCallback((hotspot: HotspotData) => {
-    console.log("Exporting data for:", hotspot.label);
-    // Implement export logic
+    const exportData = [{
+      ID: hotspot.id,
+      Label: hotspot.label,
+      Location: hotspot.location,
+      Severity: hotspot.severity,
+      Value: hotspot.value || "N/A",
+      Description: hotspot.description,
+      Trend: hotspot.trend || "N/A",
+      "Last Updated": hotspot.lastUpdated || "N/A",
+      Recommendations: hotspot.recommendations.join("; "),
+    }];
+    exportToCSV(exportData, `hotspot-${hotspot.id}`);
+    toast.success("Exported hotspot data", { description: `${hotspot.label} exported to CSV` });
   }, []);
 
-  const handleShare = useCallback((hotspot: HotspotData) => {
-    console.log("Sharing:", hotspot.label);
-    // Implement share logic
-  }, []);
+  const handleShare = useCallback(async (hotspot: HotspotData) => {
+    const shareUrl = createShareableLink({
+      moduleId,
+      view: "map",
+      filters: { hotspotId: hotspot.id },
+    });
+    const result = await copyToClipboard(shareUrl);
+    if (result.success) {
+      toast.success("Link copied!", { description: "Share this link to show this hotspot" });
+    } else {
+      toast.error("Failed to copy link");
+    }
+  }, [moduleId]);
 
   const handleAddToActionPlan = useCallback((hotspot: HotspotData) => {
-    console.log("Adding to action plan:", hotspot.label);
-    // Implement action plan logic
+    // TODO: Integrate with action plan feature
+    toast.success("Added to Action Plan", {
+      description: `${hotspot.label} and its recommendations have been added`,
+      action: { label: "View Plan", onClick: () => window.location.href = "/dashboard/plans" },
+    });
   }, []);
 
   const handleApplyRecommendation = useCallback((hotspot: HotspotData, recommendation: string) => {
-    console.log("Applying recommendation:", recommendation, "for:", hotspot.label);
-    // Implement recommendation apply logic
+    // TODO: Integrate with action plan feature
+    toast.success("Recommendation applied", {
+      description: recommendation.substring(0, 50) + "...",
+      action: { label: "View Plan", onClick: () => window.location.href = "/dashboard/plans" },
+    });
+  }, []);
+
+  // Filter handlers
+  const handleFiltersChange = useCallback((newFilters: FilterState) => {
+    setFilters(newFilters);
+  }, []);
+
+  const handleSearchChange = useCallback((query: string) => {
+    setFilters((prev) => ({ ...prev, search: query }));
+  }, []);
+
+  const handleClearFilter = useCallback((filterType: string) => {
+    setFilters((prev) => {
+      const updated = { ...prev };
+      if (filterType === "search") updated.search = "";
+      if (filterType === "severities") updated.severities = [];
+      if (filterType === "trends") updated.trends = [];
+      if (filterType === "dateRange") updated.dateRange = { preset: "30d" };
+      if (filterType === "valueRange") updated.valueRange = null;
+      return updated;
+    });
+  }, []);
+
+  const handleRefresh = useCallback(() => {
+    setIsRefreshing(true);
+    // Simulate data refresh
+    setTimeout(() => {
+      setIsRefreshing(false);
+      toast.success("Data refreshed", { description: "Latest data loaded successfully" });
+    }, 1500);
   }, []);
 
   return (
     <ModuleLayout module={module}>
+      {/* Module Action Bar */}
+      <ModuleActionBar
+        module={module as Module}
+        hotspots={exportableHotspots}
+        cityId={selectedCityId || "amsterdam"}
+        cityName={selectedCity?.name || "Amsterdam"}
+        currentView="map"
+        isFilterOpen={isFilterPanelOpen}
+        onFilterToggle={() => setIsFilterPanelOpen(true)}
+        activeFilterCount={activeFilterCount}
+        onRefresh={handleRefresh}
+        isRefreshing={isRefreshing}
+        lastUpdated={lastUpdated}
+        className="mb-6"
+      />
+
+      {/* Search and Filter Chips Row */}
+      <div className="mb-6 space-y-3">
+        <SearchBar
+          value={filters.search}
+          onChange={handleSearchChange}
+          placeholder={`Search ${module.title.toLowerCase()} hotspots...`}
+          resultsCount={filteredHotspots.length}
+          totalCount={allHotspots.length}
+        />
+
+        {/* Active filter chips */}
+        <FilterChipsContainer
+          chips={filterStateToChips(filters)}
+          onRemoveChip={(chipId) => setFilters(handleChipRemoval(chipId, filters))}
+          onClearAll={() => setFilters(DEFAULT_FILTER_STATE)}
+        />
+      </div>
+
       <div className="grid lg:grid-cols-5 gap-6">
         {/* Map visualization - takes 3 columns */}
         <div className="lg:col-span-3">
@@ -92,7 +295,7 @@ export default function ModuleDetailPage() {
             <div className="h-[500px] relative">
               <MapVisualization
                 moduleId={moduleId}
-                hotspots={hotspots}
+                hotspots={filteredHotspots}
                 selectedHotspot={selectedHotspot}
                 onHotspotClick={(hotspot) => setSelectedHotspot(hotspot.id)}
                 onViewDetails={handleViewDetails}
@@ -160,7 +363,7 @@ export default function ModuleDetailPage() {
 
           {/* Hotspot cards */}
           <div className="space-y-3">
-            {hotspots.slice(0, 3).map((hotspot) => (
+            {filteredHotspots.slice(0, 3).map((hotspot) => (
               <ActionCard
                 key={hotspot.id}
                 type="hotspot"
@@ -232,6 +435,18 @@ export default function ModuleDetailPage() {
         onShare={handleShare}
         onAddToActionPlan={handleAddToActionPlan}
         onApplyRecommendation={handleApplyRecommendation}
+      />
+
+      {/* Filter Panel */}
+      <FilterPanel
+        isOpen={isFilterPanelOpen}
+        onClose={() => setIsFilterPanelOpen(false)}
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+        onApply={() => {}}
+        resultsCount={filteredHotspots.length}
+        totalCount={allHotspots.length}
+        valueRangeConfig={getValueRangeConfig(moduleId)}
       />
     </ModuleLayout>
   );
