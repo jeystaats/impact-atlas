@@ -461,16 +461,22 @@ export const generateCityData = action({
     population: v.number(),
   },
   handler: async (ctx, args): Promise<{ success: boolean; error?: string }> => {
-    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-
-    if (!OPENAI_API_KEY) {
-      return { success: false, error: "OpenAI API key not configured" };
-    }
-
-    // Create onboarding record
+    // Create onboarding record first - always do this so the UI can show progress
     const onboardingId = await ctx.runMutation(internal.aiDirector.createOnboarding, {
       cityId: args.cityId,
     });
+
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+    if (!OPENAI_API_KEY) {
+      // Mark onboarding as failed with clear error
+      await ctx.runMutation(internal.aiDirector.completeOnboarding, {
+        onboardingId,
+        status: "failed",
+        error: "OpenAI API key not configured. Please set OPENAI_API_KEY in Convex environment variables.",
+      });
+      return { success: false, error: "OpenAI API key not configured" };
+    }
 
     const modules = Object.keys(MODULE_CONFIGS) as Array<keyof typeof MODULE_CONFIGS>;
     const progressPerModule = 90 / modules.length; // Save 10% for final steps

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { CitySearchInput } from "@/components/dashboard/CitySearchInput";
-import { CityOnboardingModal } from "@/components/dashboard/CityOnboardingModal";
+import { EnhancedCityLoadingModal } from "@/components/loading";
 import { ModuleCard } from "@/components/dashboard/ModuleCard";
 import { QuickWinsSummary } from "@/components/dashboard/QuickWinsSummary";
 import { StatCard } from "@/components/dashboard/StatCard";
@@ -18,7 +18,7 @@ import { api } from "../../../convex/_generated/api";
 import { timeAgo } from "@/lib/utils";
 
 // Fallback data for when Convex is loading or unavailable
-import { modules as fallbackModules, cities as fallbackCities } from "@/data/modules";
+import { getModulesForCity, cities as fallbackCities } from "@/data/modules";
 import { dashboardStats as fallbackStats, cityStats as fallbackCityStats } from "@/data/dashboard";
 
 export default function DashboardPage() {
@@ -65,7 +65,7 @@ export default function DashboardPage() {
     ? { id: selectedCity.slug, name: selectedCity.name, country: selectedCity.country, population: selectedCity.population, coordinates: selectedCity.coordinates }
     : fallbackCities.find((c) => c.id === selectedCitySlug) || fallbackCities[0];
 
-  // Get modules (from Convex or fallback)
+  // Get modules (from Convex or fallback with city-specific stats)
   const modules = useConvexData && modulesData
     ? modulesData.map((m: { slug: string; name: string; description: string; icon: string; color: string; status: "active" | "beta" | "coming-soon"; cityStats?: { totalHotspots?: number; criticalHotspots?: number; totalQuickWins?: number } }) => ({
         id: m.slug,
@@ -87,7 +87,7 @@ export default function DashboardPage() {
         quickWinsCount: m.cityStats?.totalQuickWins ?? 0,
         status: m.status,
       }))
-    : fallbackModules;
+    : getModulesForCity(selectedCitySlug);
 
   // Get stats (from Convex or fallback)
   const stats = useConvexData && dashboardData
@@ -187,8 +187,8 @@ export default function DashboardPage() {
 
   return (
     <div className="p-6 lg:p-8">
-      {/* City Onboarding Modal */}
-      <CityOnboardingModal
+      {/* Enhanced City Loading Modal */}
+      <EnhancedCityLoadingModal
         isOpen={isOnboarding}
         cityName={onboardingCityName}
         country={onboardingCountry}

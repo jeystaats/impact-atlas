@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useUser, useClerk } from "@clerk/nextjs";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import { toast } from "sonner";
 import { Icon } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +15,11 @@ import {
   type MapStyle,
   type NotificationSettings,
 } from "@/stores/usePreferencesStore";
+import {
+  useCurrentUser,
+  useUpdatePreferences,
+  useUpdateNotificationSetting,
+} from "@/hooks/useConvex";
 
 type SettingsTab = "profile" | "security" | "notifications" | "preferences";
 
@@ -23,9 +29,13 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
 
-  // Preferences from store
+  // Convex user and mutations
+  const convexUser = useCurrentUser();
+  const updatePreferences = useUpdatePreferences();
+  const updateNotificationSetting = useUpdateNotificationSetting();
+
+  // Preferences from store (for local/immediate UI updates)
   const {
     defaultCity,
     temperatureUnit,
@@ -42,6 +52,27 @@ export default function SettingsPage() {
   useEffect(() => {
     setIsHydrated(true);
   }, []);
+
+  // Sync preferences from Convex when user data loads
+  useEffect(() => {
+    if (convexUser?.preferences) {
+      const prefs = convexUser.preferences;
+      if (prefs.defaultCitySlug) {
+        setDefaultCity(prefs.defaultCitySlug as City);
+      }
+      if (prefs.temperatureUnit) {
+        setTemperatureUnit(prefs.temperatureUnit);
+      }
+      if (prefs.mapStyle) {
+        setMapStyle(prefs.mapStyle);
+      }
+      if (prefs.notifications) {
+        Object.entries(prefs.notifications).forEach(([key, value]) => {
+          setNotification(key as keyof NotificationSettings, value);
+        });
+      }
+    }
+  }, [convexUser, setDefaultCity, setTemperatureUnit, setMapStyle, setNotification]);
 
   // Form state
   const [firstName, setFirstName] = useState(user?.firstName || "");
@@ -81,16 +112,31 @@ export default function SettingsPage() {
     },
   ];
 
-  const handleNotificationToggle = (key: keyof NotificationSettings) => {
-    setNotification(key, !notifications[key]);
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 2000);
+  const handleNotificationToggle = async (key: keyof NotificationSettings) => {
+    const newValue = !notifications[key];
+    // Update local store immediately for responsive UI
+    setNotification(key, newValue);
+
+    // Persist to Convex
+    try {
+      await updateNotificationSetting({ key, value: newValue });
+      toast.success("Notification preference saved");
+    } catch (error) {
+      // Revert on failure
+      setNotification(key, !newValue);
+      toast.error("Failed to save notification preference");
+      console.error("Failed to update notification setting:", error);
+    }
   };
 
-  const handlePreferenceChange = (
+  const handlePreferenceChange = async (
     type: "city" | "unit" | "mapStyle",
     value: string
   ) => {
+    // Store old values for potential rollback
+    const oldValues = { defaultCity, temperatureUnit, mapStyle };
+
+    // Update local store immediately for responsive UI
     if (type === "city") {
       setDefaultCity(value as City);
     } else if (type === "unit") {
@@ -98,8 +144,29 @@ export default function SettingsPage() {
     } else if (type === "mapStyle") {
       setMapStyle(value as MapStyle);
     }
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 2000);
+
+    // Persist to Convex
+    try {
+      if (type === "city") {
+        await updatePreferences({ defaultCitySlug: value });
+      } else if (type === "unit") {
+        await updatePreferences({ temperatureUnit: value as "celsius" | "fahrenheit" });
+      } else if (type === "mapStyle") {
+        await updatePreferences({ mapStyle: value as "light" | "dark" | "satellite" });
+      }
+      toast.success("Preference saved");
+    } catch (error) {
+      // Revert on failure
+      if (type === "city") {
+        setDefaultCity(oldValues.defaultCity);
+      } else if (type === "unit") {
+        setTemperatureUnit(oldValues.temperatureUnit);
+      } else if (type === "mapStyle") {
+        setMapStyle(oldValues.mapStyle);
+      }
+      toast.error("Failed to save preference");
+      console.error("Failed to update preference:", error);
+    }
   };
 
   const handleSaveProfile = async () => {
@@ -111,9 +178,9 @@ export default function SettingsPage() {
         lastName,
       });
       setIsEditing(false);
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 3000);
+      toast.success("Profile updated successfully");
     } catch (error) {
+      toast.error("Failed to update profile");
       console.error("Failed to update profile:", error);
     } finally {
       setIsSaving(false);
@@ -166,21 +233,6 @@ export default function SettingsPage() {
           Manage your account and preferences
         </p>
       </motion.div>
-
-      {/* Success Toast */}
-      <AnimatePresence>
-        {showSuccess && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed top-20 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-400"
-          >
-            <Icon name="check" className="w-4 h-4" />
-            <span className="text-sm font-medium">Changes saved successfully</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <div className="grid lg:grid-cols-4 gap-6 max-w-5xl">
         {/* Sidebar */}

@@ -249,7 +249,12 @@ export default function QuickWinsPage() {
     }
   };
 
-  if (!isHydrated) {
+  // Show skeleton while loading
+  // 1. Not hydrated yet (localStorage loading)
+  // 2. We have a selected city ID but Convex data is still loading
+  const isConvexLoading = selectedCityId && (convexQuickWins === undefined || convexModules === undefined);
+
+  if (!isHydrated || isConvexLoading) {
     return (
       <div className="p-6 lg:p-8 min-h-screen">
         <div className="animate-pulse space-y-8">

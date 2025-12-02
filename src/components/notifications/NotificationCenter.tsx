@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Icon } from "@/components/ui/icons";
 import { useNotificationStore } from "@/stores/useNotificationStore";
@@ -31,9 +32,12 @@ export function NotificationCenter() {
           isOpen && "bg-[var(--background-secondary)]"
         )}
       >
-        <Icon
-          name="activity"
-          className="w-5 h-5 text-[var(--foreground-secondary)]"
+        <Image
+          src="/icons/bell.png"
+          alt="Notifications"
+          width={20}
+          height={20}
+          className="opacity-80"
         />
 
         {/* Unread badge */}
@@ -87,12 +91,14 @@ export function NotificationCenter() {
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
               className={cn(
-                "absolute right-0 top-full mt-2 z-50",
+                "fixed left-64 top-14 z-50",
                 "w-96 max-h-[480px] overflow-hidden",
                 "bg-[var(--background-tertiary)] rounded-xl",
                 "border border-[var(--border)] shadow-xl"
               )}
             >
+              {/* Arrow pointer */}
+              <div className="absolute -left-2 top-4 w-4 h-4 bg-[var(--background-tertiary)] border-l border-t border-[var(--border)] rotate-[-45deg]" />
               {/* Header */}
               <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between">
                 <h3 className="font-semibold text-[var(--foreground)]">
@@ -112,9 +118,12 @@ export function NotificationCenter() {
               <div className="max-h-[400px] overflow-y-auto">
                 {notifications.length === 0 ? (
                   <div className="py-12 text-center">
-                    <Icon
-                      name="activity"
-                      className="w-8 h-8 mx-auto text-[var(--foreground-muted)] mb-2"
+                    <Image
+                      src="/icons/bell.png"
+                      alt="No notifications"
+                      width={32}
+                      height={32}
+                      className="mx-auto mb-2 opacity-50"
                     />
                     <p className="text-sm text-[var(--foreground-muted)]">
                       No notifications yet

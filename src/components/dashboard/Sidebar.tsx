@@ -7,10 +7,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useUser } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import { Icon, ModuleIcon, IconName } from "@/components/ui/icons";
-import { modules as fallbackModules } from "@/data/modules";
+import { getModulesForCity } from "@/data/modules";
 import { useModulesForCity, useCurrentUser } from "@/hooks/useConvex";
 import { useSelectedCity } from "@/hooks/useSelectedCity";
 import { useUIStore } from "@/stores/useUIStore";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 
 interface SidebarProps {
   onCopilotOpen: () => void;
@@ -47,11 +48,11 @@ export function Sidebar({ onCopilotOpen }: SidebarProps) {
   const collapsed = isHydrated ? sidebarCollapsed : false;
 
   // Fetch data from Convex
-  const { selectedCityId } = useSelectedCity();
+  const { selectedCityId, selectedCitySlug } = useSelectedCity();
   const modulesData = useModulesForCity(selectedCityId);
   const convexUser = useCurrentUser();
 
-  // Normalize modules to sidebar format
+  // Normalize modules to sidebar format (with city-specific fallback)
   const modules: SidebarModule[] = useMemo(() => {
     if (modulesData && modulesData.length > 0) {
       return modulesData.map((m: { slug: string; name: string; color: string; cityStats?: { totalQuickWins?: number } }) => ({
@@ -61,16 +62,19 @@ export function Sidebar({ onCopilotOpen }: SidebarProps) {
         quickWinsCount: m.cityStats?.totalQuickWins ?? 0,
       }));
     }
-    return fallbackModules.map((m: { id: string; title: string; color: string; quickWinsCount: number }) => ({
+    // Use city-specific fallback data
+    return getModulesForCity(selectedCitySlug).map((m) => ({
       id: m.id,
       title: m.title,
       color: m.color,
       quickWinsCount: m.quickWinsCount,
     }));
-  }, [modulesData]);
+  }, [modulesData, selectedCitySlug]);
 
   // User display info - prefer Convex user data, then Clerk
+  // Use isHydrated to prevent SSR mismatch
   const userInitials = useMemo(() => {
+    if (!isHydrated) return "U"; // Default during SSR
     if (convexUser?.name) {
       const parts = convexUser.name.split(" ");
       return parts.length >= 2
@@ -81,10 +85,10 @@ export function Sidebar({ onCopilotOpen }: SidebarProps) {
       return `${user.firstName[0]}${user.lastName[0]}`;
     }
     return user?.firstName?.[0] || user?.emailAddresses?.[0]?.emailAddress?.[0]?.toUpperCase() || "U";
-  }, [convexUser, user]);
+  }, [convexUser, user, isHydrated]);
 
-  const userName = convexUser?.name || user?.fullName || user?.firstName || "User";
-  const userRole = convexUser?.role === "admin" ? "Administrator" : "Climate Officer";
+  const userName = isHydrated ? (convexUser?.name || user?.fullName || user?.firstName || "User") : "User";
+  const userRole = isHydrated && convexUser?.role === "admin" ? "Administrator" : "Climate Officer";
 
   return (
     <aside
@@ -114,18 +118,21 @@ export function Sidebar({ onCopilotOpen }: SidebarProps) {
                 )}
               </AnimatePresence>
             </Link>
-            <button
-              onClick={toggleSidebar}
-              className="p-1.5 rounded-lg hover:bg-[var(--background-secondary)] transition-colors"
-            >
-              <Icon
-                name="chevronRight"
-                className={cn(
-                  "w-4 h-4 text-[var(--foreground-muted)] transition-transform",
-                  collapsed ? "" : "rotate-180"
-                )}
-              />
-            </button>
+            <div className="flex items-center gap-1">
+              {!collapsed && <NotificationCenter />}
+              <button
+                onClick={toggleSidebar}
+                className="p-1.5 rounded-lg hover:bg-[var(--background-secondary)] transition-colors"
+              >
+                <Icon
+                  name="chevronRight"
+                  className={cn(
+                    "w-4 h-4 text-[var(--foreground-muted)] transition-transform",
+                    collapsed ? "" : "rotate-180"
+                  )}
+                />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -259,11 +266,15 @@ export function Sidebar({ onCopilotOpen }: SidebarProps) {
         <div className="p-3 border-t border-[var(--border)]">
           <div className={cn(
             "flex items-center gap-3 px-3 py-2",
-            collapsed && "justify-center"
+            collapsed && "flex-col gap-2"
           )}>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--accent-light)] to-[var(--accent)] flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
+            <Link
+              href="/dashboard/settings"
+              className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--accent-light)] to-[var(--accent)] flex items-center justify-center text-white text-sm font-semibold flex-shrink-0 hover:opacity-90 transition-opacity"
+              title={collapsed ? userName : undefined}
+            >
               {userInitials}
-            </div>
+            </Link>
             <AnimatePresence>
               {!collapsed && (
                 <motion.div
@@ -277,13 +288,10 @@ export function Sidebar({ onCopilotOpen }: SidebarProps) {
                 </motion.div>
               )}
             </AnimatePresence>
-            {user && (
+            {user && !collapsed && (
               <Link
                 href="/sign-out"
-                className={cn(
-                  "p-2 rounded-lg text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--background-secondary)] transition-colors",
-                  collapsed && "absolute bottom-16 left-1/2 -translate-x-1/2"
-                )}
+                className="p-2 rounded-lg text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--background-secondary)] transition-colors"
                 title="Sign out"
               >
                 <Icon name="logOut" className="w-4 h-4" />

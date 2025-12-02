@@ -23,26 +23,81 @@ export const getById = query({
 });
 
 /**
- * Update user preferences
+ * Update user preferences (partial update)
  */
 export const updatePreferences = mutation({
   args: {
-    preferences: v.object({
-      defaultCityId: v.optional(v.id("cities")),
-      favoriteModules: v.optional(v.array(v.string())),
-      notificationsEnabled: v.optional(v.boolean()),
-    }),
+    defaultCitySlug: v.optional(v.string()),
+    temperatureUnit: v.optional(v.union(v.literal("celsius"), v.literal("fahrenheit"))),
+    mapStyle: v.optional(v.union(v.literal("light"), v.literal("dark"), v.literal("satellite"))),
+    notifications: v.optional(v.object({
+      hotspotAlerts: v.boolean(),
+      weeklyReports: v.boolean(),
+      quickWinUpdates: v.boolean(),
+      aiInsights: v.boolean(),
+    })),
   },
   handler: async (ctx, args) => {
     const user = await requireCurrentUser(ctx);
 
-    const updatedPreferences = {
-      ...user.preferences,
-      ...args.preferences,
-    };
+    // Build updated preferences object
+    const updatedPreferences = { ...user.preferences };
+
+    if (args.defaultCitySlug !== undefined) {
+      updatedPreferences.defaultCitySlug = args.defaultCitySlug;
+    }
+    if (args.temperatureUnit !== undefined) {
+      updatedPreferences.temperatureUnit = args.temperatureUnit;
+    }
+    if (args.mapStyle !== undefined) {
+      updatedPreferences.mapStyle = args.mapStyle;
+    }
+    if (args.notifications !== undefined) {
+      updatedPreferences.notifications = args.notifications;
+    }
 
     await ctx.db.patch(user._id, {
       preferences: updatedPreferences,
+      updatedAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});
+
+/**
+ * Update a single notification setting
+ */
+export const updateNotificationSetting = mutation({
+  args: {
+    key: v.union(
+      v.literal("hotspotAlerts"),
+      v.literal("weeklyReports"),
+      v.literal("quickWinUpdates"),
+      v.literal("aiInsights")
+    ),
+    value: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    const user = await requireCurrentUser(ctx);
+
+    const currentNotifications = user.preferences.notifications ?? {
+      hotspotAlerts: true,
+      weeklyReports: true,
+      quickWinUpdates: false,
+      aiInsights: true,
+    };
+
+    const updatedNotifications = {
+      ...currentNotifications,
+      [args.key]: args.value,
+    };
+
+    await ctx.db.patch(user._id, {
+      preferences: {
+        ...user.preferences,
+        notifications: updatedNotifications,
+      },
       updatedAt: Date.now(),
     });
 
@@ -121,8 +176,16 @@ export const syncUser = mutation({
       role: "user",
       preferences: {
         defaultCityId: undefined,
+        defaultCitySlug: "amsterdam",
         favoriteModules: [],
-        notificationsEnabled: true,
+        temperatureUnit: "celsius",
+        mapStyle: "dark",
+        notifications: {
+          hotspotAlerts: true,
+          weeklyReports: true,
+          quickWinUpdates: false,
+          aiInsights: true,
+        },
       },
       onboardingCompleted: false,
       createdAt: Date.now(),
@@ -197,8 +260,16 @@ export const upsertFromClerk = internalMutation({
       role: "user",
       preferences: {
         defaultCityId: undefined,
+        defaultCitySlug: "amsterdam",
         favoriteModules: [],
-        notificationsEnabled: true,
+        temperatureUnit: "celsius",
+        mapStyle: "dark",
+        notifications: {
+          hotspotAlerts: true,
+          weeklyReports: true,
+          quickWinUpdates: false,
+          aiInsights: true,
+        },
       },
       onboardingCompleted: false,
       createdAt: Date.now(),

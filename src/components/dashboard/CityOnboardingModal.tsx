@@ -307,13 +307,21 @@ export function CityOnboardingModal({
               )}
 
               {/* Error message */}
-              {progress?.error && (
+              {(progress?.error || progress?.status === "failed") && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-center"
+                  className="mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/30"
                 >
-                  <p className="text-sm text-red-400">{progress.error}</p>
+                  <div className="flex items-start gap-3">
+                    <Icon name="warning" className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-red-400">Generation Failed</p>
+                      <p className="text-xs text-red-400/70 mt-1">
+                        {progress?.error || "An error occurred while generating city data."}
+                      </p>
+                    </div>
+                  </div>
                 </motion.div>
               )}
             </div>
@@ -330,6 +338,16 @@ export function CityOnboardingModal({
                   <Icon name="arrowRight" className="w-4 h-4" />
                   Enter Dashboard
                 </motion.button>
+              ) : progress?.status === "failed" ? (
+                <motion.button
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  onClick={onClose}
+                  className="flex-1 py-3 px-4 rounded-xl bg-[var(--background-secondary)] border border-[var(--border)] text-[var(--foreground)] font-medium hover:bg-[var(--background-tertiary)] transition-colors flex items-center justify-center gap-2"
+                >
+                  <Icon name="x" className="w-4 h-4" />
+                  Close
+                </motion.button>
               ) : canEnterEarly ? (
                 <>
                   <button
@@ -344,14 +362,15 @@ export function CityOnboardingModal({
                   </div>
                 </>
               ) : (
-                <div className="flex-1 py-3 px-4 rounded-xl bg-[var(--background-secondary)] text-[var(--foreground-muted)] text-center text-sm">
-                  <motion.span
-                    animate={{ opacity: [0.5, 1, 0.5] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
+                <>
+                  <button
+                    onClick={onClose}
+                    className="flex-1 py-3 px-4 rounded-xl bg-[var(--background-secondary)] border border-[var(--border)] text-[var(--foreground-muted)] font-medium hover:bg-[var(--background-tertiary)] hover:text-[var(--foreground)] transition-colors flex items-center justify-center gap-2"
                   >
-                    {progress?.status === "failed" ? "Generation failed" : "Please wait..."}
-                  </motion.span>
-                </div>
+                    <Icon name="x" className="w-4 h-4" />
+                    Continue in Background
+                  </button>
+                </>
               )}
             </div>
           </motion.div>

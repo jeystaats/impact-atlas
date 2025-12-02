@@ -7,6 +7,8 @@ import { Sidebar } from "@/components/dashboard/Sidebar";
 import { AICopilotEnhanced } from "@/components/copilot/AICopilotEnhanced";
 import { CommandPalette } from "@/components/copilot/CommandPalette";
 import { MobileBlocker } from "@/components/dashboard/MobileBlocker";
+import { ToastContainer } from "@/components/notifications/ToastContainer";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { Icon } from "@/components/ui/icons";
 import { cities, modules } from "@/data/modules";
 import { usePreferencesStore } from "@/stores/usePreferencesStore";
@@ -89,12 +91,15 @@ export default function DashboardLayout({
           </div>
           <span className="font-semibold text-[var(--foreground)]">Impact Atlas</span>
         </div>
-        <button
-          onClick={() => setCopilotOpen(true)}
-          className="p-2 rounded-lg bg-[var(--accent)] text-white"
-        >
-          <Icon name="sparkles" className="w-5 h-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          <NotificationCenter />
+          <button
+            onClick={() => setCopilotOpen(true)}
+            className="p-2 rounded-lg bg-[var(--accent)] text-white"
+          >
+            <Icon name="sparkles" className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Keyboard shortcut hint */}
@@ -156,6 +161,9 @@ export default function DashboardLayout({
         onAskAI={handleAskAI}
         onNavigate={(path) => router.push(path)}
       />
+
+      {/* Toast Notifications */}
+      <ToastContainer />
     </div>
   );
 }

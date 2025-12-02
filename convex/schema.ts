@@ -18,8 +18,16 @@ export default defineSchema({
     // User preferences
     preferences: v.object({
       defaultCityId: v.optional(v.id("cities")),
+      defaultCitySlug: v.optional(v.string()), // For easy lookup
       favoriteModules: v.array(v.string()),
-      notificationsEnabled: v.boolean(),
+      temperatureUnit: v.optional(v.union(v.literal("celsius"), v.literal("fahrenheit"))),
+      mapStyle: v.optional(v.union(v.literal("light"), v.literal("dark"), v.literal("satellite"))),
+      notifications: v.optional(v.object({
+        hotspotAlerts: v.boolean(),
+        weeklyReports: v.boolean(),
+        quickWinUpdates: v.boolean(),
+        aiInsights: v.boolean(),
+      })),
     }),
 
     // Onboarding

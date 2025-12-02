@@ -298,6 +298,13 @@ export function useUpdatePreferences() {
 }
 
 /**
+ * Update a single notification setting
+ */
+export function useUpdateNotificationSetting() {
+  return useMutation(api.users.updateNotificationSetting);
+}
+
+/**
  * Set default city
  */
 export function useSetDefaultCity() {

@@ -3,8 +3,9 @@
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Icon, ModuleIcon } from "@/components/ui/icons";
-import { modules as fallbackModules } from "@/data/modules";
+import { getModulesForCity } from "@/data/modules";
 import { useModulesForCity } from "@/hooks/useConvex";
+import { useSelectedCity } from "@/hooks/useSelectedCity";
 import { Id } from "../../../convex/_generated/dataModel";
 
 interface QuickWinsSummaryProps {
@@ -12,10 +13,13 @@ interface QuickWinsSummaryProps {
 }
 
 export function QuickWinsSummary({ cityId }: QuickWinsSummaryProps) {
+  // Get selected city slug for fallback data
+  const { selectedCitySlug } = useSelectedCity();
+
   // Fetch modules with city-specific stats from Convex
   const modulesData = useModulesForCity(cityId);
 
-  // Normalize modules to a common format
+  // Normalize modules to a common format (with city-specific fallback)
   const modules = modulesData
     ? modulesData.map((m: { slug: string; name: string; color: string; cityStats?: { totalQuickWins?: number } }) => ({
         id: m.slug,
@@ -23,7 +27,7 @@ export function QuickWinsSummary({ cityId }: QuickWinsSummaryProps) {
         color: m.color,
         quickWinsCount: m.cityStats?.totalQuickWins ?? 0,
       }))
-    : fallbackModules.map((m: { id: string; title: string; color: string; quickWinsCount: number }) => ({
+    : getModulesForCity(selectedCitySlug).map((m) => ({
         id: m.id,
         title: m.title,
         color: m.color,

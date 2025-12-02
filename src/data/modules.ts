@@ -151,3 +151,64 @@ export const cities: City[] = [
     coordinates: { lat: -37.8136, lng: 144.9631 },
   },
 ];
+
+// City-specific module stats (fallback when Convex data is not available)
+export const cityModuleStats: Record<string, Record<string, { hotspots: number; quickWins: number }>> = {
+  amsterdam: {
+    "urban-heat": { hotspots: 23, quickWins: 12 },
+    "coastal-plastic": { hotspots: 8, quickWins: 6 },
+    "ocean-plastic": { hotspots: 5, quickWins: 4 },
+    "port-emissions": { hotspots: 12, quickWins: 9 },
+    "biodiversity": { hotspots: 15, quickWins: 15 },
+    "restoration": { hotspots: 18, quickWins: 11 },
+  },
+  copenhagen: {
+    "urban-heat": { hotspots: 15, quickWins: 8 },
+    "coastal-plastic": { hotspots: 6, quickWins: 5 },
+    "ocean-plastic": { hotspots: 4, quickWins: 3 },
+    "port-emissions": { hotspots: 8, quickWins: 7 },
+    "biodiversity": { hotspots: 12, quickWins: 12 },
+    "restoration": { hotspots: 14, quickWins: 8 },
+  },
+  singapore: {
+    "urban-heat": { hotspots: 35, quickWins: 18 },
+    "coastal-plastic": { hotspots: 14, quickWins: 10 },
+    "ocean-plastic": { hotspots: 9, quickWins: 7 },
+    "port-emissions": { hotspots: 22, quickWins: 15 },
+    "biodiversity": { hotspots: 18, quickWins: 14 },
+    "restoration": { hotspots: 12, quickWins: 8 },
+  },
+  barcelona: {
+    "urban-heat": { hotspots: 28, quickWins: 14 },
+    "coastal-plastic": { hotspots: 11, quickWins: 8 },
+    "ocean-plastic": { hotspots: 7, quickWins: 5 },
+    "port-emissions": { hotspots: 15, quickWins: 11 },
+    "biodiversity": { hotspots: 14, quickWins: 13 },
+    "restoration": { hotspots: 16, quickWins: 10 },
+  },
+  melbourne: {
+    "urban-heat": { hotspots: 32, quickWins: 20 },
+    "coastal-plastic": { hotspots: 18, quickWins: 12 },
+    "ocean-plastic": { hotspots: 12, quickWins: 9 },
+    "port-emissions": { hotspots: 19, quickWins: 14 },
+    "biodiversity": { hotspots: 25, quickWins: 22 },
+    "restoration": { hotspots: 28, quickWins: 12 },
+  },
+};
+
+// Get modules with city-specific stats (for fallback use)
+export function getModulesForCity(citySlug: string): Module[] {
+  const cityStats = cityModuleStats[citySlug] || cityModuleStats.amsterdam;
+
+  return modules.map((module) => {
+    const stats = cityStats[module.id] || { hotspots: 0, quickWins: 0 };
+    return {
+      ...module,
+      metrics: [
+        { label: "Hotspots", value: stats.hotspots, trend: "neutral" as const },
+        { label: "Quick Wins", value: stats.quickWins },
+      ],
+      quickWinsCount: stats.quickWins,
+    };
+  });
+}
