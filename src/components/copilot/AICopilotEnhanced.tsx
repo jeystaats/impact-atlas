@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef, FormEvent, useMemo } from "react";
+import { useState, useEffect, useRef, FormEvent, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useChat } from "@ai-sdk/react";
 import { TextStreamChatTransport } from "ai";
+import { useMutation } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 import { Icon } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
 import { NeuralThinking } from "./NeuralThinking";
@@ -11,6 +13,8 @@ import { IntelligenceCard } from "./IntelligenceCard";
 import { SmartSuggestions } from "./SmartSuggestions";
 import { cn } from "@/lib/utils";
 import { City } from "@/types";
+import { useSelectedCity } from "@/hooks/useSelectedCity";
+import { Id } from "../../../convex/_generated/dataModel";
 
 interface AICopilotEnhancedProps {
   isOpen: boolean;
@@ -58,6 +62,21 @@ export function AICopilotEnhanced({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [input, setInput] = useState("");
+
+  // Get selected city for saving quick wins
+  const { selectedCityId } = useSelectedCity();
+
+  // Mutation for saving quick wins
+  const createQuickWin = useMutation(api.quickWins.createFromAI);
+
+  // Handler to save AI response as quick win
+  const handleSaveQuickWin = useCallback(async (content: string) => {
+    await createQuickWin({
+      content,
+      moduleSlug: moduleId,
+      cityId: selectedCityId as Id<"cities"> | undefined,
+    });
+  }, [createQuickWin, moduleId, selectedCityId]);
 
   // Create transport with city/module context in body
   const transport = useMemo(
@@ -244,6 +263,8 @@ export function AICopilotEnhanced({
                             type={parseMessageType(getMessageContent(message))}
                             content={getMessageContent(message)}
                             isStreaming={isLoading && index === messages.length - 1}
+                            onClose={onClose}
+                            onSaveQuickWin={handleSaveQuickWin}
                           />
                         </div>
                       )}

@@ -8,6 +8,33 @@ export interface HotspotData {
   description: string;
   location: string;
   recommendations: string[];
+  // Enhanced fields for rich popup display
+  trend?: "up" | "down" | "stable";
+  trendValue?: string;
+  lastUpdated?: string;
+  dataPoints?: number;
+}
+
+// GeoJSON types for polygon/area data layers
+export interface GeoJSONFeature {
+  type: "Feature";
+  properties: {
+    id: string;
+    name: string;
+    severity?: "low" | "medium" | "high" | "critical";
+    value?: string | number;
+    description?: string;
+    [key: string]: unknown;
+  };
+  geometry: {
+    type: "Polygon" | "MultiPolygon";
+    coordinates: number[][][] | number[][][][];
+  };
+}
+
+export interface GeoJSONData {
+  type: "FeatureCollection";
+  features: GeoJSONFeature[];
 }
 
 // Amsterdam-centered hotspots (default city)
@@ -27,6 +54,10 @@ export const moduleHotspots: Record<string, HotspotData[]> = {
         "Install cool roofing on municipal buildings",
         "Create pocket parks with shade structures",
       ],
+      trend: "up",
+      trendValue: "+0.3°C/yr",
+      lastUpdated: "2 hours ago",
+      dataPoints: 1248,
     },
     {
       id: "uh-2",
@@ -41,6 +72,10 @@ export const moduleHotspots: Record<string, HotspotData[]> = {
         "Implement cool pavement coatings",
         "Add green buffer zones around facilities",
       ],
+      trend: "stable",
+      trendValue: "No change",
+      lastUpdated: "4 hours ago",
+      dataPoints: 892,
     },
     {
       id: "uh-3",
@@ -55,6 +90,10 @@ export const moduleHotspots: Record<string, HotspotData[]> = {
         "Install shade structures over parking lots",
         "Replace dark asphalt with reflective surfaces",
       ],
+      trend: "down",
+      trendValue: "-0.2°C/yr",
+      lastUpdated: "6 hours ago",
+      dataPoints: 654,
     },
     {
       id: "uh-4",
@@ -69,6 +108,9 @@ export const moduleHotspots: Record<string, HotspotData[]> = {
         "Schedule tree maintenance program",
         "Plant replacement trees for aging specimens",
       ],
+      trend: "stable",
+      lastUpdated: "1 day ago",
+      dataPoints: 412,
     },
   ],
   "coastal-plastic": [

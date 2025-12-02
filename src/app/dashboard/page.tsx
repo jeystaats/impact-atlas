@@ -1,32 +1,119 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { CitySelector } from "@/components/dashboard/CitySelector";
 import { ModuleCard } from "@/components/dashboard/ModuleCard";
 import { QuickWinsSummary } from "@/components/dashboard/QuickWinsSummary";
 import { StatCard } from "@/components/dashboard/StatCard";
-import { ImpactRadar } from "@/components/dashboard/ImpactRadar";
 import { CityOverviewMap } from "@/components/dashboard/CityOverviewMap";
-import { modules, cities } from "@/data/modules";
-import { dashboardStats, cityStats } from "@/data/dashboard";
-import { usePreferencesStore, type City } from "@/stores/usePreferencesStore";
+import { useSelectedCity } from "@/hooks/useSelectedCity";
+import { useModulesForCity, useDashboardStats } from "@/hooks/useConvex";
+import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
+
+// Fallback data for when Convex is loading or unavailable
+import { modules as fallbackModules, cities as fallbackCities } from "@/data/modules";
+import { dashboardStats as fallbackStats, cityStats as fallbackCityStats } from "@/data/dashboard";
 
 export default function DashboardPage() {
-  const { defaultCity, setDefaultCity } = usePreferencesStore();
-  const [isHydrated, setIsHydrated] = useState(false);
+  const {
+    selectedCitySlug,
+    selectedCity,
+    selectedCityId,
+    cities,
+    isLoading: citiesLoading,
+    isHydrated,
+    setCity
+  } = useSelectedCity();
 
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
+  // Fetch modules with city-specific stats from Convex
+  const modulesData = useModulesForCity(selectedCityId);
 
-  const selectedCity = isHydrated ? defaultCity : "amsterdam";
-  const currentCity = cities.find((c) => c.id === selectedCity) || cities[0];
+  // Fetch dashboard stats from Convex
+  const dashboardData = useDashboardStats(selectedCityId);
 
-  const handleCityChange = (cityId: string) => {
-    setDefaultCity(cityId as City);
+  // Determine if we're using Convex data or fallbacks
+  const useConvexData = modulesData !== undefined && selectedCityId;
+
+  // Get current city (from Convex or fallback)
+  const currentCity = selectedCity
+    ? { id: selectedCity.slug, name: selectedCity.name, country: selectedCity.country, population: selectedCity.population, coordinates: selectedCity.coordinates }
+    : fallbackCities.find((c) => c.id === selectedCitySlug) || fallbackCities[0];
+
+  // Get modules (from Convex or fallback)
+  const modules = useConvexData && modulesData
+    ? modulesData.map((m) => ({
+        id: m.slug,
+        title: m.name,
+        description: m.description,
+        icon: m.icon.toLowerCase(),
+        color: m.color,
+        metrics: [
+          {
+            label: "Hotspots",
+            value: m.cityStats?.totalHotspots ?? 0,
+            trend: m.cityStats?.criticalHotspots && m.cityStats.criticalHotspots > 0 ? "up" as const : "neutral" as const,
+          },
+          {
+            label: "Quick Wins",
+            value: m.cityStats?.totalQuickWins ?? 0,
+          },
+        ],
+        quickWinsCount: m.cityStats?.totalQuickWins ?? 0,
+        status: m.status,
+      }))
+    : fallbackModules;
+
+  // Get stats (from Convex or fallback)
+  const stats = useConvexData && dashboardData
+    ? [
+        {
+          label: "Active Modules",
+          value: dashboardData.summary.activeModules,
+          icon: "dashboard" as const,
+          color: "#0D9488",
+          trend: "neutral" as const,
+          sparklineData: dashboardData.sparklineData,
+        },
+        {
+          label: "Quick Wins",
+          value: dashboardData.summary.totalQuickWins,
+          icon: "zap" as const,
+          color: "#10B981",
+          trend: "up" as const,
+          trendValue: `+${dashboardData.quickWinsByImpact.high}`,
+          sparklineData: dashboardData.sparklineData,
+        },
+        {
+          label: "Hotspots",
+          value: dashboardData.summary.totalHotspots,
+          icon: "target" as const,
+          color: "#F59E0B",
+          trend: dashboardData.hotspotsBySeverity.critical > 0 ? "up" as const : "down" as const,
+          trendValue: dashboardData.hotspotsBySeverity.critical > 0
+            ? `${dashboardData.hotspotsBySeverity.critical} critical`
+            : "stable",
+          sparklineData: dashboardData.sparklineData,
+        },
+        {
+          label: "AI Insights",
+          value: dashboardData.summary.aiInsights,
+          icon: "sparkles" as const,
+          color: "#8B5CF6",
+          trend: "up" as const,
+          sparklineData: dashboardData.sparklineData,
+        },
+      ]
+    : (fallbackCityStats[selectedCitySlug] || fallbackStats);
+
+  const handleCityChange = (citySlug: string) => {
+    setCity(citySlug);
   };
+
+  // Show skeleton while hydrating
+  if (!isHydrated) {
+    return <DashboardSkeleton />;
+  }
 
   return (
     <div className="p-6 lg:p-8">
@@ -49,12 +136,16 @@ export default function DashboardPage() {
             Here's what's happening in {currentCity.name}
           </motion.p>
         </div>
-        <CitySelector selectedCity={selectedCity} onCityChange={handleCityChange} />
+        <CitySelector
+          selectedCity={selectedCitySlug}
+          onCityChange={handleCityChange}
+          cities={cities.length > 0 ? cities : undefined}
+        />
       </div>
 
       {/* Stats row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {(cityStats[selectedCity] || dashboardStats).map((stat, index) => (
+        {stats.map((stat, index) => (
           <StatCard key={stat.label} stat={stat} index={index} />
         ))}
       </div>
@@ -76,26 +167,11 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Sidebar - Quick Wins Summary + Impact Radar */}
+        {/* Sidebar - Quick Wins Summary */}
         <div className="lg:col-span-1 space-y-6">
-          {/* Impact Radar */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="p-4 rounded-xl bg-[var(--background-tertiary)] border border-[var(--border)]"
-          >
-            <h3 className="text-sm font-medium text-[var(--foreground-muted)] uppercase tracking-wider mb-4">
-              Module Health
-            </h3>
-            <div className="flex justify-center">
-              <ImpactRadar size={240} />
-            </div>
-          </motion.div>
-
           <div>
             <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">Quick Wins</h2>
-            <QuickWinsSummary />
+            <QuickWinsSummary cityId={selectedCityId} />
           </div>
 
           {/* Recent activity */}
@@ -145,7 +221,7 @@ export default function DashboardPage() {
             Showing data for {currentCity.name}
           </span>
         </div>
-        <CityOverviewMap cityId={selectedCity} height={450} />
+        <CityOverviewMap cityId={selectedCitySlug} height={450} />
       </motion.div>
     </div>
   );

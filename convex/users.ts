@@ -79,6 +79,61 @@ export const setDefaultCity = mutation({
 });
 
 /**
+ * Sync user from Clerk on sign-in (called from client)
+ * This replaces the webhook approach - user data is synced when they authenticate
+ */
+export const syncUser = mutation({
+  args: {
+    email: v.string(),
+    name: v.optional(v.string()),
+    imageUrl: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const clerkId = identity.subject;
+
+    const existingUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", clerkId))
+      .unique();
+
+    if (existingUser) {
+      // Update existing user
+      await ctx.db.patch(existingUser._id, {
+        email: args.email,
+        name: args.name,
+        imageUrl: args.imageUrl,
+        updatedAt: Date.now(),
+      });
+      return { userId: existingUser._id, isNew: false };
+    }
+
+    // Create new user
+    const userId = await ctx.db.insert("users", {
+      clerkId,
+      email: args.email,
+      name: args.name,
+      imageUrl: args.imageUrl,
+      role: "user",
+      preferences: {
+        defaultCityId: undefined,
+        favoriteModules: [],
+        notificationsEnabled: true,
+      },
+      onboardingCompleted: false,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+
+    return { userId, isNew: true };
+  },
+});
+
+/**
  * Complete onboarding
  */
 export const completeOnboarding = mutation({

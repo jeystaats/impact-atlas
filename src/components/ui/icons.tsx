@@ -47,6 +47,16 @@ import {
   Plus,
   ClipboardList,
   BarChart3,
+  Layers,
+  Locate,
+  Maximize2,
+  Eye,
+  EyeOff,
+  Activity,
+  Clock,
+  ChevronUp,
+  CircleDot,
+  Hexagon,
   type LucideProps,
 } from "lucide-react";
 
@@ -59,6 +69,7 @@ export const Icons = {
   sprout: Sprout,
   chevronRight: ChevronRight,
   chevronDown: ChevronDown,
+  chevronUp: ChevronUp,
   arrowUpRight: ArrowUpRight,
   arrowDownRight: ArrowDownRight,
   arrowRight: ArrowRight,
@@ -99,6 +110,15 @@ export const Icons = {
   plus: Plus,
   clipboard: ClipboardList,
   chart: BarChart3,
+  layers: Layers,
+  locate: Locate,
+  maximize: Maximize2,
+  eye: Eye,
+  eyeOff: EyeOff,
+  activity: Activity,
+  clock: Clock,
+  circleDot: CircleDot,
+  hexagon: Hexagon,
 };
 
 export type IconName = keyof typeof Icons;

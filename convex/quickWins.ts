@@ -352,3 +352,116 @@ export const create = mutation({
     return quickWinId;
   },
 });
+
+/**
+ * Create a quick win from AI-generated content
+ * Extracts title from content and uses defaults for impact/effort
+ */
+export const createFromAI = mutation({
+  args: {
+    content: v.string(),
+    moduleSlug: v.optional(v.string()),
+    cityId: v.optional(v.id("cities")),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+
+    // Extract title from content (first line or first sentence)
+    let title = args.content.split("\n")[0].trim();
+    // Remove markdown formatting
+    title = title.replace(/^[#*\-\d.]+\s*/, "").trim();
+    // Truncate if too long
+    if (title.length > 100) {
+      title = title.substring(0, 97) + "...";
+    }
+    // Fallback title
+    if (!title || title.length < 5) {
+      title = "AI-Generated Quick Win";
+    }
+
+    // Get module by slug or use a default
+    let moduleId = null;
+    if (args.moduleSlug) {
+      const module = await ctx.db
+        .query("modules")
+        .withIndex("by_slug", (q) => q.eq("slug", args.moduleSlug!))
+        .first();
+      moduleId = module?._id;
+    }
+
+    // If no module found, try to get the first active module
+    if (!moduleId) {
+      const defaultModule = await ctx.db
+        .query("modules")
+        .withIndex("by_active_order", (q) => q.eq("isActive", true))
+        .first();
+      moduleId = defaultModule?._id;
+    }
+
+    if (!moduleId) {
+      throw new Error("No module found to associate quick win with");
+    }
+
+    // Extract tags from content
+    const tags: string[] = [];
+    const tagPatterns = [
+      /tree|planting|canopy/gi,
+      /heat|temperature|cooling/gi,
+      /plastic|debris|waste/gi,
+      /emission|carbon|co2/gi,
+      /biodiversity|species|habitat/gi,
+      /restoration|rewild/gi,
+    ];
+
+    const tagLabels = [
+      "trees",
+      "heat",
+      "plastic",
+      "emissions",
+      "biodiversity",
+      "restoration",
+    ];
+
+    tagPatterns.forEach((pattern, i) => {
+      if (pattern.test(args.content)) {
+        tags.push(tagLabels[i]);
+      }
+    });
+
+    // Add AI-generated tag
+    tags.push("ai-generated");
+
+    // Detect impact level from content
+    let impact: "low" | "medium" | "high" = "medium";
+    if (/high impact|significant|major|substantial/i.test(args.content)) {
+      impact = "high";
+    } else if (/low impact|minor|small/i.test(args.content)) {
+      impact = "low";
+    }
+
+    // Detect effort level from content
+    let effort: "low" | "medium" | "high" = "medium";
+    if (/easy|simple|quick|low effort|minimal/i.test(args.content)) {
+      effort = "low";
+    } else if (/complex|difficult|high effort|intensive/i.test(args.content)) {
+      effort = "high";
+    }
+
+    const quickWinId = await ctx.db.insert("quickWins", {
+      cityId: args.cityId,
+      moduleId,
+      title,
+      description: args.content,
+      impact,
+      effort,
+      tags,
+      category: "ai-suggestion",
+      sortOrder: 999, // Place at end by default
+      isActive: true,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    return quickWinId;
+  },
+});

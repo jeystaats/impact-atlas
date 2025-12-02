@@ -6,9 +6,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { cities } from "@/data/modules";
 import { Icon } from "@/components/ui/icons";
+import { useMapStyle } from "@/hooks/useMapStyle";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-const MAP_STYLE = "mapbox://styles/mapbox/dark-v11";
 
 interface Vessel {
   id: string;
@@ -158,6 +158,7 @@ export function ShipTracker({
   const [selectedVessel, setSelectedVessel] = useState<Vessel | null>(null);
   const [showEmissions, setShowEmissions] = useState(true);
   const [filterType, setFilterType] = useState<string>("all");
+  const { mapStyleUrl } = useMapStyle();
 
   const city = cities.find((c) => c.id === cityId) || cities[0];
 
@@ -292,7 +293,7 @@ export function ShipTracker({
             zoom: 12,
           }}
           style={{ width: "100%", height: "100%" }}
-          mapStyle={MAP_STYLE}
+          mapStyle={mapStyleUrl}
           mapboxAccessToken={MAPBOX_TOKEN}
           attributionControl={false}
         >

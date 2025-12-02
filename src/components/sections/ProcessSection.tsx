@@ -21,7 +21,7 @@ const steps = [
     number: "03",
     title: "Act on Quick Wins",
     description: "Receive prioritized action playbooks with cost estimates, timelines, and projected impact.",
-    icon: "/icons/action.png",
+    icon: "/icons/quickwin.png",
   },
 ];
 

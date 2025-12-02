@@ -6,9 +6,10 @@ import { motion } from "framer-motion";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { cities } from "@/data/modules";
 import { Icon } from "@/components/ui/icons";
+import { useMapStyle } from "@/hooks/useMapStyle";
+import { useTemperature } from "@/hooks/useTemperature";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-const MAP_STYLE = "mapbox://styles/mapbox/dark-v11";
 
 interface HeatPoint {
   lat: number;
@@ -84,6 +85,8 @@ export function HeatmapOverlay({
   const [showLabels, setShowLabels] = useState(true);
   const [timeOfDay, setTimeOfDay] = useState<"morning" | "afternoon" | "evening">("afternoon");
   const [animatedIntensity, setAnimatedIntensity] = useState(0);
+  const { mapStyleUrl } = useMapStyle();
+  const { formatTemperature, unitSymbol } = useTemperature();
 
   const city = cities.find((c) => c.id === cityId) || cities[0];
 
@@ -219,7 +222,7 @@ export function HeatmapOverlay({
             zoom: 12.5,
           }}
           style={{ width: "100%", height: "100%" }}
-          mapStyle={MAP_STYLE}
+          mapStyle={mapStyleUrl}
           mapboxAccessToken={MAPBOX_TOKEN}
           attributionControl={false}
         >
@@ -257,9 +260,9 @@ export function HeatmapOverlay({
               <div className="w-24 h-2 rounded-full bg-gradient-to-r from-blue-400 via-yellow-400 to-red-600" />
             </div>
             <div className="flex items-center gap-2 text-xs text-[var(--foreground-muted)]">
-              <span>+0°C</span>
-              <span>+3°C</span>
-              <span>+6°C</span>
+              <span>+{formatTemperature(0, 0)}</span>
+              <span>+{formatTemperature(3, 0)}</span>
+              <span>+{formatTemperature(6, 0)}</span>
             </div>
           </div>
 
@@ -289,7 +292,7 @@ export function HeatmapOverlay({
             </div>
             <div className="flex items-center gap-1.5">
               <span className="text-[var(--foreground)]">
-                +{(heatData.reduce((acc, p) => acc + p.temperature, 0) / heatData.length).toFixed(1)}°C
+                +{formatTemperature(heatData.reduce((acc, p) => acc + p.temperature, 0) / heatData.length)}
               </span>
               <span className="text-[var(--foreground-muted)]">avg</span>
             </div>

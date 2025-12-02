@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { ModuleLayout } from "@/components/modules/ModuleLayout";
@@ -8,16 +8,19 @@ import { MapVisualization } from "@/components/modules/MapVisualization";
 import { HeatmapOverlay } from "@/components/modules/HeatmapOverlay";
 import { ShipTracker } from "@/components/modules/ShipTracker";
 import { PlasticFlowMap } from "@/components/modules/PlasticFlowMap";
+import { HotspotDetailDrawer } from "@/components/modules/HotspotDetailDrawer";
 import { ActionCard } from "@/components/modules/ActionCard";
 import { Icon } from "@/components/ui/icons";
 import { modules } from "@/data/modules";
-import { moduleHotspots, moduleInsights } from "@/data/hotspots";
+import { moduleHotspots, moduleInsights, HotspotData } from "@/data/hotspots";
 import { notFound } from "next/navigation";
 
 export default function ModuleDetailPage() {
   const params = useParams();
   const moduleId = params.moduleId as string;
   const [selectedHotspot, setSelectedHotspot] = useState<string | null>(null);
+  const [drawerHotspot, setDrawerHotspot] = useState<HotspotData | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const module = modules.find((m) => m.id === moduleId);
   if (!module) {
@@ -28,6 +31,36 @@ export default function ModuleDetailPage() {
   const insights = moduleInsights[moduleId] || [];
 
   const selectedHotspotData = hotspots.find((h) => h.id === selectedHotspot);
+
+  // Handlers for the drawer
+  const handleViewDetails = useCallback((hotspot: HotspotData) => {
+    setDrawerHotspot(hotspot);
+    setIsDrawerOpen(true);
+  }, []);
+
+  const handleCloseDrawer = useCallback(() => {
+    setIsDrawerOpen(false);
+  }, []);
+
+  const handleExportData = useCallback((hotspot: HotspotData) => {
+    console.log("Exporting data for:", hotspot.label);
+    // Implement export logic
+  }, []);
+
+  const handleShare = useCallback((hotspot: HotspotData) => {
+    console.log("Sharing:", hotspot.label);
+    // Implement share logic
+  }, []);
+
+  const handleAddToActionPlan = useCallback((hotspot: HotspotData) => {
+    console.log("Adding to action plan:", hotspot.label);
+    // Implement action plan logic
+  }, []);
+
+  const handleApplyRecommendation = useCallback((hotspot: HotspotData, recommendation: string) => {
+    console.log("Applying recommendation:", recommendation, "for:", hotspot.label);
+    // Implement recommendation apply logic
+  }, []);
 
   return (
     <ModuleLayout module={module}>
@@ -62,6 +95,7 @@ export default function ModuleDetailPage() {
                 hotspots={hotspots}
                 selectedHotspot={selectedHotspot}
                 onHotspotClick={(hotspot) => setSelectedHotspot(hotspot.id)}
+                onViewDetails={handleViewDetails}
               />
             </div>
           </div>
@@ -188,6 +222,17 @@ export default function ModuleDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Hotspot Detail Drawer */}
+      <HotspotDetailDrawer
+        hotspot={drawerHotspot}
+        isOpen={isDrawerOpen}
+        onClose={handleCloseDrawer}
+        onExportData={handleExportData}
+        onShare={handleShare}
+        onAddToActionPlan={handleAddToActionPlan}
+        onApplyRecommendation={handleApplyRecommendation}
+      />
     </ModuleLayout>
   );
 }

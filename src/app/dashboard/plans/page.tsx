@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Icon, ModuleIcon } from "@/components/ui/icons";
 import {
@@ -8,13 +8,16 @@ import {
   Calendar,
   ChevronRight,
   Layers,
-  Clock,
   CheckCircle2,
   FileEdit,
   Play,
-  MoreHorizontal,
   Sparkles,
 } from "lucide-react";
+import { useMyActionPlans, useUpdateActionPlanStatus } from "@/hooks/useConvex";
+import { useSelectedCity } from "@/hooks/useSelectedCity";
+import { modules as fallbackModules } from "@/data/modules";
+import { Id } from "../../../../convex/_generated/dataModel";
+import { useUIStore } from "@/stores/useUIStore";
 
 // Types
 type PlanStatus = "draft" | "active" | "completed";
@@ -25,8 +28,9 @@ interface LinkedModule {
   color: string;
 }
 
-interface ActionPlan {
+interface NormalizedActionPlan {
   id: string;
+  convexId?: Id<"actionPlans">;
   title: string;
   description: string;
   status: PlanStatus;
@@ -38,8 +42,8 @@ interface ActionPlan {
   priority: "low" | "medium" | "high";
 }
 
-// Mock data
-const mockActionPlans: ActionPlan[] = [
+// Mock data for fallback
+const mockActionPlans: NormalizedActionPlan[] = [
   {
     id: "plan-1",
     title: "Downtown Heat Mitigation Strategy",
@@ -102,6 +106,12 @@ const mockActionPlans: ActionPlan[] = [
     priority: "medium",
   },
 ];
+
+// Module color lookup from fallback data
+const moduleColorMap = fallbackModules.reduce((acc, m) => {
+  acc[m.id] = { title: m.title, color: m.color };
+  return acc;
+}, {} as Record<string, { title: string; color: string }>);
 
 // Status configuration
 const statusConfig: Record<
@@ -263,7 +273,7 @@ function StatusDropdown({
             >
               {(Object.keys(statusConfig) as PlanStatus[]).map((s) => {
                 const cfg = statusConfig[s];
-                const Icon = cfg.icon;
+                const IconComponent = cfg.icon;
                 return (
                   <motion.button
                     key={s}
@@ -276,7 +286,7 @@ function StatusDropdown({
                       s === status ? "bg-[var(--background-tertiary)]" : ""
                     }`}
                   >
-                    <Icon className="w-3.5 h-3.5" style={{ color: cfg.color }} />
+                    <IconComponent className="w-3.5 h-3.5" style={{ color: cfg.color }} />
                     <span className="text-sm text-[var(--foreground)]">{cfg.label}</span>
                     {s === status && (
                       <CheckCircle2 className="w-3.5 h-3.5 ml-auto text-[var(--accent)]" />
@@ -298,8 +308,8 @@ function ActionPlanCard({
   onStatusChange,
   index,
 }: {
-  plan: ActionPlan;
-  onStatusChange: (id: string, status: PlanStatus) => void;
+  plan: NormalizedActionPlan;
+  onStatusChange: (id: string, status: PlanStatus, convexId?: Id<"actionPlans">) => void;
   index: number;
 }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -417,7 +427,7 @@ function ActionPlanCard({
 
           <StatusDropdown
             status={plan.status}
-            onStatusChange={(status) => onStatusChange(plan.id, status)}
+            onStatusChange={(status) => onStatusChange(plan.id, status, plan.convexId)}
           />
         </div>
       </div>
@@ -563,7 +573,7 @@ function EmptyState() {
 }
 
 // Stats Summary Component
-function StatsSummary({ plans }: { plans: ActionPlan[] }) {
+function StatsSummary({ plans }: { plans: NormalizedActionPlan[] }) {
   const stats = [
     {
       label: "Total Plans",
@@ -686,21 +696,83 @@ function FilterTabs({
 
 // Main Page Component
 export default function ActionPlansPage() {
-  const [plans, setPlans] = useState<ActionPlan[]>(mockActionPlans);
-  const [activeFilter, setActiveFilter] = useState<"all" | PlanStatus>("all");
+  const { selectedCityId } = useSelectedCity();
+  const { actionPlansFilters, setActionPlansFilter } = useUIStore();
+  const [isHydrated, setIsHydrated] = useState(false);
 
-  const handleStatusChange = (id: string, newStatus: PlanStatus) => {
-    setPlans((prev) =>
-      prev.map((plan) =>
-        plan.id === id
-          ? {
-              ...plan,
-              status: newStatus,
-              progress: newStatus === "completed" ? 100 : plan.progress,
-            }
-          : plan
-      )
-    );
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  // Use persisted filter after hydration, default to "all" during SSR
+  const activeFilter = isHydrated ? actionPlansFilters.statusFilter : "all";
+
+  // Fetch action plans from Convex
+  const convexPlans = useMyActionPlans({ cityId: selectedCityId });
+  const updateStatus = useUpdateActionPlanStatus();
+
+  // Local state for optimistic updates (when using mock data)
+  const [localPlans, setLocalPlans] = useState<NormalizedActionPlan[]>(mockActionPlans);
+
+  // Normalize Convex plans to component format
+  const plans: NormalizedActionPlan[] = useMemo(() => {
+    if (convexPlans && convexPlans.length > 0) {
+      return convexPlans.map((plan) => {
+        // Map moduleIds to linked modules with colors
+        const linkedModules: LinkedModule[] = (plan.moduleIds || []).map((moduleId) => {
+          const moduleInfo = moduleColorMap[moduleId];
+          return {
+            id: moduleId,
+            title: moduleInfo?.title || moduleId.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
+            color: moduleInfo?.color || "#6B7280",
+          };
+        });
+
+        // Handle status - archived maps to completed for display
+        const displayStatus: PlanStatus = plan.status === "archived" ? "completed" : plan.status as PlanStatus;
+
+        return {
+          id: plan._id,
+          convexId: plan._id,
+          title: plan.title,
+          description: plan.description || "",
+          status: displayStatus,
+          progress: plan.progress,
+          dueDate: plan.targetDate
+            ? new Date(plan.targetDate).toISOString().split("T")[0]
+            : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+          linkedModules,
+          quickWinsCount: plan.quickWinIds?.length || 0,
+          createdAt: new Date(plan.createdAt).toISOString().split("T")[0],
+          priority: plan.priority,
+        };
+      });
+    }
+    return localPlans;
+  }, [convexPlans, localPlans]);
+
+  const handleStatusChange = async (id: string, newStatus: PlanStatus, convexId?: Id<"actionPlans">) => {
+    // If we have a Convex ID, update via Convex
+    if (convexId) {
+      try {
+        await updateStatus({ planId: convexId, status: newStatus });
+      } catch (error) {
+        console.error("Failed to update plan status:", error);
+      }
+    } else {
+      // Fallback: update local state
+      setLocalPlans((prev) =>
+        prev.map((plan) =>
+          plan.id === id
+            ? {
+                ...plan,
+                status: newStatus,
+                progress: newStatus === "completed" ? 100 : plan.progress,
+              }
+            : plan
+        )
+      );
+    }
   };
 
   const filteredPlans =
@@ -759,7 +831,7 @@ export default function ActionPlansPage() {
       {/* Filter Tabs */}
       <FilterTabs
         activeFilter={activeFilter}
-        onFilterChange={setActiveFilter}
+        onFilterChange={setActionPlansFilter}
         counts={counts}
       />
 

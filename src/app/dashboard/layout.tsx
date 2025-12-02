@@ -6,9 +6,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { AICopilotEnhanced } from "@/components/copilot/AICopilotEnhanced";
 import { CommandPalette } from "@/components/copilot/CommandPalette";
+import { MobileBlocker } from "@/components/dashboard/MobileBlocker";
 import { Icon } from "@/components/ui/icons";
 import { cities, modules } from "@/data/modules";
 import { usePreferencesStore } from "@/stores/usePreferencesStore";
+import { useUIStore } from "@/stores/useUIStore";
 
 export default function DashboardLayout({
   children,
@@ -17,10 +19,17 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [copilotOpen, setCopilotOpen] = useState(false);
-  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [pendingAIQuestion, setPendingAIQuestion] = useState<string | null>(null);
+
+  // UI state from store
+  const {
+    copilotOpen,
+    setCopilotOpen,
+    commandPaletteOpen,
+    setCommandPaletteOpen,
+    mobileSidebarOpen,
+    setMobileSidebarOpen,
+  } = useUIStore();
 
   // Get city from preferences store
   const { defaultCity } = usePreferencesStore();
@@ -45,7 +54,7 @@ export default function DashboardLayout({
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [setCommandPaletteOpen]);
 
   // Handle AI question from command palette
   const handleAskAI = (question: string) => {
@@ -63,6 +72,9 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
+      {/* Mobile blocker - shows beautiful message on mobile devices */}
+      <MobileBlocker />
+
       {/* Mobile header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-40 h-16 px-4 flex items-center justify-between glass-strong border-b border-[var(--border)]">
         <button

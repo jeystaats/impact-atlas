@@ -8,9 +8,9 @@ import { moduleHotspots, HotspotData } from "@/data/hotspots";
 import { modules } from "@/data/modules";
 import { cities } from "@/data/modules";
 import { Icon } from "@/components/ui/icons";
+import { useMapStyle } from "@/hooks/useMapStyle";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-const MAP_STYLE = "mapbox://styles/mapbox/dark-v11";
 
 interface CityOverviewMapProps {
   cityId?: string;
@@ -33,6 +33,7 @@ export function CityOverviewMap({
   const [activeModules, setActiveModules] = useState<Set<string>>(
     new Set(modules.map((m) => m.id))
   );
+  const { mapStyleUrl } = useMapStyle();
 
   const city = cities.find((c) => c.id === cityId) || cities[0];
 
@@ -141,7 +142,7 @@ export function CityOverviewMap({
             zoom: 12,
           }}
           style={{ width: "100%", height: "100%" }}
-          mapStyle={MAP_STYLE}
+          mapStyle={mapStyleUrl}
           mapboxAccessToken={MAPBOX_TOKEN}
           attributionControl={false}
         >

@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { motion, useInView, AnimatePresence } from "framer-motion";
+import { motion, useInView } from "framer-motion";
+import Image from "next/image";
 
 const modules = [
   {
@@ -9,236 +10,78 @@ const modules = [
     title: "Urban Heat & Trees",
     description: "Map heat islands, find cooling opportunities in hours",
     color: "--ld-heat",
-    angle: 0, // Position on the radar (degrees)
-    icon: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-      </svg>
-    ),
+    angle: 345,
+    radius: 0.88,
+    iconPath: "/icons/modules/sun.png",
   },
   {
     id: "air",
     title: "Air Pollution",
     description: "Track pollution corridors and health outcomes",
     color: "--ld-air",
-    angle: 60,
-    icon: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
-      </svg>
-    ),
+    angle: 52,
+    radius: 0.62,
+    iconPath: "/icons/modules/wind.png",
   },
   {
     id: "plastic",
     title: "Coastal Plastic",
     description: "Identify accumulation zones and cleanup priorities",
     color: "--ld-ocean",
-    angle: 120,
-    icon: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-      </svg>
-    ),
+    angle: 95,
+    radius: 0.78,
+    iconPath: "/icons/modules/ocean.png",
   },
   {
     id: "port",
     title: "Port Emissions",
     description: "Monitor maritime impact on air and water quality",
     color: "--ld-port",
-    angle: 180,
-    icon: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5" />
-      </svg>
-    ),
+    angle: 168,
+    radius: 0.52,
+    iconPath: "/icons/modules/boat.png",
   },
   {
     id: "bio",
     title: "Biodiversity",
     description: "Map critical habitats and wildlife corridors",
     color: "--ld-bio",
-    angle: 240,
-    icon: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14" />
-      </svg>
-    ),
+    angle: 218,
+    radius: 0.72,
+    iconPath: "/icons/modules/leaf.png",
   },
   {
     id: "restore",
     title: "Land Restoration",
     description: "Prioritize nature-based solutions by ROI",
     color: "--ld-restore",
-    angle: 300,
-    icon: (
-      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
-      </svg>
-    ),
+    angle: 285,
+    radius: 0.58,
+    iconPath: "/icons/modules/sprout.png",
   },
 ];
 
-function RadarBlip({
-  module,
-  isScanned,
-  isHovered,
-  onHover,
-  onLeave,
-  onClick,
-  radarRadius
-}: {
-  module: typeof modules[0];
-  isScanned: boolean;
-  isHovered: boolean;
-  onHover: () => void;
-  onLeave: () => void;
-  onClick: () => void;
-  radarRadius: number;
-}) {
-  // Calculate position on the radar circle
-  const angleRad = (module.angle - 90) * (Math.PI / 180);
-  const x = Math.cos(angleRad) * radarRadius;
-  const y = Math.sin(angleRad) * radarRadius;
-
-  return (
-    <motion.div
-      className="absolute cursor-pointer z-10"
-      style={{
-        left: "50%",
-        top: "50%",
-        transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
-      }}
-      onMouseEnter={onHover}
-      onMouseLeave={onLeave}
-      onClick={onClick}
-    >
-      {/* Pulse rings when scanned - subtle */}
-      <AnimatePresence>
-        {isScanned && !isHovered && (
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0.3 }}
-            animate={{ scale: 2.5, opacity: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.2, ease: "easeOut" }}
-            className="absolute rounded-full border"
-            style={{
-              borderColor: `var(${module.color})`,
-              width: 16,
-              height: 16,
-              left: -8,
-              top: -8,
-            }}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Blip dot */}
-      <motion.div
-        animate={{
-          scale: isHovered ? 1.5 : isScanned ? 1 : 0.7,
-          opacity: isScanned ? 1 : 0.4,
-        }}
-        transition={{ duration: 0.3 }}
-        className="relative w-3 h-3 rounded-full"
-        style={{
-          background: isScanned ? `var(${module.color})` : "var(--ld-silver-muted)",
-          boxShadow: isHovered
-            ? `0 0 20px var(${module.color}), 0 0 40px color-mix(in srgb, var(${module.color}) 50%, transparent)`
-            : isScanned
-              ? `0 0 12px color-mix(in srgb, var(${module.color}) 40%, transparent)`
-              : "none",
-        }}
-      />
-    </motion.div>
-  );
-}
-
-// Separate component for the detail card that appears on hover
-function ModuleDetailCard({
-  module,
-  isVisible
-}: {
-  module: typeof modules[0] | null;
-  isVisible: boolean;
-}) {
-  return (
-    <AnimatePresence mode="wait">
-      {isVisible && module && (
-        <motion.div
-          key={module.id}
-          initial={{ opacity: 0, y: 20, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 10, scale: 0.95 }}
-          transition={{ duration: 0.25 }}
-          className="absolute left-1/2 -translate-x-1/2 bottom-16 w-64 p-4 rounded-xl z-30"
-          style={{
-            background: "var(--ld-navy-dark)",
-            border: `1px solid color-mix(in srgb, var(${module.color}) 30%, transparent)`,
-            boxShadow: `0 20px 60px rgba(0,0,0,0.6), 0 0 40px color-mix(in srgb, var(${module.color}) 10%, transparent)`,
-          }}
-        >
-          {/* Icon */}
-          <div
-            className="w-10 h-10 rounded-lg flex items-center justify-center mb-3"
-            style={{
-              background: `color-mix(in srgb, var(${module.color}) 15%, transparent)`,
-              color: `var(${module.color})`,
-            }}
-          >
-            {module.icon}
-          </div>
-
-          {/* Title */}
-          <h3
-            className="text-base font-semibold mb-2"
-            style={{ color: "var(--ld-white)" }}
-          >
-            {module.title}
-          </h3>
-
-          {/* Description */}
-          <p
-            className="text-sm leading-relaxed"
-            style={{ color: "var(--ld-white-60)" }}
-          >
-            {module.description}
-          </p>
-
-          {/* Accent line at top */}
-          <div
-            className="absolute top-0 left-4 right-4 h-px"
-            style={{ background: `var(${module.color})` }}
-          />
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
-
 export default function ModulesSection() {
   const sectionRef = useRef<HTMLElement>(null);
-  const isInView = useInView(sectionRef, { once: true, amount: 0.3 });
+  const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
   const [scanAngle, setScanAngle] = useState(0);
   const [scannedModules, setScannedModules] = useState<Set<string>>(new Set());
   const [hoveredModule, setHoveredModule] = useState<string | null>(null);
-  const [isPaused, setIsPaused] = useState(false);
-  const [selectedModule, setSelectedModule] = useState<string | null>(null);
 
-  // Radar dimensions
-  const radarRadius = 180;
+  // Larger radar
+  const radarRadius = 140;
 
   // Animate radar sweep
   useEffect(() => {
-    if (!isInView || isPaused) return;
+    if (!isInView) return;
 
     const interval = setInterval(() => {
       setScanAngle((prev) => {
-        const newAngle = (prev + 2) % 360;
+        const newAngle = (prev + 2.5) % 360;
 
-        // Check if any module is being scanned
         modules.forEach((module) => {
           const diff = Math.abs(newAngle - module.angle);
-          if (diff < 10 || diff > 350) {
+          if (diff < 12 || diff > 348) {
             setScannedModules((s) => new Set([...s, module.id]));
           }
         });
@@ -248,18 +91,7 @@ export default function ModulesSection() {
     }, 30);
 
     return () => clearInterval(interval);
-  }, [isInView, isPaused]);
-
-  // Pause on hover
-  const handleModuleHover = (id: string) => {
-    setHoveredModule(id);
-    setIsPaused(true);
-  };
-
-  const handleModuleLeave = () => {
-    setHoveredModule(null);
-    setIsPaused(false);
-  };
+  }, [isInView]);
 
   return (
     <section
@@ -268,198 +100,260 @@ export default function ModulesSection() {
       className="ld-section relative overflow-hidden"
       style={{ background: "var(--ld-navy-deep)" }}
     >
-      {/* Background grid pattern - very subtle */}
+      {/* Background grid pattern */}
       <div
-        className="absolute inset-0 opacity-[0.015]"
+        className="absolute inset-0 opacity-[0.02]"
         style={{
           backgroundImage: `
             linear-gradient(var(--ld-silver-muted) 1px, transparent 1px),
             linear-gradient(90deg, var(--ld-silver-muted) 1px, transparent 1px)
           `,
-          backgroundSize: "60px 60px",
+          backgroundSize: "40px 40px",
         }}
       />
 
       <div className="ld-section-content relative z-10">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={isInView ? { opacity: 1 } : {}}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="ld-caption mb-4"
-          >
-            Six Modules
-          </motion.p>
+        {/* Two column layout: Radar left, content right */}
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
 
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
+          {/* Left: Radar - Bigger */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={isInView ? { opacity: 1, scale: 1 } : {}}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="ld-display-lg mb-4"
+            className="relative mx-auto lg:mx-0 order-2 lg:order-1"
+            style={{ width: radarRadius * 2 + 60, height: radarRadius * 2 + 60 }}
           >
-            Scanning for{" "}
-            <span className="ld-gradient-text">opportunities.</span>
-          </motion.h2>
+            {/* Radar circles */}
+            {[0.33, 0.66, 1].map((scale, i) => (
+              <div
+                key={i}
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                style={{
+                  width: radarRadius * 2 * scale,
+                  height: radarRadius * 2 * scale,
+                  border: "1px solid var(--ld-white-10)",
+                }}
+              />
+            ))}
 
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={isInView ? { opacity: 1 } : {}}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            className="ld-body-lg max-w-2xl mx-auto"
-          >
-            Our AI continuously monitors six environmental domains,
-            identifying high-impact interventions in real-time.
-          </motion.p>
-        </div>
-
-        {/* Radar Container */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={isInView ? { opacity: 1, scale: 1 } : {}}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          className="relative mx-auto"
-          style={{ width: radarRadius * 2 + 100, height: radarRadius * 2 + 100 }}
-        >
-          {/* Radar circles */}
-          {[0.33, 0.66, 1].map((scale, i) => (
+            {/* Cross lines */}
             <div
-              key={i}
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-px"
+              style={{ background: "var(--ld-white-10)", height: radarRadius * 2 }}
+            />
+            <div
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-px"
+              style={{ background: "var(--ld-white-10)", width: radarRadius * 2 }}
+            />
+
+            {/* Radar sweep */}
+            <div
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
               style={{
-                width: radarRadius * 2 * scale,
-                height: radarRadius * 2 * scale,
-                border: "1px solid var(--ld-white-10)",
+                width: radarRadius * 2,
+                height: radarRadius * 2,
+                background: `conic-gradient(from ${scanAngle}deg, transparent 0deg, rgba(45, 212, 191, 0.2) 3deg, rgba(45, 212, 191, 0.05) 25deg, transparent 50deg)`,
               }}
             />
-          ))}
 
-          {/* Cross lines */}
-          <div
-            className="absolute left-1/2 top-0 bottom-0 w-[1px] -translate-x-1/2"
-            style={{ background: "var(--ld-white-10)" }}
-          />
-          <div
-            className="absolute top-1/2 left-0 right-0 h-[1px] -translate-y-1/2"
-            style={{ background: "var(--ld-white-10)" }}
-          />
-
-          {/* Radar sweep - subtle */}
-          <motion.div
-            className="absolute left-1/2 top-1/2 origin-center"
-            style={{
-              width: radarRadius + 50,
-              height: 1,
-              marginLeft: 0,
-              marginTop: 0,
-              background: `linear-gradient(90deg, var(--ld-teal), transparent)`,
-              opacity: 0.6,
-              rotate: scanAngle,
-            }}
-          />
-
-          {/* Sweep trail (conic gradient) - very subtle */}
-          <div
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
-            style={{
-              width: radarRadius * 2 + 20,
-              height: radarRadius * 2 + 20,
-              background: `conic-gradient(from ${scanAngle - 20}deg, transparent, rgba(45, 212, 191, 0.06), transparent 20deg)`,
-            }}
-          />
-
-          {/* Center dot - refined */}
-          <div
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full"
-            style={{
-              background: "var(--ld-teal)",
-              boxShadow: "0 0 8px var(--ld-teal-glow)",
-            }}
-          />
-
-          {/* Module blips */}
-          {modules.map((module) => (
-            <RadarBlip
-              key={module.id}
-              module={module}
-              isScanned={scannedModules.has(module.id)}
-              isHovered={hoveredModule === module.id}
-              onHover={() => handleModuleHover(module.id)}
-              onLeave={handleModuleLeave}
-              onClick={() => setSelectedModule(module.id)}
-              radarRadius={radarRadius}
+            {/* Center dot */}
+            <div
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full"
+              style={{
+                background: "var(--ld-teal)",
+                boxShadow: "0 0 12px var(--ld-teal-glow)",
+              }}
             />
-          ))}
 
-          {/* Module detail card - fixed position below radar */}
-          <ModuleDetailCard
-            module={hoveredModule ? modules.find(m => m.id === hoveredModule) || null : null}
-            isVisible={!!hoveredModule}
-          />
-        </motion.div>
+            {/* Module blips - scattered */}
+            {modules.map((module) => {
+              const blipRadius = radarRadius * module.radius;
+              const angleRad = (module.angle - 90) * (Math.PI / 180);
+              const xPos = Math.cos(angleRad) * blipRadius;
+              const yPos = Math.sin(angleRad) * blipRadius;
+              const isScanned = scannedModules.has(module.id);
+              const isHovered = hoveredModule === module.id;
+              const containerCenter = radarRadius + 30;
 
-        {/* Status text - outside radar container */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.6, delay: 0.8 }}
-          className="text-center mt-6"
-          style={{ color: "var(--ld-white-50)" }}
-        >
-          <motion.p
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="text-xs font-mono uppercase tracking-wider"
-          >
-            {scannedModules.size < 6 ? "Scanning..." : "All modules detected"}
-          </motion.p>
-          <p className="text-xs font-mono mt-1" style={{ color: "var(--ld-teal)" }}>
-            {scannedModules.size}/6 modules active
-          </p>
-        </motion.div>
+              return (
+                <motion.div
+                  key={module.id}
+                  className="absolute cursor-pointer z-10"
+                  style={{
+                    left: containerCenter + xPos,
+                    top: containerCenter + yPos,
+                    marginLeft: -6,
+                    marginTop: -6,
+                  }}
+                  onMouseEnter={() => setHoveredModule(module.id)}
+                  onMouseLeave={() => setHoveredModule(null)}
+                  animate={{
+                    scale: isHovered ? 1.8 : isScanned ? 1.2 : 0.7,
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                >
+                  <div
+                    className="w-3 h-3 rounded-full transition-all duration-300"
+                    style={{
+                      background: isScanned ? `var(${module.color})` : "var(--ld-silver-muted)",
+                      boxShadow: isHovered
+                        ? `0 0 20px var(${module.color}), 0 0 40px var(${module.color})`
+                        : isScanned
+                          ? `0 0 12px color-mix(in srgb, var(${module.color}) 70%, transparent)`
+                          : "none",
+                    }}
+                  />
+                </motion.div>
+              );
+            })}
 
-        {/* Module legend - with colors */}
+            {/* Status */}
+            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-center whitespace-nowrap">
+              <p className="text-xs font-mono" style={{ color: "var(--ld-teal)" }}>
+                {scannedModules.size}/6 detected
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Right: Header + description */}
+          <div className="order-1 lg:order-2">
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={isInView ? { opacity: 1 } : {}}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="ld-caption mb-3"
+            >
+              Six Modules
+            </motion.p>
+
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="ld-display-lg mb-4"
+            >
+              Scanning for{" "}
+              <span className="ld-gradient-text">opportunities.</span>
+            </motion.h2>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={isInView ? { opacity: 1 } : {}}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="ld-body-lg mb-6"
+            >
+              Our AI monitors six environmental domains, identifying high-impact interventions in real-time.
+            </motion.p>
+          </div>
+        </div>
+
+        {/* Module Cards Grid - Modern design with gradient borders */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 1 }}
-          className="flex flex-wrap justify-center gap-3 mt-8"
+          transition={{ duration: 0.6, delay: 0.6 }}
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-16"
         >
-          {modules.map((module) => (
-            <motion.button
-              key={module.id}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => {
-                setHoveredModule(module.id);
-                setIsPaused(true);
-                setTimeout(() => {
-                  setHoveredModule(null);
-                  setIsPaused(false);
-                }, 3000);
-              }}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full transition-all"
-              style={{
-                background: scannedModules.has(module.id)
-                  ? `color-mix(in srgb, var(${module.color}) 10%, transparent)`
-                  : "transparent",
-                border: `1px solid ${scannedModules.has(module.id) ? `color-mix(in srgb, var(${module.color}) 30%, transparent)` : "var(--ld-white-10)"}`,
-              }}
-            >
-              <span
-                className="w-1.5 h-1.5 rounded-full transition-colors"
-                style={{
-                  background: scannedModules.has(module.id) ? `var(${module.color})` : "var(--ld-silver-muted)",
-                }}
-              />
-              <span
-                className="text-xs"
-                style={{ color: scannedModules.has(module.id) ? "var(--ld-white-70)" : "var(--ld-white-30)" }}
+          {modules.map((module, i) => {
+            const isScanned = scannedModules.has(module.id);
+            const isHovered = hoveredModule === module.id;
+
+            return (
+              <motion.div
+                key={module.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.4, delay: 0.7 + i * 0.08 }}
+                onMouseEnter={() => setHoveredModule(module.id)}
+                onMouseLeave={() => setHoveredModule(null)}
+                className="group relative cursor-pointer"
               >
-                {module.title}
-              </span>
-            </motion.button>
-          ))}
+                {/* Gradient border wrapper */}
+                <div
+                  className="absolute -inset-[1px] rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  style={{
+                    background: `linear-gradient(135deg, var(${module.color}), transparent 50%, var(${module.color}))`,
+                  }}
+                />
+
+                {/* Card content */}
+                <div
+                  className="relative p-5 rounded-2xl h-full transition-all duration-500 overflow-hidden"
+                  style={{
+                    background: "var(--ld-navy-dark)",
+                    border: isScanned && !isHovered ? `1px solid color-mix(in srgb, var(${module.color}) 30%, transparent)` : "1px solid transparent",
+                    transform: isHovered ? "translateY(-6px)" : "none",
+                    boxShadow: isHovered
+                      ? `0 20px 40px rgba(0,0,0,0.5), 0 0 30px color-mix(in srgb, var(${module.color}) 20%, transparent)`
+                      : "0 4px 20px rgba(0,0,0,0.2)",
+                  }}
+                >
+                  {/* Background icon - faded */}
+                  <div
+                    className="absolute -right-4 -bottom-4 w-32 h-32 opacity-[0.07] group-hover:opacity-[0.12] transition-opacity duration-500 pointer-events-none"
+                  >
+                    <Image
+                      src={module.iconPath}
+                      alt=""
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+
+                  {/* Glow effect on hover */}
+                  <div
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl"
+                    style={{
+                      background: `radial-gradient(circle at 30% 30%, color-mix(in srgb, var(${module.color}) 10%, transparent), transparent 60%)`,
+                    }}
+                  />
+
+                  {/* Icon container */}
+                  <div
+                    className="relative w-14 h-14 rounded-xl flex items-center justify-center mb-4 transition-all duration-300"
+                    style={{
+                      background: `linear-gradient(135deg, color-mix(in srgb, var(${module.color}) 15%, transparent), color-mix(in srgb, var(${module.color}) 5%, transparent))`,
+                      boxShadow: isHovered ? `0 0 20px color-mix(in srgb, var(${module.color}) 30%, transparent)` : "none",
+                    }}
+                  >
+                    <Image
+                      src={module.iconPath}
+                      alt={module.title}
+                      width={36}
+                      height={36}
+                      className="object-contain relative z-10"
+                    />
+                  </div>
+
+                  {/* Title */}
+                  <h3
+                    className="relative text-base font-semibold mb-2 transition-colors duration-300"
+                    style={{ color: isHovered ? "var(--ld-white)" : "var(--ld-white-90)" }}
+                  >
+                    {module.title}
+                  </h3>
+
+                  {/* Description */}
+                  <p
+                    className="relative text-sm leading-relaxed transition-colors duration-300"
+                    style={{ color: isHovered ? "var(--ld-white-70)" : "var(--ld-white-40)" }}
+                  >
+                    {module.description}
+                  </p>
+
+                  {/* Active indicator dot */}
+                  <div
+                    className="absolute top-4 right-4 w-2 h-2 rounded-full transition-all duration-300"
+                    style={{
+                      background: isScanned ? `var(${module.color})` : "var(--ld-white-10)",
+                      boxShadow: isScanned ? `0 0 8px var(${module.color})` : "none",
+                    }}
+                  />
+                </div>
+              </motion.div>
+            );
+          })}
         </motion.div>
       </div>
     </section>

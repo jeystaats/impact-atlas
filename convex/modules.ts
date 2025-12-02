@@ -16,19 +16,21 @@ export const list = query({
     activeOnly: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    let modulesQuery = ctx.db.query("modules");
+    let modules;
 
     if (args.category) {
-      modulesQuery = modulesQuery.withIndex("by_category", (q) =>
-        q.eq("category", args.category!)
-      );
+      modules = await ctx.db
+        .query("modules")
+        .withIndex("by_category", (q) => q.eq("category", args.category!))
+        .collect();
     } else if (args.activeOnly) {
-      modulesQuery = modulesQuery.withIndex("by_active_order", (q) =>
-        q.eq("isActive", true)
-      );
+      modules = await ctx.db
+        .query("modules")
+        .withIndex("by_active_order", (q) => q.eq("isActive", true))
+        .collect();
+    } else {
+      modules = await ctx.db.query("modules").collect();
     }
-
-    const modules = await modulesQuery.collect();
 
     // Sort by sortOrder
     return modules.sort((a, b) => a.sortOrder - b.sortOrder);

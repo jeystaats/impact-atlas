@@ -3,20 +3,46 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Icon } from "@/components/ui/icons";
-import { cities } from "@/data/modules";
+import { cities as fallbackCities } from "@/data/modules";
 import { cn } from "@/lib/utils";
 import { formatNumber } from "@/lib/utils";
+import { Doc } from "../../../convex/_generated/dataModel";
 
 interface CitySelectorProps {
   selectedCity: string;
-  onCityChange: (cityId: string) => void;
+  onCityChange: (citySlug: string) => void;
+  // Optional: Convex cities data
+  cities?: Doc<"cities">[];
 }
 
-export function CitySelector({ selectedCity, onCityChange }: CitySelectorProps) {
+// Type for normalized city data
+interface NormalizedCity {
+  slug: string;
+  name: string;
+  country: string;
+  population: number;
+}
+
+export function CitySelector({ selectedCity, onCityChange, cities: convexCities }: CitySelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-  const currentCity = cities.find((c) => c.id === selectedCity) || cities[0];
+  // Normalize cities to a common format
+  const cities: NormalizedCity[] = convexCities
+    ? convexCities.map((c) => ({
+        slug: c.slug,
+        name: c.name,
+        country: c.country,
+        population: c.population,
+      }))
+    : fallbackCities.map((c) => ({
+        slug: c.id,
+        name: c.name,
+        country: c.country,
+        population: c.population,
+      }));
+
+  const currentCity = cities.find((c) => c.slug === selectedCity) || cities[0];
   const filteredCities = cities.filter((city) =>
     city.name.toLowerCase().includes(search.toLowerCase()) ||
     city.country.toLowerCase().includes(search.toLowerCase())
@@ -85,15 +111,15 @@ export function CitySelector({ selectedCity, onCityChange }: CitySelectorProps) 
               <div className="max-h-64 overflow-y-auto space-y-1">
                 {filteredCities.map((city) => (
                   <button
-                    key={city.id}
+                    key={city.slug}
                     onClick={() => {
-                      onCityChange(city.id);
+                      onCityChange(city.slug);
                       setIsOpen(false);
                       setSearch("");
                     }}
                     className={cn(
                       "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left",
-                      city.id === selectedCity
+                      city.slug === selectedCity
                         ? "bg-[var(--accent-bg)] text-[var(--accent-dark)]"
                         : "hover:bg-[var(--background-secondary)] text-[var(--foreground)]"
                     )}
@@ -101,7 +127,7 @@ export function CitySelector({ selectedCity, onCityChange }: CitySelectorProps) 
                     <div
                       className={cn(
                         "w-8 h-8 rounded-lg flex items-center justify-center",
-                        city.id === selectedCity
+                        city.slug === selectedCity
                           ? "bg-[var(--accent)] text-white"
                           : "bg-[var(--background-secondary)]"
                       )}

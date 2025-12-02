@@ -516,36 +516,7 @@ body {
   animation: ld-fade-up 600ms ease-out forwards;
 }
 
-/* Landing hotspot pulse */
-.landing-dark .ld-hotspot {
-  position: relative;
-}
-
-.landing-dark .ld-hotspot::before,
-.landing-dark .ld-hotspot::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  animation: ld-pulse-ring 2s ease-out infinite;
-}
-
-.landing-dark .ld-hotspot::before {
-  width: 200%;
-  height: 200%;
-  border: 2px solid currentColor;
-  opacity: 0.6;
-}
-
-.landing-dark .ld-hotspot::after {
-  width: 300%;
-  height: 300%;
-  border: 1px solid currentColor;
-  opacity: 0.3;
-  animation-delay: 0.5s;
-}
+/* Landing hotspot pulse - rings are added directly in component */
 
 /* Landing bento grid */
 .landing-dark .ld-bento-grid {

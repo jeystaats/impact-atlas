@@ -50,42 +50,38 @@ http.route({
     // Handle the event
     const eventType = evt.type;
 
-    switch (eventType) {
-      case "user.created":
-      case "user.updated": {
-        const { id, email_addresses, first_name, last_name, image_url } =
-          evt.data;
+    if (eventType === "user.created" || eventType === "user.updated") {
+      const data = evt.data as {
+        id: string;
+        email_addresses?: Array<{ email_address: string }>;
+        first_name?: string | null;
+        last_name?: string | null;
+        image_url?: string;
+      };
 
-        const email = email_addresses?.[0]?.email_address;
-        if (!email) {
-          console.error("No email found for user:", id);
-          return new Response("No email found", { status: 400 });
-        }
+      const email = data.email_addresses?.[0]?.email_address;
+      if (!email) {
+        console.error("No email found for user:", data.id);
+        return new Response("No email found", { status: 400 });
+      }
 
-        const name = [first_name, last_name].filter(Boolean).join(" ") || undefined;
+      const name = [data.first_name, data.last_name].filter(Boolean).join(" ") || undefined;
 
-        await ctx.runMutation(internal.users.upsertFromClerk, {
-          clerkId: id,
-          email,
-          name,
-          imageUrl: image_url,
+      await ctx.runMutation(internal.users.upsertFromClerk, {
+        clerkId: data.id,
+        email,
+        name,
+        imageUrl: data.image_url,
+      });
+    } else if (eventType === "user.deleted") {
+      const data = evt.data as { id?: string };
+      if (data.id) {
+        await ctx.runMutation(internal.users.deleteByClerkId, {
+          clerkId: data.id,
         });
-
-        break;
       }
-
-      case "user.deleted": {
-        const { id } = evt.data;
-        if (id) {
-          await ctx.runMutation(internal.users.deleteByClerkId, {
-            clerkId: id,
-          });
-        }
-        break;
-      }
-
-      default:
-        console.log(`Unhandled webhook event type: ${eventType}`);
+    } else {
+      console.log(`Unhandled webhook event type: ${eventType}`);
     }
 
     return new Response("OK", { status: 200 });

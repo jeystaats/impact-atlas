@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Icon, IconName } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 
@@ -113,6 +115,8 @@ interface IntelligenceCardProps {
   impact?: "low" | "medium" | "high";
   effort?: "low" | "medium" | "high";
   isStreaming?: boolean;
+  onClose?: () => void;
+  onSaveQuickWin?: (content: string) => Promise<void>;
 }
 
 const cardConfig: Record<CardType, { icon: IconName; gradient: string; border: string }> = {
@@ -159,9 +163,36 @@ export function IntelligenceCard({
   impact,
   effort,
   isStreaming,
+  onClose,
+  onSaveQuickWin,
 }: IntelligenceCardProps) {
+  const router = useRouter();
+  const [isSaving, setIsSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const config = cardConfig[type];
   const { cleanContent, actions } = extractActions(content);
+
+  // Handle navigation with close
+  const handleNavigation = (href: string) => {
+    if (onClose) {
+      onClose();
+    }
+    router.push(href);
+  };
+
+  // Handle save as quick win
+  const handleSaveQuickWin = async () => {
+    if (!onSaveQuickWin || isSaving || saved) return;
+    setIsSaving(true);
+    try {
+      await onSaveQuickWin(content);
+      setSaved(true);
+    } catch (error) {
+      console.error("Failed to save quick win:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <motion.div
@@ -303,23 +334,33 @@ export function IntelligenceCard({
                 return (
                   <button
                     key={i}
-                    onClick={() => {
-                      // TODO: Implement save to quick wins functionality
-                      console.log("Save as quick win:", content);
-                    }}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/20 transition-colors border border-emerald-200"
+                    onClick={handleSaveQuickWin}
+                    disabled={isSaving || saved || !onSaveQuickWin}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border",
+                      saved
+                        ? "bg-emerald-100 text-emerald-700 border-emerald-300"
+                        : "bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/20 border-emerald-200",
+                      (isSaving || !onSaveQuickWin) && "opacity-50 cursor-not-allowed"
+                    )}
                   >
-                    <Icon name={action.icon} className="w-3.5 h-3.5" />
-                    {action.label}
+                    {isSaving ? (
+                      <Icon name="loader" className="w-3.5 h-3.5 animate-spin" />
+                    ) : saved ? (
+                      <Icon name="check" className="w-3.5 h-3.5" />
+                    ) : (
+                      <Icon name={action.icon} className="w-3.5 h-3.5" />
+                    )}
+                    {saved ? "Saved!" : isSaving ? "Saving..." : action.label}
                   </button>
                 );
               }
 
-              // Module and page navigation links
+              // Module and page navigation links - use button with router for close behavior
               return (
-                <Link
+                <button
                   key={i}
-                  href={action.href}
+                  onClick={() => handleNavigation(action.href)}
                   className={cn(
                     "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
                     action.type === "module"
@@ -330,7 +371,7 @@ export function IntelligenceCard({
                   <Icon name={action.icon} className="w-3.5 h-3.5" />
                   {action.label}
                   <Icon name="arrowRight" className="w-3 h-3 opacity-50" />
-                </Link>
+                </button>
               );
             })}
           </div>

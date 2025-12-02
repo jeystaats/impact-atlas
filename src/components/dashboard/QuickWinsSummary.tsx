@@ -3,9 +3,33 @@
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Icon, ModuleIcon } from "@/components/ui/icons";
-import { modules } from "@/data/modules";
+import { modules as fallbackModules } from "@/data/modules";
+import { useModulesForCity } from "@/hooks/useConvex";
+import { Id } from "../../../convex/_generated/dataModel";
 
-export function QuickWinsSummary() {
+interface QuickWinsSummaryProps {
+  cityId?: Id<"cities">;
+}
+
+export function QuickWinsSummary({ cityId }: QuickWinsSummaryProps) {
+  // Fetch modules with city-specific stats from Convex
+  const modulesData = useModulesForCity(cityId);
+
+  // Normalize modules to a common format
+  const modules = modulesData
+    ? modulesData.map((m) => ({
+        id: m.slug,
+        title: m.name,
+        color: m.color,
+        quickWinsCount: m.cityStats?.totalQuickWins ?? 0,
+      }))
+    : fallbackModules.map((m) => ({
+        id: m.id,
+        title: m.title,
+        color: m.color,
+        quickWinsCount: m.quickWinsCount,
+      }));
+
   const totalWins = modules.reduce((sum, m) => sum + m.quickWinsCount, 0);
   const topModules = [...modules].sort((a, b) => b.quickWinsCount - a.quickWinsCount).slice(0, 3);
 

@@ -3,12 +3,13 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 
+// Positions as percentages within the map container (keep within 15-85% range)
 const cities = [
-  { name: "Singapore", x: 75, y: 55, color: "--ld-heat", delay: 0.4 },
-  { name: "Rotterdam", x: 48, y: 28, color: "--ld-ocean", delay: 0.6 },
-  { name: "Copenhagen", x: 50, y: 24, color: "--ld-bio", delay: 0.8 },
-  { name: "Lagos", x: 47, y: 52, color: "--ld-air", delay: 1.0 },
-  { name: "Mumbai", x: 68, y: 45, color: "--ld-restore", delay: 1.2 },
+  { name: "Singapore", x: 78, y: 62, color: "--ld-heat", delay: 0.4 },      // Southeast Asia
+  { name: "Rotterdam", x: 48, y: 35, color: "--ld-ocean", delay: 0.6 },     // Europe
+  { name: "Copenhagen", x: 52, y: 28, color: "--ld-bio", delay: 0.8 },      // Europe (north)
+  { name: "Lagos", x: 46, y: 58, color: "--ld-air", delay: 1.0 },           // Africa
+  { name: "Mumbai", x: 68, y: 48, color: "--ld-restore", delay: 1.2 },      // Asia
 ];
 
 export default function VisionSection() {
@@ -90,27 +91,41 @@ export default function VisionSection() {
             className="relative aspect-[4/3] rounded-2xl overflow-hidden"
             style={{ background: "var(--ld-navy-dark)", border: "1px solid var(--ld-white-10)" }}
           >
-            {/* Simple world map SVG */}
+            {/* Simple world map SVG - positions match % coordinates in container */}
             <svg
-              viewBox="0 0 100 60"
+              viewBox="0 0 100 75"
+              preserveAspectRatio="none"
               className="absolute inset-0 w-full h-full"
-              style={{ opacity: 0.3 }}
+              style={{ opacity: 0.25 }}
             >
-              {/* Simplified continent shapes */}
+              {/* North America */}
               <path
-                d="M20,15 Q25,10 35,12 L40,15 Q45,18 42,25 L35,30 Q30,28 25,30 L20,25 Q15,20 20,15"
+                d="M5,15 Q10,10 22,12 L28,18 Q32,24 28,32 L20,36 Q12,34 8,30 L5,22 Q3,18 5,15"
                 fill="var(--ld-navy-light)"
               />
+              {/* South America */}
               <path
-                d="M45,20 Q55,15 60,20 L65,30 Q60,40 50,38 L45,30 Q42,25 45,20"
+                d="M18,42 Q24,38 30,42 L32,55 Q28,65 20,62 L15,52 Q14,46 18,42"
                 fill="var(--ld-navy-light)"
               />
+              {/* Europe - centered around x:48-52, y:28-35 */}
               <path
-                d="M60,25 Q75,20 85,30 L90,45 Q85,55 70,50 L60,40 Q55,35 60,25"
+                d="M42,22 Q50,18 58,22 L60,32 Q56,40 48,38 L42,32 Q40,26 42,22"
                 fill="var(--ld-navy-light)"
               />
+              {/* Africa - centered around x:46, y:58 */}
               <path
-                d="M15,35 Q20,32 30,35 L35,45 Q30,55 20,50 L15,42 Q12,38 15,35"
+                d="M40,42 Q50,38 56,44 L54,62 Q48,70 40,66 L36,52 Q38,46 40,42"
+                fill="var(--ld-navy-light)"
+              />
+              {/* Asia - centered around x:68-78, y:48-62 */}
+              <path
+                d="M60,18 Q75,12 90,22 L92,42 Q88,58 72,55 L62,48 Q58,36 60,26 Q58,22 60,18"
+                fill="var(--ld-navy-light)"
+              />
+              {/* Australia */}
+              <path
+                d="M76,58 Q86,55 92,62 L90,70 Q82,74 76,68 L74,62 Q74,60 76,58"
                 fill="var(--ld-navy-light)"
               />
             </svg>
@@ -122,16 +137,60 @@ export default function VisionSection() {
                 initial={{ scale: 0, opacity: 0 }}
                 animate={isInView ? { scale: 1, opacity: 1 } : {}}
                 transition={{ duration: 0.5, delay: city.delay }}
-                className="absolute ld-hotspot"
+                className="absolute"
                 style={{
                   left: `${city.x}%`,
                   top: `${city.y}%`,
                   transform: "translate(-50%, -50%)",
-                  color: `var(${city.color})`,
                 }}
               >
+                {/* Pulse rings */}
+                <motion.div
+                  className="absolute rounded-full"
+                  style={{
+                    width: 20,
+                    height: 20,
+                    top: "50%",
+                    left: "50%",
+                    marginTop: -10,
+                    marginLeft: -10,
+                    border: `2px solid var(${city.color})`,
+                  }}
+                  animate={{
+                    scale: [1, 1.8, 1],
+                    opacity: [0.6, 0, 0.6],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeOut",
+                  }}
+                />
+                <motion.div
+                  className="absolute rounded-full"
+                  style={{
+                    width: 32,
+                    height: 32,
+                    top: "50%",
+                    left: "50%",
+                    marginTop: -16,
+                    marginLeft: -16,
+                    border: `1px solid var(${city.color})`,
+                  }}
+                  animate={{
+                    scale: [1, 1.5, 1],
+                    opacity: [0.3, 0, 0.3],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeOut",
+                    delay: 0.5,
+                  }}
+                />
+                {/* Dot */}
                 <div
-                  className="w-2.5 h-2.5 rounded-full"
+                  className="relative w-2.5 h-2.5 rounded-full"
                   style={{
                     backgroundColor: `var(${city.color})`,
                     boxShadow: `0 0 12px color-mix(in srgb, var(${city.color}) 50%, transparent)`,
