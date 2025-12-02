@@ -1,18 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sidebar } from "@/components/dashboard/Sidebar";
-import { AICopilot } from "@/components/dashboard/AICopilot";
+import { AICopilotEnhanced } from "@/components/copilot/AICopilotEnhanced";
+import { CommandPalette } from "@/components/copilot/CommandPalette";
 import { Icon } from "@/components/ui/icons";
+import { cities, modules } from "@/data/modules";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
   const [copilotOpen, setCopilotOpen] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [selectedCity] = useState(cities[0]);
+  const [pendingAIQuestion, setPendingAIQuestion] = useState<string | null>(null);
+
+  // Extract current module from pathname
+  const moduleMatch = pathname.match(/\/dashboard\/modules\/([^/]+)/);
+  const currentModuleId = moduleMatch ? moduleMatch[1] : undefined;
+  const currentModule = currentModuleId ? modules.find(m => m.id === currentModuleId) : undefined;
+
+  // Global keyboard shortcut for Command Palette
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setCommandPaletteOpen(true);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Handle AI question from command palette
+  const handleAskAI = (question: string) => {
+    setPendingAIQuestion(question);
+    setCopilotOpen(true);
+  };
+
+  // Clear pending question when copilot opens
+  useEffect(() => {
+    if (copilotOpen && pendingAIQuestion) {
+      // The question will be handled by the copilot component
+      setPendingAIQuestion(null);
+    }
+  }, [copilotOpen, pendingAIQuestion]);
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
@@ -36,6 +75,12 @@ export default function DashboardLayout({
         >
           <Icon name="sparkles" className="w-5 h-5" />
         </button>
+      </div>
+
+      {/* Keyboard shortcut hint */}
+      <div className="hidden lg:flex fixed bottom-4 left-1/2 -translate-x-1/2 z-30 items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--foreground)]/80 text-white text-xs backdrop-blur-sm">
+        <kbd className="px-1.5 py-0.5 rounded bg-white/20">⌘K</kbd>
+        <span>Quick actions</span>
       </div>
 
       {/* Mobile sidebar overlay */}
@@ -75,8 +120,22 @@ export default function DashboardLayout({
         {children}
       </main>
 
-      {/* AI Copilot */}
-      <AICopilot isOpen={copilotOpen} onClose={() => setCopilotOpen(false)} />
+      {/* AI Copilot - Enhanced with OpenAI */}
+      <AICopilotEnhanced
+        isOpen={copilotOpen}
+        onClose={() => setCopilotOpen(false)}
+        city={selectedCity}
+        moduleId={currentModuleId}
+        moduleName={currentModule?.title}
+      />
+
+      {/* Command Palette */}
+      <CommandPalette
+        isOpen={commandPaletteOpen}
+        onClose={() => setCommandPaletteOpen(false)}
+        onAskAI={handleAskAI}
+        onNavigate={(path) => router.push(path)}
+      />
     </div>
   );
 }

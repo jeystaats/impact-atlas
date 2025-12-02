@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { CitySelector } from "@/components/dashboard/CitySelector";
 import { ModuleCard } from "@/components/dashboard/ModuleCard";
@@ -80,9 +81,9 @@ export default function DashboardPage() {
         <div className="lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-[var(--foreground)]">Modules</h2>
-            <button className="text-sm text-[var(--accent)] hover:underline">
+            <Link href="/dashboard/quick-wins" className="text-sm text-[var(--accent)] hover:underline">
               View all
-            </button>
+            </Link>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
             {modules.map((module, index) => (

@@ -1,21 +1,28 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Space_Grotesk, Inter } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-display",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
+  variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "Impact Atlas | AI-Powered Climate Intelligence for Cities",
-  description: "Find quick climate wins for your city. AI-powered platform to identify heat islands, predict plastic accumulation, track emissions, and discover restoration opportunities.",
-  keywords: ["climate", "sustainability", "AI", "cities", "urban planning", "environment"],
+  title: "Impact Atlas | Climate Intelligence for Cities",
+  description: "Discover your city's fastest, highest-impact climate and health wins. AI-powered platform revealing hotspots and quick wins across urban heat, air pollution, coastal plastic, port emissions, biodiversity and restoration.",
+  keywords: ["climate", "sustainability", "AI", "cities", "urban planning", "environment", "urban heat", "air quality", "biodiversity"],
+  openGraph: {
+    title: "Impact Atlas | Climate Intelligence for Cities",
+    description: "Discover your city's fastest, highest-impact climate and health wins.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -26,7 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[var(--background)]`}
+        className={`${spaceGrotesk.variable} ${inter.variable} antialiased bg-ink`}
       >
         {children}
       </body>
