@@ -9,6 +9,7 @@
  */
 
 import type * as actionPlans from "../actionPlans.js";
+import type * as activity from "../activity.js";
 import type * as aiDirector from "../aiDirector.js";
 import type * as aiInsights from "../aiInsights.js";
 import type * as cities from "../cities.js";
@@ -35,6 +36,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   actionPlans: typeof actionPlans;
+  activity: typeof activity;
   aiDirector: typeof aiDirector;
   aiInsights: typeof aiInsights;
   cities: typeof cities;

@@ -13,6 +13,9 @@ import { useSelectedCity } from "@/hooks/useSelectedCity";
 import { useModulesForCity, useDashboardStats } from "@/hooks/useConvex";
 import { useCityOnboarding } from "@/hooks/useCityOnboarding";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
+import { timeAgo } from "@/lib/utils";
 
 // Fallback data for when Convex is loading or unavailable
 import { modules as fallbackModules, cities as fallbackCities } from "@/data/modules";
@@ -47,6 +50,12 @@ export default function DashboardPage() {
 
   // Fetch dashboard stats from Convex
   const dashboardData = useDashboardStats(selectedCityId);
+
+  // Fetch recent activity from Convex
+  const recentActivity = useQuery(
+    api.activity.getRecent,
+    selectedCityId ? { cityId: selectedCityId, limit: 5 } : "skip"
+  );
 
   // Determine if we're using Convex data or fallbacks
   const useConvexData = modulesData !== undefined && selectedCityId;
@@ -165,8 +174,14 @@ export default function DashboardPage() {
     router.refresh();
   };
 
-  // Show skeleton while hydrating
-  if (!isHydrated) {
+  // Determine if Convex data is still loading
+  // We show skeleton if:
+  // 1. Not hydrated yet (localStorage loading)
+  // 2. We have a selected city ID but Convex data is still undefined (first load)
+  const isConvexLoading = selectedCityId && (modulesData === undefined || dashboardData === undefined);
+
+  // Show skeleton while hydrating or waiting for Convex data
+  if (!isHydrated || isConvexLoading) {
     return <DashboardSkeleton />;
   }
 
@@ -246,27 +261,55 @@ export default function DashboardPage() {
               Recent Activity
             </h3>
             <div className="space-y-3">
-              {[
-                { action: "New heat island detected", module: "Urban Heat", time: "2 min ago" },
-                { action: "Plastic forecast updated", module: "Coastal Plastic", time: "15 min ago" },
-                { action: "Port emissions spike", module: "Port Emissions", time: "1 hr ago" },
-              ].map((activity, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 + index * 0.1 }}
-                  className="flex items-start gap-3 p-3 rounded-lg bg-[var(--background-tertiary)] border border-[var(--border)]"
-                >
-                  <div className="w-2 h-2 rounded-full bg-[var(--accent)] mt-1.5" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-[var(--foreground)]">{activity.action}</p>
-                    <p className="text-xs text-[var(--foreground-muted)]">
-                      {activity.module} • {activity.time}
-                    </p>
+              {recentActivity && recentActivity.length > 0 ? (
+                recentActivity.map((activity, index) => (
+                  <motion.div
+                    key={activity.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4 + index * 0.1 }}
+                    className="flex items-start gap-3 p-3 rounded-lg bg-[var(--background-tertiary)] border border-[var(--border)]"
+                  >
+                    <div
+                      className="w-2 h-2 rounded-full mt-1.5"
+                      style={{
+                        backgroundColor:
+                          activity.severity === "critical"
+                            ? "#EF4444"
+                            : activity.severity === "high"
+                              ? "#F59E0B"
+                              : activity.type === "quick_win_completed"
+                                ? "#10B981"
+                                : "var(--accent)",
+                      }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-[var(--foreground)]">{activity.action}</p>
+                      <p className="text-xs text-[var(--foreground-muted)]">
+                        {activity.module} • {timeAgo(activity.timestamp)}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))
+              ) : recentActivity?.length === 0 ? (
+                <p className="text-sm text-[var(--foreground-muted)] py-4 text-center">
+                  No recent activity
+                </p>
+              ) : (
+                // Loading state
+                [...Array(3)].map((_, index) => (
+                  <div
+                    key={index}
+                    className="flex items-start gap-3 p-3 rounded-lg bg-[var(--background-tertiary)] border border-[var(--border)] animate-pulse"
+                  >
+                    <div className="w-2 h-2 rounded-full bg-[var(--foreground-muted)] mt-1.5 opacity-30" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-[var(--foreground-muted)] rounded opacity-20 w-3/4" />
+                      <div className="h-3 bg-[var(--foreground-muted)] rounded opacity-20 w-1/2" />
+                    </div>
                   </div>
-                </motion.div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>

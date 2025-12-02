@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Icon, IconName } from "@/components/ui/icons";
 import { Notification, NotificationType } from "./types";
 import { useNotificationStore } from "@/stores/useNotificationStore";
-import { cn } from "@/lib/utils";
+import { cn, timeAgo } from "@/lib/utils";
 
 const typeConfig: Record<NotificationType, { icon: IconName; color: string }> = {
   success: { icon: "check", color: "#10B981" },
@@ -13,15 +13,6 @@ const typeConfig: Record<NotificationType, { icon: IconName; color: string }> = 
   info: { icon: "info", color: "#3B82F6" },
   "ai-insight": { icon: "sparkles", color: "#8B5CF6" },
 };
-
-function timeAgo(date: Date): string {
-  const dateObj = date instanceof Date ? date : new Date(date);
-  const seconds = Math.floor((new Date().getTime() - dateObj.getTime()) / 1000);
-  if (seconds < 60) return "Just now";
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-  return `${Math.floor(seconds / 86400)}d ago`;
-}
 
 interface NotificationItemProps {
   notification: Notification;
