@@ -552,4 +552,774 @@ satelliteData      hotspots
 
 ---
 
+## Additional Improvements & Enhancements
+
+### Immediate Polish (Quick Wins)
+
+#### 1. Test the Air Quality Pipeline
+```bash
+# Seed the database with all modules including air-quality
+npx convex run seed:runFullSeed
+
+# Trigger manual fetch for a single city
+npx convex run satelliteData:triggerFetch '{"citySlug": "amsterdam"}'
+
+# Trigger fetch for all cities
+npx convex run satelliteData:triggerFetchAll '{"daysBack": 7}'
+
+# View results in Convex dashboard
+# Tables to check: satelliteData, dataIngestionLog, hotspots
+```
+
+#### 2. Fix Pre-existing TypeScript Errors
+Location: `src/app/dashboard/modules/[moduleId]/page.tsx`
+
+Known issues:
+- `SearchBar` component has incorrect prop names
+- `FilterChip` component has incorrect prop names
+
+```typescript
+// Find the correct prop interface and update usage
+// Check: src/components/dashboard/SearchBar.tsx
+// Check: src/components/dashboard/FilterChip.tsx
+```
+
+---
+
+### UI/UX Enhancements
+
+#### 3. Real-time Data Indicators
+
+**File**: `src/components/dashboard/ModuleCard.tsx` (or create new component)
+
+Features to add:
+- "Last updated" timestamp showing when satellite data was last fetched
+- Loading spinner/skeleton while data is being fetched
+- "Stale data" warning if data is older than 48 hours
+- Refresh button to manually trigger data update
+
+```typescript
+// Example implementation
+interface DataFreshnessIndicatorProps {
+  lastUpdated: number | null;
+  isLoading: boolean;
+  onRefresh: () => void;
+}
+
+const DataFreshnessIndicator = ({ lastUpdated, isLoading, onRefresh }: DataFreshnessIndicatorProps) => {
+  const isStale = lastUpdated && Date.now() - lastUpdated > 48 * 60 * 60 * 1000;
+
+  return (
+    <div className="flex items-center gap-2 text-xs text-gray-500">
+      {isLoading ? (
+        <Loader2 className="h-3 w-3 animate-spin" />
+      ) : isStale ? (
+        <AlertTriangle className="h-3 w-3 text-amber-500" />
+      ) : (
+        <CheckCircle className="h-3 w-3 text-green-500" />
+      )}
+      <span>
+        {lastUpdated
+          ? `Updated ${formatDistanceToNow(lastUpdated)} ago`
+          : "No data yet"}
+      </span>
+      <button onClick={onRefresh} disabled={isLoading}>
+        <RefreshCw className="h-3 w-3" />
+      </button>
+    </div>
+  );
+};
+```
+
+#### 4. Data Visualization - Time Series Charts
+
+**New Component**: `src/components/charts/TimeSeriesChart.tsx`
+
+Features:
+- Line chart showing metric trends over days/weeks
+- Support for multiple metrics (NO2, temperature, NDVI)
+- Zoom and pan functionality
+- Export to PNG/CSV
+
+```typescript
+// Use Recharts (already installed) or similar
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+
+interface TimeSeriesChartProps {
+  data: Array<{
+    date: number;
+    value: number;
+    unit: string;
+  }>;
+  thresholds?: {
+    low: number;
+    medium: number;
+    high: number;
+    critical: number;
+  };
+}
+
+// Add Convex query to fetch historical data
+// convex/satelliteData.ts
+export const getTimeSeries = query({
+  args: {
+    cityId: v.id("cities"),
+    moduleId: v.id("modules"),
+    metricKey: v.string(),
+    daysBack: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const startDate = Date.now() - (args.daysBack || 30) * 24 * 60 * 60 * 1000;
+
+    return await ctx.db
+      .query("satelliteData")
+      .withIndex("by_city_module", (q) =>
+        q.eq("cityId", args.cityId).eq("moduleId", args.moduleId)
+      )
+      .filter((q) => q.gte(q.field("measurementDate"), startDate))
+      .order("asc")
+      .collect();
+  },
+});
+```
+
+#### 5. Hotspot Detail Drawer Enhancements
+
+**File**: `src/components/dashboard/HotspotDetailDrawer.tsx`
+
+Current state: Basic implementation exists
+
+Enhancements needed:
+- Show satellite data metrics directly
+- Display measurement date and data quality
+- Add trend sparklines
+- Show related AI insights
+- Link to historical data view
+
+```typescript
+// Enhanced drawer content structure
+interface EnhancedHotspotDetail {
+  // Basic info
+  name: string;
+  description: string;
+  severity: "low" | "medium" | "high" | "critical";
+
+  // Location
+  coordinates: { lat: number; lng: number };
+  address?: string;
+  neighborhood?: string;
+
+  // Satellite data
+  measurements: Array<{
+    key: string;
+    value: number;
+    unit: string;
+    qualityFlag?: number;
+    trend?: "up" | "down" | "stable";
+  }>;
+  measurementDate: number;
+  satelliteId: string;
+
+  // AI insights
+  insights: Array<{
+    title: string;
+    content: string;
+    confidence: number;
+  }>;
+
+  // Quick wins
+  recommendations: Array<{
+    title: string;
+    priority: "high" | "medium" | "low";
+    estimatedImpact: string;
+  }>;
+}
+```
+
+---
+
+### Backend Improvements
+
+#### 6. Error Handling & Retries
+
+**File**: `convex/satelliteData.ts`
+
+Current state: Basic error logging exists
+
+Enhancements:
+- Implement exponential backoff for retries
+- Add alerting for repeated failures
+- Create error recovery mechanisms
+
+```typescript
+// Enhanced error handling pattern
+const MAX_RETRIES = 3;
+const BASE_DELAY_MS = 1000;
+
+async function fetchWithRetry<T>(
+  fetchFn: () => Promise<T>,
+  retryCount: number = 0
+): Promise<T> {
+  try {
+    return await fetchFn();
+  } catch (error) {
+    if (retryCount < MAX_RETRIES) {
+      const delay = BASE_DELAY_MS * Math.pow(2, retryCount);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return fetchWithRetry(fetchFn, retryCount + 1);
+    }
+    throw error;
+  }
+}
+
+// Add webhook notification for failures
+export const notifyOnFailure = internalAction({
+  args: {
+    logId: v.id("dataIngestionLog"),
+    error: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Option 1: Slack webhook
+    // Option 2: Email via SendGrid/Resend
+    // Option 3: Store for admin dashboard alert
+
+    await fetch(process.env.SLACK_WEBHOOK_URL!, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        text: `⚠️ Data ingestion failed: ${args.error}`,
+        blocks: [/* ... */],
+      }),
+    });
+  },
+});
+```
+
+#### 7. Data Caching Layer
+
+**Purpose**: Reduce external API calls, improve response times
+
+```typescript
+// Add to convex/schema.ts
+dataCache: defineTable({
+  cacheKey: v.string(), // e.g., "sentinel5p:amsterdam:2025-12-01"
+  data: v.any(),
+  expiresAt: v.number(),
+  createdAt: v.number(),
+})
+  .index("by_key", ["cacheKey"])
+  .index("by_expiry", ["expiresAt"]),
+
+// Helper functions in convex/cache.ts
+export const getCached = query({
+  args: { key: v.string() },
+  handler: async (ctx, args) => {
+    const cached = await ctx.db
+      .query("dataCache")
+      .withIndex("by_key", (q) => q.eq("cacheKey", args.key))
+      .unique();
+
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.data;
+    }
+    return null;
+  },
+});
+
+export const setCache = mutation({
+  args: {
+    key: v.string(),
+    data: v.any(),
+    ttlSeconds: v.number(),
+  },
+  handler: async (ctx, args) => {
+    // Delete existing
+    const existing = await ctx.db
+      .query("dataCache")
+      .withIndex("by_key", (q) => q.eq("cacheKey", args.key))
+      .unique();
+    if (existing) {
+      await ctx.db.delete(existing._id);
+    }
+
+    // Insert new
+    await ctx.db.insert("dataCache", {
+      cacheKey: args.key,
+      data: args.data,
+      expiresAt: Date.now() + args.ttlSeconds * 1000,
+      createdAt: Date.now(),
+    });
+  },
+});
+
+// Cron to clean expired cache
+crons.daily(
+  "clean-expired-cache",
+  { hourUTC: 2, minuteUTC: 0 },
+  internal.cache.cleanExpired
+);
+```
+
+#### 8. Rate Limiting for External APIs
+
+**Purpose**: Respect API limits, prevent blocking
+
+```typescript
+// convex/rateLimiter.ts
+export const RATE_LIMITS = {
+  copernicus: {
+    requestsPerMinute: 60,
+    requestsPerDay: 10000,
+  },
+  planetaryComputer: {
+    requestsPerMinute: 100,
+    requestsPerDay: 50000,
+  },
+};
+
+// Track API calls
+apiRateLimits: defineTable({
+  apiName: v.string(),
+  windowStart: v.number(),
+  requestCount: v.number(),
+})
+  .index("by_api_window", ["apiName", "windowStart"]),
+
+// Check before making request
+export const canMakeRequest = query({
+  args: { apiName: v.string() },
+  handler: async (ctx, args) => {
+    const limits = RATE_LIMITS[args.apiName as keyof typeof RATE_LIMITS];
+    if (!limits) return true;
+
+    const minuteWindow = Math.floor(Date.now() / 60000);
+    const record = await ctx.db
+      .query("apiRateLimits")
+      .withIndex("by_api_window", (q) =>
+        q.eq("apiName", args.apiName).eq("windowStart", minuteWindow)
+      )
+      .unique();
+
+    return !record || record.requestCount < limits.requestsPerMinute;
+  },
+});
+```
+
+---
+
+### New Features
+
+#### 9. City Comparison View
+
+**New Page**: `src/app/dashboard/compare/page.tsx`
+
+Features:
+- Side-by-side city metrics comparison
+- Radar chart for multi-metric overview
+- Ranking table with sortable columns
+- Historical trend comparison
+
+```typescript
+// Component structure
+const ComparisonPage = () => {
+  const [selectedCities, setSelectedCities] = useState<string[]>([]);
+  const [selectedMetric, setSelectedMetric] = useState<string>("no2Level");
+
+  // Fetch data for all selected cities
+  const cityData = useQueries(
+    selectedCities.map(citySlug =>
+      convexQuery(api.satelliteData.getLatestByCity, { citySlug })
+    )
+  );
+
+  return (
+    <div className="grid grid-cols-2 gap-4">
+      {/* City selector */}
+      {/* Metric selector */}
+      {/* Comparison charts */}
+      {/* Ranking table */}
+    </div>
+  );
+};
+```
+
+#### 10. Export/Reports Feature
+
+**New Component**: `src/components/reports/ReportGenerator.tsx`
+
+Features:
+- Export data as CSV/JSON
+- Generate PDF reports with charts
+- Schedule automated reports
+- Email delivery option
+
+```typescript
+// Client-side export utilities
+export const exportToCSV = (data: any[], filename: string) => {
+  const headers = Object.keys(data[0]).join(",");
+  const rows = data.map(row =>
+    Object.values(row).map(v =>
+      typeof v === "string" ? `"${v}"` : v
+    ).join(",")
+  );
+
+  const csv = [headers, ...rows].join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${filename}.csv`;
+  a.click();
+};
+
+// PDF generation (use @react-pdf/renderer or jspdf)
+export const generatePDFReport = async (reportData: ReportData) => {
+  // ... PDF generation logic
+};
+
+// Convex mutation to schedule reports
+export const scheduleReport = mutation({
+  args: {
+    userId: v.id("users"),
+    reportType: v.string(),
+    schedule: v.string(), // cron expression
+    emailTo: v.string(),
+    config: v.object({
+      cities: v.array(v.string()),
+      modules: v.array(v.string()),
+      dateRange: v.number(),
+    }),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.insert("scheduledReports", {
+      ...args,
+      nextRunAt: calculateNextRun(args.schedule),
+      createdAt: Date.now(),
+    });
+  },
+});
+```
+
+---
+
+### Infrastructure
+
+#### 11. Environment Variables Setup
+
+**File**: `.env.local` (create from `.env.example`)
+
+```bash
+# Copernicus Data Space
+COPERNICUS_CLIENT_ID=your_client_id
+COPERNICUS_CLIENT_SECRET=your_client_secret
+
+# Microsoft Planetary Computer
+PLANETARY_COMPUTER_API_KEY=your_api_key
+
+# Climate Data Store
+CDS_API_KEY=your_cds_key
+
+# Optional: Alerting
+SLACK_WEBHOOK_URL=https://hooks.slack.com/...
+SENDGRID_API_KEY=your_sendgrid_key
+
+# Feature flags
+ENABLE_SATELLITE_DATA=true
+ENABLE_SCHEDULED_JOBS=true
+```
+
+**File**: `convex/convex.config.ts` (if using Convex env vars)
+```typescript
+// Access env vars in Convex actions
+const clientId = process.env.COPERNICUS_CLIENT_ID;
+```
+
+#### 12. Admin Monitoring Dashboard
+
+**New Page**: `src/app/admin/ingestion/page.tsx`
+
+Features:
+- Real-time ingestion job status
+- Success/failure rates
+- Data freshness per city/module
+- Manual trigger buttons
+- Error log viewer
+
+```typescript
+// Dashboard showing ingestion status
+const AdminIngestionPage = () => {
+  const logs = useQuery(api.satelliteData.getIngestionLog, {
+    limit: 100,
+    status: undefined, // all statuses
+  });
+
+  const stats = useMemo(() => {
+    if (!logs) return null;
+
+    return {
+      total: logs.length,
+      completed: logs.filter(l => l.status === "completed").length,
+      failed: logs.filter(l => l.status === "failed").length,
+      avgDuration: calculateAvgDuration(logs),
+      lastRun: Math.max(...logs.map(l => l.completedAt || 0)),
+    };
+  }, [logs]);
+
+  return (
+    <div>
+      {/* Stats cards */}
+      {/* Status timeline */}
+      {/* Error details */}
+      {/* Manual trigger buttons */}
+    </div>
+  );
+};
+
+// Add to convex/satelliteData.ts
+export const getIngestionStats = query({
+  args: { daysBack: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const since = Date.now() - (args.daysBack || 7) * 24 * 60 * 60 * 1000;
+
+    const logs = await ctx.db
+      .query("dataIngestionLog")
+      .filter((q) => q.gte(q.field("startedAt"), since))
+      .collect();
+
+    return {
+      totalJobs: logs.length,
+      successRate: logs.filter(l => l.status === "completed").length / logs.length,
+      failedJobs: logs.filter(l => l.status === "failed"),
+      avgRecordsPerJob: logs.reduce((sum, l) => sum + l.recordsStored, 0) / logs.length,
+      byCity: groupBy(logs, "cityId"),
+      bySource: groupBy(logs, "dataSourceSlug"),
+    };
+  },
+});
+```
+
+#### 13. Unit Tests for Data Processing
+
+**Directory**: `convex/__tests__/`
+
+```typescript
+// convex/__tests__/satelliteData.test.ts
+import { describe, it, expect } from "vitest";
+import { determineSeverity, calculateAnomalies, parseSTACResponse } from "../satelliteData";
+
+describe("Severity Classification", () => {
+  it("classifies NO2 levels correctly", () => {
+    expect(determineSeverity(5, "NO2")).toBe("low");
+    expect(determineSeverity(15, "NO2")).toBe("medium");
+    expect(determineSeverity(35, "NO2")).toBe("high");
+    expect(determineSeverity(60, "NO2")).toBe("critical");
+  });
+
+  it("classifies temperature anomalies correctly", () => {
+    expect(determineSeverity(1.5, "LST_ANOMALY")).toBe("low");
+    expect(determineSeverity(3, "LST_ANOMALY")).toBe("medium");
+    expect(determineSeverity(5, "LST_ANOMALY")).toBe("high");
+    expect(determineSeverity(7, "LST_ANOMALY")).toBe("critical");
+  });
+});
+
+describe("STAC Response Parsing", () => {
+  it("extracts measurement values from STAC features", () => {
+    const mockResponse = {
+      features: [
+        {
+          id: "test-product",
+          properties: {
+            datetime: "2025-12-01T00:00:00Z",
+            "s5p:processing_mode": "NRTI",
+          },
+          assets: {
+            NO2: { href: "https://..." },
+          },
+        },
+      ],
+    };
+
+    const result = parseSTACResponse(mockResponse);
+    expect(result).toHaveLength(1);
+    expect(result[0].productType).toBe("NO2");
+  });
+});
+
+describe("Anomaly Calculation", () => {
+  it("calculates temperature anomalies correctly", () => {
+    const cityAvg = 25.5;
+    const measurements = [28.0, 30.5, 24.0, 32.0];
+
+    const anomalies = calculateAnomalies(measurements, cityAvg);
+
+    expect(anomalies[0]).toBe(2.5);  // 28.0 - 25.5
+    expect(anomalies[1]).toBe(5.0);  // 30.5 - 25.5
+    expect(anomalies[2]).toBe(-1.5); // 24.0 - 25.5
+    expect(anomalies[3]).toBe(6.5);  // 32.0 - 25.5
+  });
+});
+```
+
+**Run tests:**
+```bash
+# Add to package.json scripts
+"test:convex": "vitest run convex/__tests__"
+
+# Run
+npm run test:convex
+```
+
+---
+
+### Mobile Responsiveness Audit
+
+#### Areas to Review:
+- [ ] City selection modal on small screens
+- [ ] Map controls and touch interactions
+- [ ] Hotspot detail drawer on mobile
+- [ ] Chart readability on narrow viewports
+- [ ] Navigation and sidebar collapse
+
+#### Key Breakpoints:
+```typescript
+// Tailwind breakpoints to test
+// sm: 640px
+// md: 768px
+// lg: 1024px
+// xl: 1280px
+// 2xl: 1536px
+
+// Ensure components adapt properly at each breakpoint
+```
+
+---
+
+### Performance Optimization
+
+#### Lazy Loading:
+```typescript
+// Lazy load heavy components
+const MapWithHotspots = dynamic(
+  () => import("@/components/maps/MapWithHotspots"),
+  {
+    loading: () => <MapSkeleton />,
+    ssr: false
+  }
+);
+
+const TimeSeriesChart = dynamic(
+  () => import("@/components/charts/TimeSeriesChart"),
+  { loading: () => <ChartSkeleton /> }
+);
+```
+
+#### Data Pagination:
+```typescript
+// Add pagination to large queries
+export const listSatelliteDataPaginated = query({
+  args: {
+    cityId: v.id("cities"),
+    cursor: v.optional(v.string()),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit || 50;
+
+    let query = ctx.db
+      .query("satelliteData")
+      .withIndex("by_city", (q) => q.eq("cityId", args.cityId))
+      .order("desc");
+
+    if (args.cursor) {
+      query = query.filter((q) =>
+        q.lt(q.field("_creationTime"), parseInt(args.cursor!))
+      );
+    }
+
+    const results = await query.take(limit + 1);
+    const hasMore = results.length > limit;
+    const data = hasMore ? results.slice(0, -1) : results;
+
+    return {
+      data,
+      nextCursor: hasMore ? String(data[data.length - 1]._creationTime) : null,
+    };
+  },
+});
+```
+
+---
+
+### Security Considerations
+
+#### API Key Management:
+- Never expose API keys in client-side code
+- Use Convex actions (server-side) for all external API calls
+- Rotate keys periodically
+- Implement key scoping where supported
+
+#### Input Validation:
+- All Convex functions already validate via `v.` validators
+- Add additional business logic validation where needed
+- Sanitize any user-provided data before storage
+
+#### Rate Limiting for Users:
+```typescript
+// Prevent abuse of manual trigger endpoints
+export const triggerFetch = mutation({
+  args: { citySlug: v.string() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+
+    // Check user's recent triggers
+    const recentTriggers = await ctx.db
+      .query("userActions")
+      .withIndex("by_user", (q) => q.eq("userId", identity.subject))
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("action"), "trigger_fetch"),
+          q.gte(q.field("timestamp"), Date.now() - 60000)
+        )
+      )
+      .collect();
+
+    if (recentTriggers.length >= 5) {
+      throw new Error("Rate limit exceeded. Please wait before triggering again.");
+    }
+
+    // Log action
+    await ctx.db.insert("userActions", {
+      userId: identity.subject,
+      action: "trigger_fetch",
+      timestamp: Date.now(),
+    });
+
+    // Proceed with fetch...
+  },
+});
+```
+
+---
+
+## Implementation Priority Matrix
+
+| Priority | Feature | Effort | Impact |
+|----------|---------|--------|--------|
+| 🔴 High | Test Air Quality Pipeline | Low | High |
+| 🔴 High | Fix TypeScript Errors | Low | Medium |
+| 🟡 Medium | Real-time Data Indicators | Medium | High |
+| 🟡 Medium | Time Series Charts | Medium | High |
+| 🟡 Medium | Error Handling & Retries | Medium | High |
+| 🟡 Medium | Environment Variables Setup | Low | High |
+| 🟢 Low | Data Caching Layer | Medium | Medium |
+| 🟢 Low | City Comparison View | High | Medium |
+| 🟢 Low | Export/Reports | High | Medium |
+| 🟢 Low | Admin Monitoring Dashboard | High | Medium |
+| 🟢 Low | Unit Tests | Medium | Low |
+
+---
+
 *This document should be updated as implementation progresses.*
