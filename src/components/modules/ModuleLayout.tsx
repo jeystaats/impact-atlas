@@ -4,7 +4,6 @@ import { ReactNode } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Icon, ModuleIcon } from "@/components/ui/icons";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Module } from "@/types";
 
@@ -27,52 +26,35 @@ export function ModuleLayout({ module, children }: ModuleLayoutProps) {
           <span className="text-[var(--foreground)]">{module.title}</span>
         </div>
 
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="w-14 h-14 rounded-xl flex items-center justify-center"
-              style={{ backgroundColor: module.color + "15" }}
+        <div className="flex items-center gap-4">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="w-14 h-14 rounded-xl flex items-center justify-center"
+            style={{ backgroundColor: module.color + "15" }}
+          >
+            <ModuleIcon
+              moduleId={module.id}
+              className="w-7 h-7"
+              style={{ color: module.color }}
+            />
+          </motion.div>
+          <div>
+            <motion.h1
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="text-2xl font-bold text-[var(--foreground)]"
             >
-              <ModuleIcon
-                moduleId={module.id}
-                className="w-7 h-7"
-                style={{ color: module.color }}
-              />
-            </motion.div>
-            <div>
-              <motion.h1
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="text-2xl font-bold text-[var(--foreground)]"
-              >
-                {module.title}
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 }}
-                className="text-[var(--foreground-secondary)] text-sm max-w-xl"
-              >
-                {module.description}
-              </motion.p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
-              <Icon name="filter" className="w-4 h-4" />
-              Filters
-            </Button>
-            <Button variant="outline" size="sm">
-              <Icon name="download" className="w-4 h-4" />
-              Export
-            </Button>
-            <Button variant="outline" size="sm">
-              <Icon name="share" className="w-4 h-4" />
-              Share
-            </Button>
+              {module.title}
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-[var(--foreground-secondary)] text-sm max-w-xl"
+            >
+              {module.description}
+            </motion.p>
           </div>
         </div>
 

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import Map, { Marker, Source, Layer, Popup, NavigationControl } from "react-map-gl/mapbox";
+import { useState, useEffect, useMemo, useRef } from "react";
+import Map, { Marker, Source, Layer, Popup, NavigationControl, MapRef } from "react-map-gl/mapbox";
 import { motion, AnimatePresence } from "framer-motion";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { cities } from "@/data/modules";
@@ -175,9 +175,30 @@ export function ShipTracker({
   const [selectedVessel, setSelectedVessel] = useState<Vessel | null>(null);
   const [showEmissions, setShowEmissions] = useState(true);
   const [filterType, setFilterType] = useState<string>("all");
+  const mapRef = useRef<MapRef>(null);
   const { mapStyleUrl } = useMapStyle();
 
   const city = cities.find((c) => c.id === cityId) || cities[0];
+
+  // Auto-fit bounds to vessels on initial load
+  useEffect(() => {
+    if (vessels.length > 0 && mapRef.current) {
+      const lngs = vessels.map((v) => v.position.lng);
+      const lats = vessels.map((v) => v.position.lat);
+
+      const bounds: [[number, number], [number, number]] = [
+        [Math.min(...lngs) - 0.02, Math.min(...lats) - 0.02],
+        [Math.max(...lngs) + 0.02, Math.max(...lats) + 0.02],
+      ];
+
+      setTimeout(() => {
+        mapRef.current?.fitBounds(bounds, {
+          padding: 50,
+          duration: 1000,
+        });
+      }, 100);
+    }
+  }, [vessels.length > 0]);
 
   // Initialize vessels
   useEffect(() => {
@@ -304,6 +325,7 @@ export function ShipTracker({
       {/* Map */}
       <div style={{ height: height - 160 }}>
         <Map
+          ref={mapRef}
           initialViewState={{
             longitude: city.coordinates.lng + 0.02,
             latitude: city.coordinates.lat + 0.02,

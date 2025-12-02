@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import Map, { Source, Layer, Marker, NavigationControl } from "react-map-gl/mapbox";
+import Map, { Source, Layer, Marker, NavigationControl, MapRef } from "react-map-gl/mapbox";
 import { motion, AnimatePresence } from "framer-motion";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { cities } from "@/data/modules";
@@ -313,9 +313,30 @@ export function AirQualityMap({
   const [showWind, setShowWind] = useState(true);
   const [pulsePhase, setPulsePhase] = useState(0);
   const animationRef = useRef<number | undefined>(undefined);
+  const mapRef = useRef<MapRef>(null);
   const { mapStyleUrl } = useMapStyle();
 
   const city = cities.find((c) => c.id === cityId) || cities[0];
+
+  // Auto-fit bounds to monitoring stations on initial load
+  useEffect(() => {
+    if (stations.length > 0 && mapRef.current) {
+      const lngs = stations.map((s) => s.lng);
+      const lats = stations.map((s) => s.lat);
+
+      const bounds: [[number, number], [number, number]] = [
+        [Math.min(...lngs) - 0.01, Math.min(...lats) - 0.01],
+        [Math.max(...lngs) + 0.01, Math.max(...lats) + 0.01],
+      ];
+
+      setTimeout(() => {
+        mapRef.current?.fitBounds(bounds, {
+          padding: 50,
+          duration: 1000,
+        });
+      }, 100);
+    }
+  }, [stations.length > 0]);
 
   // Wind configuration (Barcelona typically has sea breeze from SE)
   const windDirection = useMemo(() => {
@@ -629,6 +650,7 @@ export function AirQualityMap({
       {/* Map */}
       <div style={{ height: height - (showControls ? 220 : 160) }}>
         <Map
+          ref={mapRef}
           initialViewState={{
             longitude: city.coordinates.lng,
             latitude: city.coordinates.lat,

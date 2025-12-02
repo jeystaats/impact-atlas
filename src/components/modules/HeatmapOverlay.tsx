@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import Map, { Source, Layer, NavigationControl } from "react-map-gl/mapbox";
+import { useState, useMemo, useEffect, useRef } from "react";
+import Map, { Source, Layer, NavigationControl, MapRef } from "react-map-gl/mapbox";
 import { motion } from "framer-motion";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { cities } from "@/data/modules";
@@ -93,10 +93,32 @@ export function HeatmapOverlay({
   const [showLabels, setShowLabels] = useState(true);
   const [timeOfDay, setTimeOfDay] = useState<"morning" | "afternoon" | "evening">("afternoon");
   const [animatedIntensity, setAnimatedIntensity] = useState(0);
+  const mapRef = useRef<MapRef>(null);
   const { mapStyleUrl } = useMapStyle();
   const { formatTemperature, unitSymbol } = useTemperature();
 
   const city = cities.find((c) => c.id === cityId) || cities[0];
+
+  // Auto-fit bounds to heat clusters on initial load
+  useEffect(() => {
+    const clusters = BARCELONA_HEAT_CLUSTERS;
+    if (clusters.length > 0 && mapRef.current) {
+      const lngs = clusters.map((c) => city.coordinates.lng + c.offsetLng);
+      const lats = clusters.map((c) => city.coordinates.lat + c.offsetLat);
+
+      const bounds: [[number, number], [number, number]] = [
+        [Math.min(...lngs) - 0.01, Math.min(...lats) - 0.01],
+        [Math.max(...lngs) + 0.01, Math.max(...lats) + 0.01],
+      ];
+
+      setTimeout(() => {
+        mapRef.current?.fitBounds(bounds, {
+          padding: 50,
+          duration: 1000,
+        });
+      }, 100);
+    }
+  }, [city]);
 
   // Generate heat data based on city
   const heatData = useMemo(() => {
@@ -224,6 +246,7 @@ export function HeatmapOverlay({
       {/* Map */}
       <div style={{ height: height - 140 }}>
         <Map
+          ref={mapRef}
           initialViewState={{
             longitude: city.coordinates.lng,
             latitude: city.coordinates.lat,

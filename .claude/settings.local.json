@@ -33,7 +33,9 @@
       "Bash(do echo -n \"$mod: \")",
       "Bash(done)",
       "WebFetch(domain:www.staats.dev)",
-      "WebFetch(domain:www.linkedin.com)"
+      "WebFetch(domain:www.linkedin.com)",
+      "WebFetch(domain:events.norrsken.org)",
+      "WebFetch(domain:www.norrsken.org)"
     ],
     "deny": [],
     "ask": []
