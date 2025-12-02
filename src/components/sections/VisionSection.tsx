@@ -4,11 +4,11 @@ import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 
 const cities = [
-  { name: "Singapore", x: 75, y: 55, color: "--ld-heat", delay: 0.4 },
-  { name: "Rotterdam", x: 48, y: 28, color: "--ld-ocean", delay: 0.6 },
-  { name: "Copenhagen", x: 50, y: 24, color: "--ld-bio", delay: 0.8 },
-  { name: "Lagos", x: 47, y: 52, color: "--ld-air", delay: 1.0 },
-  { name: "Mumbai", x: 68, y: 45, color: "--ld-restore", delay: 1.2 },
+  { name: "Singapore", x: 75, y: 55, delay: 0.4 },
+  { name: "Rotterdam", x: 48, y: 28, delay: 0.6 },
+  { name: "Copenhagen", x: 50, y: 24, delay: 0.8 },
+  { name: "Lagos", x: 47, y: 52, delay: 1.0 },
+  { name: "Mumbai", x: 68, y: 45, delay: 1.2 },
 ];
 
 export default function VisionSection() {
@@ -115,7 +115,7 @@ export default function VisionSection() {
               />
             </svg>
 
-            {/* Hotspots */}
+            {/* Hotspots - unified teal */}
             {cities.map((city) => (
               <motion.div
                 key={city.name}
@@ -127,23 +127,23 @@ export default function VisionSection() {
                   left: `${city.x}%`,
                   top: `${city.y}%`,
                   transform: "translate(-50%, -50%)",
-                  color: `var(${city.color})`,
+                  color: "var(--ld-teal)",
                 }}
               >
                 <div
-                  className="w-3 h-3 rounded-full"
+                  className="w-2 h-2 rounded-full"
                   style={{
-                    backgroundColor: `var(${city.color})`,
-                    boxShadow: `0 0 15px var(${city.color})`,
+                    backgroundColor: "var(--ld-teal)",
+                    boxShadow: "0 0 10px var(--ld-teal-glow)",
                   }}
                 />
               </motion.div>
             ))}
 
-            {/* Inner glow */}
+            {/* Inner border - subtle */}
             <div
-              className="absolute inset-0 pointer-events-none"
-              style={{ boxShadow: "inset 0 0 60px rgba(0, 206, 209, 0.1)" }}
+              className="absolute inset-0 pointer-events-none rounded-2xl"
+              style={{ boxShadow: "inset 0 0 40px rgba(0, 0, 0, 0.3)" }}
             />
           </motion.div>
         </div>

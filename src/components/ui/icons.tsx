@@ -62,6 +62,8 @@ export const Icons = {
   sparkles: Sparkles,
   trendingUp: TrendingUp,
   trendingDown: TrendingDown,
+  trendUp: TrendingUp,
+  trendDown: TrendingDown,
   menu: Menu,
   x: X,
   search: Search,

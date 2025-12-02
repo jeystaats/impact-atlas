@@ -6,8 +6,9 @@ import { motion } from "framer-motion";
 import { CitySelector } from "@/components/dashboard/CitySelector";
 import { ModuleCard } from "@/components/dashboard/ModuleCard";
 import { QuickWinsSummary } from "@/components/dashboard/QuickWinsSummary";
-import { Icon } from "@/components/ui/icons";
+import { StatCard } from "@/components/dashboard/StatCard";
 import { modules, cities } from "@/data/modules";
+import { dashboardStats, cityStats } from "@/data/dashboard";
 
 export default function DashboardPage() {
   const [selectedCity, setSelectedCity] = useState(cities[0].id);
@@ -38,42 +39,11 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats row */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
-      >
-        {[
-          { label: "Active Modules", value: "6", icon: "dashboard" as const, color: "var(--accent)" },
-          { label: "Quick Wins", value: "57", icon: "zap" as const, color: "#10B981" },
-          { label: "Hotspots", value: "142", icon: "target" as const, color: "#F59E0B" },
-          { label: "AI Insights", value: "28", icon: "sparkles" as const, color: "#8B5CF6" },
-        ].map((stat, index) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 + index * 0.05 }}
-            className="p-4 lg:p-6 rounded-xl bg-[var(--background-tertiary)] border border-[var(--border)]"
-          >
-            <div className="flex items-center gap-3">
-              <div
-                className="w-10 h-10 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: stat.color + "15" }}
-              >
-                <Icon name={stat.icon} className="w-5 h-5" style={{ color: stat.color }} />
-              </div>
-              <div>
-                <p className="text-xs text-[var(--foreground-muted)]">{stat.label}</p>
-                <p className="text-xl lg:text-2xl font-bold text-[var(--foreground)] tabular-nums">
-                  {stat.value}
-                </p>
-              </div>
-            </div>
-          </motion.div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {(cityStats[selectedCity] || dashboardStats).map((stat, index) => (
+          <StatCard key={stat.label} stat={stat} index={index} />
         ))}
-      </motion.div>
+      </div>
 
       {/* Main content grid */}
       <div className="grid lg:grid-cols-3 gap-6">

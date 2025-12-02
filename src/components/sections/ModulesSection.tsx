@@ -112,53 +112,37 @@ function RadarBlip({
       onMouseLeave={onLeave}
       onClick={onClick}
     >
-      {/* Pulse rings when scanned */}
+      {/* Pulse rings when scanned - subtle */}
       <AnimatePresence>
         {isScanned && (
-          <>
-            <motion.div
-              initial={{ scale: 0.5, opacity: 0.8 }}
-              animate={{ scale: 2.5, opacity: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
-              className="absolute inset-0 rounded-full"
-              style={{
-                background: `var(${module.color})`,
-                width: 60,
-                height: 60,
-                marginLeft: -30,
-                marginTop: -30,
-              }}
-            />
-            <motion.div
-              initial={{ scale: 0.5, opacity: 0.6 }}
-              animate={{ scale: 3, opacity: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 2, ease: "easeOut", delay: 0.2 }}
-              className="absolute inset-0 rounded-full"
-              style={{
-                background: `var(${module.color})`,
-                width: 60,
-                height: 60,
-                marginLeft: -30,
-                marginTop: -30,
-              }}
-            />
-          </>
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0.3 }}
+            animate={{ scale: 2, opacity: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+            className="absolute inset-0 rounded-full border"
+            style={{
+              borderColor: "var(--ld-teal)",
+              width: 40,
+              height: 40,
+              marginLeft: -20,
+              marginTop: -20,
+            }}
+          />
         )}
       </AnimatePresence>
 
       {/* Blip dot */}
       <motion.div
         animate={{
-          scale: isHovered ? 1.3 : isScanned ? [1, 1.2, 1] : 0.8,
-          opacity: isScanned ? 1 : 0.3,
+          scale: isHovered ? 1.2 : isScanned ? 1 : 0.7,
+          opacity: isScanned ? 1 : 0.4,
         }}
         transition={{ duration: 0.3 }}
-        className="relative z-10 w-4 h-4 rounded-full"
+        className="relative z-10 w-3 h-3 rounded-full"
         style={{
-          background: `var(${module.color})`,
-          boxShadow: isScanned ? `0 0 20px var(${module.color}), 0 0 40px var(${module.color})` : "none",
+          background: isScanned ? `var(${module.color})` : "var(--ld-silver-muted)",
+          boxShadow: isScanned ? `0 0 12px color-mix(in srgb, var(${module.color}) 40%, transparent)` : "none",
         }}
       />
 
@@ -166,34 +150,34 @@ function RadarBlip({
       <AnimatePresence>
         {(isScanned || isHovered) && (
           <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.9 }}
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 5, scale: 0.95 }}
-            transition={{ duration: 0.3 }}
-            className="absolute left-1/2 -translate-x-1/2 mt-4 w-48 p-4 rounded-xl z-20"
+            transition={{ duration: 0.2 }}
+            className="absolute left-1/2 -translate-x-1/2 mt-4 w-44 p-3 rounded-lg z-20"
             style={{
               background: "var(--ld-navy-dark)",
-              border: `1px solid color-mix(in srgb, var(${module.color}) 30%, transparent)`,
-              boxShadow: `0 10px 40px rgba(0,0,0,0.4), 0 0 20px color-mix(in srgb, var(${module.color}) 20%, transparent)`,
+              border: "1px solid var(--ld-white-10)",
+              boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
             }}
           >
             {/* Icon */}
             <div
-              className="w-10 h-10 rounded-lg flex items-center justify-center mb-3"
+              className="w-8 h-8 rounded-md flex items-center justify-center mb-2"
               style={{
-                background: `color-mix(in srgb, var(${module.color}) 20%, transparent)`,
+                background: `color-mix(in srgb, var(${module.color}) 15%, transparent)`,
                 color: `var(${module.color})`,
               }}
             >
               {module.icon}
             </div>
 
-            {/* Title with typing effect */}
+            {/* Title */}
             <motion.h3
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.1 }}
-              className="text-sm font-semibold mb-1"
+              className="text-sm font-medium mb-1"
               style={{ color: "var(--ld-white)" }}
             >
               {module.title}
@@ -203,20 +187,20 @@ function RadarBlip({
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="text-xs"
+              transition={{ delay: 0.15 }}
+              className="text-xs leading-relaxed"
               style={{ color: "var(--ld-white-50)" }}
             >
               {module.description}
             </motion.p>
 
-            {/* Data stream effect */}
+            {/* Subtle line */}
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: "100%" }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="mt-3 h-[2px] rounded-full"
-              style={{ background: `var(${module.color})` }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+              className="mt-2 h-px"
+              style={{ background: "var(--ld-white-10)" }}
             />
           </motion.div>
         )}
@@ -278,22 +262,16 @@ export default function ModulesSection() {
       className="ld-section relative overflow-hidden"
       style={{ background: "var(--ld-navy-deep)" }}
     >
-      {/* Background grid pattern */}
+      {/* Background grid pattern - very subtle */}
       <div
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0 opacity-[0.015]"
         style={{
           backgroundImage: `
-            linear-gradient(var(--ld-teal) 1px, transparent 1px),
-            linear-gradient(90deg, var(--ld-teal) 1px, transparent 1px)
+            linear-gradient(var(--ld-silver-muted) 1px, transparent 1px),
+            linear-gradient(90deg, var(--ld-silver-muted) 1px, transparent 1px)
           `,
-          backgroundSize: "50px 50px",
+          backgroundSize: "60px 60px",
         }}
-      />
-
-      {/* Ambient glow */}
-      <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[150px]"
-        style={{ background: "var(--ld-teal)", opacity: 0.05 }}
       />
 
       <div className="ld-section-content relative z-10">
@@ -360,36 +338,36 @@ export default function ModulesSection() {
             style={{ background: "var(--ld-white-10)" }}
           />
 
-          {/* Radar sweep */}
+          {/* Radar sweep - subtle */}
           <motion.div
             className="absolute left-1/2 top-1/2 origin-center"
             style={{
-              width: radarRadius + 100,
-              height: 2,
+              width: radarRadius + 80,
+              height: 1,
               marginLeft: 0,
-              marginTop: -1,
+              marginTop: 0,
               background: `linear-gradient(90deg, var(--ld-teal), transparent)`,
-              boxShadow: "0 0 20px var(--ld-teal)",
+              opacity: 0.6,
               rotate: scanAngle,
             }}
           />
 
-          {/* Sweep trail (conic gradient) */}
+          {/* Sweep trail (conic gradient) - very subtle */}
           <div
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
             style={{
               width: radarRadius * 2 + 50,
               height: radarRadius * 2 + 50,
-              background: `conic-gradient(from ${scanAngle - 30}deg, transparent, rgba(0, 206, 209, 0.15), transparent 30deg)`,
+              background: `conic-gradient(from ${scanAngle - 20}deg, transparent, rgba(45, 212, 191, 0.06), transparent 20deg)`,
             }}
           />
 
-          {/* Center dot */}
+          {/* Center dot - refined */}
           <div
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full"
             style={{
               background: "var(--ld-teal)",
-              boxShadow: "0 0 10px var(--ld-teal), 0 0 20px var(--ld-teal)",
+              boxShadow: "0 0 8px var(--ld-teal-glow)",
             }}
           />
 
@@ -425,17 +403,17 @@ export default function ModulesSection() {
           </div>
         </motion.div>
 
-        {/* Module legend - compact list below radar */}
+        {/* Module legend - refined, minimal */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 1 }}
-          className="flex flex-wrap justify-center gap-4 mt-8"
+          className="flex flex-wrap justify-center gap-3 mt-8"
         >
           {modules.map((module) => (
             <motion.button
               key={module.id}
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => {
                 setHoveredModule(module.id);
@@ -448,21 +426,20 @@ export default function ModulesSection() {
               className="flex items-center gap-2 px-3 py-1.5 rounded-full transition-all"
               style={{
                 background: scannedModules.has(module.id)
-                  ? `color-mix(in srgb, var(${module.color}) 15%, transparent)`
-                  : "var(--ld-white-5)",
-                border: `1px solid ${scannedModules.has(module.id) ? `var(${module.color})` : "var(--ld-white-10)"}`,
+                  ? "var(--ld-white-5)"
+                  : "transparent",
+                border: "1px solid var(--ld-white-10)",
               }}
             >
               <span
-                className="w-2 h-2 rounded-full"
+                className="w-1.5 h-1.5 rounded-full transition-colors"
                 style={{
-                  background: `var(${module.color})`,
-                  boxShadow: scannedModules.has(module.id) ? `0 0 8px var(${module.color})` : "none",
+                  background: scannedModules.has(module.id) ? "var(--ld-teal)" : "var(--ld-silver-muted)",
                 }}
               />
               <span
-                className="text-xs font-medium"
-                style={{ color: scannedModules.has(module.id) ? "var(--ld-white)" : "var(--ld-white-50)" }}
+                className="text-xs"
+                style={{ color: scannedModules.has(module.id) ? "var(--ld-white-70)" : "var(--ld-white-30)" }}
               >
                 {module.title}
               </span>

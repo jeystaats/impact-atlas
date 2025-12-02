@@ -242,32 +242,45 @@ body {
    ========================================== */
 
 .landing-dark {
-  /* Dark theme overrides */
-  --ld-navy-deep: #0a1628;
-  --ld-navy-dark: #0f2136;
-  --ld-navy-mid: #1a2d4a;
-  --ld-navy-light: #243b5c;
+  /* ===========================================
+     SILVER & TEAL - Premium Tech Palette
+     Inspired by Linear, Vercel, Apple, Nothing
+     =========================================== */
 
-  --ld-white: #ffffff;
-  --ld-white-90: rgba(255, 255, 255, 0.9);
-  --ld-white-70: rgba(255, 255, 255, 0.7);
-  --ld-white-50: rgba(255, 255, 255, 0.5);
-  --ld-white-30: rgba(255, 255, 255, 0.3);
-  --ld-white-10: rgba(255, 255, 255, 0.1);
-  --ld-white-5: rgba(255, 255, 255, 0.05);
+  /* Base darks - cool charcoal with subtle blue undertone */
+  --ld-navy-deep: #09090b;
+  --ld-navy-dark: #18181b;
+  --ld-navy-mid: #27272a;
+  --ld-navy-light: #3f3f46;
 
-  --ld-teal: #00CED1;
-  --ld-teal-light: #40E0D0;
-  --ld-teal-dark: #00A3A6;
-  --ld-teal-glow: rgba(0, 206, 209, 0.4);
+  /* Silver/Gray scale - the primary palette */
+  --ld-silver: #e4e4e7;
+  --ld-silver-dark: #a1a1aa;
+  --ld-silver-muted: #71717a;
 
-  /* Module colors */
-  --ld-heat: #FF6B35;
-  --ld-air: #7B68EE;
-  --ld-ocean: #00CED1;
-  --ld-port: #708090;
-  --ld-bio: #32CD32;
-  --ld-restore: #DAA520;
+  /* Text hierarchy */
+  --ld-white: #fafafa;
+  --ld-white-90: rgba(250, 250, 250, 0.9);
+  --ld-white-70: rgba(250, 250, 250, 0.7);
+  --ld-white-50: rgba(250, 250, 250, 0.5);
+  --ld-white-30: rgba(250, 250, 250, 0.3);
+  --ld-white-10: rgba(250, 250, 250, 0.08);
+  --ld-white-5: rgba(250, 250, 250, 0.04);
+
+  /* Teal - the ONLY accent color, used sparingly */
+  --ld-teal: #2dd4bf;
+  --ld-teal-light: #5eead4;
+  --ld-teal-dark: #14b8a6;
+  --ld-teal-glow: rgba(45, 212, 191, 0.15);
+  --ld-teal-subtle: rgba(45, 212, 191, 0.1);
+
+  /* Module colors - refined, muted versions (10% accent rule) */
+  --ld-heat: #f97316;      /* warm orange - muted */
+  --ld-air: #a78bfa;       /* soft violet */
+  --ld-ocean: #22d3ee;     /* cyan */
+  --ld-port: #94a3b8;      /* slate */
+  --ld-bio: #4ade80;       /* soft green */
+  --ld-restore: #fbbf24;   /* amber */
 
   background: var(--ld-navy-deep);
   color: var(--ld-white);
@@ -387,36 +400,35 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Landing gradient text */
+/* Landing gradient text - subtle silver to teal */
 .landing-dark .ld-gradient-text {
-  background: linear-gradient(135deg, var(--ld-teal-light) 0%, var(--ld-teal) 100%);
+  background: linear-gradient(135deg, var(--ld-silver) 0%, var(--ld-teal) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Landing buttons */
+/* Landing buttons - refined, minimal */
 .landing-dark .ld-btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 1rem 2rem;
-  background: linear-gradient(135deg, var(--ld-teal) 0%, var(--ld-teal-light) 100%);
+  padding: 0.875rem 1.75rem;
+  background: var(--ld-white);
   color: var(--ld-navy-deep);
-  font-weight: 600;
-  font-size: 1rem;
+  font-weight: 500;
+  font-size: 0.9375rem;
   border: none;
-  border-radius: 12px;
+  border-radius: 9999px;
   cursor: pointer;
   transition: all 200ms ease;
-  box-shadow: 0 4px 20px var(--ld-teal-glow);
   text-decoration: none;
 }
 
 .landing-dark .ld-btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px var(--ld-teal-glow);
+  background: var(--ld-silver);
+  transform: translateY(-1px);
 }
 
 .landing-dark .ld-btn-secondary {
@@ -424,13 +436,13 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 1rem 2rem;
+  padding: 0.875rem 1.75rem;
   background: transparent;
   color: var(--ld-white-70);
   font-weight: 500;
-  font-size: 1rem;
-  border: 1px solid var(--ld-white-30);
-  border-radius: 12px;
+  font-size: 0.9375rem;
+  border: 1px solid var(--ld-white-10);
+  border-radius: 9999px;
   cursor: pointer;
   transition: all 200ms ease;
   text-decoration: none;
@@ -438,35 +450,34 @@ body {
 
 .landing-dark .ld-btn-secondary:hover {
   color: var(--ld-white);
-  border-color: var(--ld-white-50);
+  border-color: var(--ld-white-30);
   background: var(--ld-white-5);
 }
 
-/* Landing cards */
+/* Landing cards - subtle, refined */
 .landing-dark .ld-card {
   background: var(--ld-navy-dark);
   border: 1px solid var(--ld-white-10);
-  border-radius: 16px;
+  border-radius: 12px;
   transition: all 300ms ease;
 }
 
 .landing-dark .ld-card:hover {
-  border-color: var(--ld-white-30);
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  border-color: var(--ld-white-10);
+  background: var(--ld-navy-mid);
 }
 
 /* Landing glass effect */
 .landing-dark .ld-glass {
-  background: rgba(15, 33, 54, 0.8);
+  background: rgba(24, 24, 27, 0.8);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--ld-white-10);
 }
 
-/* Landing glow effects */
+/* Landing glow effects - very subtle */
 .landing-dark .ld-glow-teal {
-  box-shadow: 0 0 30px var(--ld-teal-glow), 0 0 60px var(--ld-teal-glow);
+  box-shadow: 0 0 40px var(--ld-teal-glow);
 }
 
 /* Landing animations */
@@ -605,6 +616,223 @@ body {
   .landing-dark *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==========================================
+   AUTH PAGES STYLING
+   For Sign-In and Sign-Up pages
+   ========================================== */
+
+/* Auth pages use landing-dark but without scroll snap */
+.landing-dark:has(.auth-background) {
+  scroll-snap-type: none;
+  overflow: auto;
+  height: auto;
+}
+
+/* Auth Background Container */
+.auth-background {
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Auth form container - Clerk component styling */
+.auth-form-container {
+  width: 100%;
+}
+
+/* Clerk component overrides for dark theme */
+.auth-form-container .cl-rootBox {
+  width: 100%;
+}
+
+.auth-form-container .cl-card {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.auth-form-container .cl-headerTitle,
+.auth-form-container .cl-headerSubtitle {
+  display: none !important;
+}
+
+.auth-form-container .cl-socialButtonsBlockButton {
+  background: var(--ld-white-5) !important;
+  border: 1px solid var(--ld-white-10) !important;
+  color: var(--ld-white-90) !important;
+  transition: all 200ms ease !important;
+  border-radius: 10px !important;
+}
+
+.auth-form-container .cl-socialButtonsBlockButton:hover {
+  background: var(--ld-white-10) !important;
+  border-color: var(--ld-white-30) !important;
+}
+
+.auth-form-container .cl-socialButtonsBlockButtonText {
+  color: var(--ld-white-70) !important;
+  font-weight: 500 !important;
+}
+
+.auth-form-container .cl-dividerLine {
+  background: var(--ld-white-10) !important;
+}
+
+.auth-form-container .cl-dividerText {
+  color: var(--ld-white-30) !important;
+}
+
+.auth-form-container .cl-formFieldLabel {
+  color: var(--ld-white-70) !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+}
+
+.auth-form-container .cl-formFieldInput {
+  background: var(--ld-white-5) !important;
+  border: 1px solid var(--ld-white-10) !important;
+  color: var(--ld-white) !important;
+  border-radius: 10px !important;
+  transition: all 200ms ease !important;
+}
+
+.auth-form-container .cl-formFieldInput::placeholder {
+  color: var(--ld-white-30) !important;
+}
+
+.auth-form-container .cl-formFieldInput:focus {
+  border-color: var(--ld-teal) !important;
+  box-shadow: 0 0 0 2px var(--ld-teal-glow) !important;
+  outline: none !important;
+}
+
+.auth-form-container .cl-formButtonPrimary {
+  background: linear-gradient(135deg, var(--ld-teal) 0%, var(--ld-teal-light) 100%) !important;
+  border: none !important;
+  font-weight: 600 !important;
+  border-radius: 10px !important;
+  transition: all 200ms ease !important;
+}
+
+.auth-form-container .cl-formButtonPrimary:hover {
+  box-shadow: 0 4px 20px var(--ld-teal-glow) !important;
+  transform: translateY(-1px);
+}
+
+.auth-form-container .cl-footerActionLink {
+  color: var(--ld-teal) !important;
+  font-weight: 500 !important;
+}
+
+.auth-form-container .cl-footerActionLink:hover {
+  color: var(--ld-teal-light) !important;
+}
+
+.auth-form-container .cl-identityPreviewText {
+  color: var(--ld-white-70) !important;
+}
+
+.auth-form-container .cl-identityPreviewEditButton {
+  color: var(--ld-teal) !important;
+}
+
+.auth-form-container .cl-formFieldInputShowPasswordButton {
+  color: var(--ld-white-50) !important;
+}
+
+.auth-form-container .cl-formFieldInputShowPasswordButton:hover {
+  color: var(--ld-white-70) !important;
+}
+
+.auth-form-container .cl-otpCodeFieldInput {
+  background: var(--ld-white-5) !important;
+  border: 1px solid var(--ld-white-10) !important;
+  color: var(--ld-white) !important;
+}
+
+.auth-form-container .cl-otpCodeFieldInput:focus {
+  border-color: var(--ld-teal) !important;
+}
+
+.auth-form-container .cl-formResendCodeLink {
+  color: var(--ld-teal) !important;
+}
+
+.auth-form-container .cl-alert {
+  background: var(--ld-white-5) !important;
+  border: 1px solid var(--ld-white-10) !important;
+  border-radius: 10px !important;
+}
+
+.auth-form-container .cl-alertText {
+  color: var(--ld-white-70) !important;
+}
+
+.auth-form-container .cl-footer {
+  display: none !important;
+}
+
+.auth-form-container .cl-internal-b3fm6y {
+  background: var(--ld-white-5) !important;
+  border: 1px solid var(--ld-white-10) !important;
+}
+
+/* Auth animations */
+@keyframes auth-glow-pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes auth-particle-float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(-10px) translateX(5px);
+  }
+  50% {
+    transform: translateY(-5px) translateX(-5px);
+  }
+  75% {
+    transform: translateY(-15px) translateX(3px);
+  }
+}
+
+@keyframes auth-globe-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.auth-glow-pulse {
+  animation: auth-glow-pulse 4s ease-in-out infinite;
+}
+
+.auth-particle-float {
+  animation: auth-particle-float 6s ease-in-out infinite;
+}
+
+.auth-globe-rotate {
+  animation: auth-globe-rotate 120s linear infinite;
+}
+
+/* Auth page specific reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .auth-background *,
+  .auth-form-container * {
+    animation: none !important;
     transition-duration: 0.01ms !important;
   }
 }

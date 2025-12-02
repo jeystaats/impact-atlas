@@ -14,40 +14,18 @@ export default function CTASection() {
       className="ld-section relative"
       style={{ background: "var(--ld-navy-deep)" }}
     >
-      {/* Radial gradient background */}
+      {/* Subtle radial gradient - barely visible */}
       <div
         className="absolute inset-0"
         style={{
-          background: "radial-gradient(ellipse at center, rgba(0, 206, 209, 0.08) 0%, transparent 60%)",
+          background: "radial-gradient(ellipse at center, rgba(45, 212, 191, 0.03) 0%, transparent 60%)",
         }}
       />
 
-      {/* Animated glow orbs */}
-      <motion.div
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.3, 0.5, 0.3],
-        }}
-        transition={{
-          duration: 4,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="absolute top-1/3 left-1/4 w-64 h-64 rounded-full blur-[100px]"
-        style={{ background: "var(--ld-teal)" }}
-      />
-      <motion.div
-        animate={{
-          scale: [1.2, 1, 1.2],
-          opacity: [0.2, 0.4, 0.2],
-        }}
-        transition={{
-          duration: 5,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="absolute bottom-1/3 right-1/4 w-48 h-48 rounded-full blur-[80px]"
-        style={{ background: "var(--ld-teal-light)" }}
+      {/* Subtle ambient glow - very restrained */}
+      <div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] rounded-full blur-[150px]"
+        style={{ background: "var(--ld-navy-mid)", opacity: 0.5 }}
       />
 
       <div className="ld-section-content relative z-10 text-center">
