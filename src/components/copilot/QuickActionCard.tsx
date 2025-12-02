@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { motion, useSpring, useTransform, AnimatePresence } from "framer-motion";
+import { useState, useRef } from "react";
+import { motion, useSpring, AnimatePresence } from "framer-motion";
 import { Icon, IconName } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 
@@ -38,54 +38,23 @@ interface QuickActionCardProps {
   isCompact?: boolean;
 }
 
-// Animated number component with counting effect
+// Simple animated display - keeps the value display clean without complex animations
+// that conflict with React's rules of hooks
 function AnimatedValue({
   value,
-  delay = 0
 }: {
   value: string;
   delay?: number;
 }) {
-  const [displayValue, setDisplayValue] = useState("0");
-  const numericMatch = value.match(/^([+-]?)(\d+\.?\d*)/);
-
-  useEffect(() => {
-    if (!numericMatch) {
-      setDisplayValue(value);
-      return;
-    }
-
-    const sign = numericMatch[1] || "";
-    const target = parseFloat(numericMatch[2]);
-    const suffix = value.replace(numericMatch[0], "");
-    const duration = 800;
-    const startTime = Date.now() + delay;
-
-    const animate = () => {
-      const elapsed = Date.now() - startTime;
-      if (elapsed < 0) {
-        requestAnimationFrame(animate);
-        return;
-      }
-
-      const progress = Math.min(elapsed / duration, 1);
-      // Ease out cubic
-      const eased = 1 - Math.pow(1 - progress, 3);
-      const current = target * eased;
-
-      // Format to match original precision
-      const decimals = (numericMatch[2].split(".")[1] || "").length;
-      setDisplayValue(`${sign}${current.toFixed(decimals)}${suffix}`);
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
-    };
-
-    requestAnimationFrame(animate);
-  }, [value, delay, numericMatch]);
-
-  return <span>{displayValue}</span>;
+  return (
+    <motion.span
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
+    >
+      {value}
+    </motion.span>
+  );
 }
 
 // Effort indicator with segmented visualization
@@ -236,7 +205,7 @@ export function QuickActionCard({
   onAddToPlan,
   onViewOnMap,
   onDismiss,
-  isCompact = false,
+  // isCompact can be used for future compact mode rendering
 }: QuickActionCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isAdding, setIsAdding] = useState(false);

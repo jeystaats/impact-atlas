@@ -1,4 +1,6 @@
-// Note: OpenAI client is created lazily in API routes to avoid build-time errors
+// SERVER-ONLY: This file should only be imported in API routes
+// Importing this in client components would expose the system prompt
+import "server-only";
 
 export const CLIMATE_DIRECTOR_SYSTEM_PROMPT = `You are the Climate Intelligence Director for Impact Atlas, an AI-powered platform that helps cities find "quick wins" for climate action.
 
@@ -111,7 +113,7 @@ export interface HotspotContextData {
  * Create rich context from a selected hotspot for the AI
  * This provides the AI with detailed data about the selected location
  */
-export function createHotspotContext(hotspot: HotspotContextData, moduleId?: string): string {
+export function createHotspotContext(hotspot: HotspotContextData): string {
   const severityDescriptions: Record<string, string> = {
     low: "Minor concern - opportunity for preventive action",
     medium: "Moderate concern - action recommended within 3-6 months",

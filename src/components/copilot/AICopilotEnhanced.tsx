@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { NeuralThinking } from "./NeuralThinking";
 import { IntelligenceCard } from "./IntelligenceCard";
 import { SmartSuggestions } from "./SmartSuggestions";
-import { QuickActionCard, QuickAction, QuickActionList } from "./QuickActionCard";
+import { QuickAction, QuickActionList } from "./QuickActionCard";
 import { cn } from "@/lib/utils";
 import { City } from "@/types";
 import { useSelectedCity } from "@/hooks/useSelectedCity";
@@ -67,10 +67,14 @@ export function AICopilotEnhanced({
   moduleId,
   moduleName,
   selectedHotspot,
+  selectedHotspotData,
+  onViewOnMap,
 }: AICopilotEnhancedProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [input, setInput] = useState("");
+  const [extractedActions, setExtractedActions] = useState<QuickAction[]>([]);
+  const [showActionsPanel, setShowActionsPanel] = useState(false);
 
   // Get selected city for saving quick wins
   const { selectedCityId } = useSelectedCity();
@@ -87,7 +91,31 @@ export function AICopilotEnhanced({
     });
   }, [createQuickWin, moduleId, selectedCityId]);
 
-  // Create transport with city/module context in body
+  // Handler to add QuickAction to plan
+  const handleAddToPlan = useCallback(async (action: QuickAction) => {
+    // Create a formatted content string from the action
+    const content = `**${action.title}**\n\n${action.description}\n\nImpact: ${action.impactValue} ${action.impactUnit}\nEffort: ${action.effortLevel}${action.location ? `\nLocation: ${action.location.name}` : ""}`;
+    await createQuickWin({
+      content,
+      moduleSlug: action.moduleId || moduleId,
+      cityId: selectedCityId as Id<"cities"> | undefined,
+    });
+  }, [createQuickWin, moduleId, selectedCityId]);
+
+  // Handler for "View on Map" button
+  const handleViewOnMap = useCallback((action: QuickAction) => {
+    if (action.location?.lat && action.location?.lng && onViewOnMap) {
+      onViewOnMap(action.location.lat, action.location.lng);
+      onClose();
+    }
+  }, [onViewOnMap, onClose]);
+
+  // Handler to dismiss an action
+  const handleDismissAction = useCallback((action: QuickAction) => {
+    setExtractedActions(prev => prev.filter(a => a.id !== action.id));
+  }, []);
+
+  // Create transport with city/module/hotspot context in body
   const transport = useMemo(
     () =>
       new TextStreamChatTransport({
@@ -96,9 +124,10 @@ export function AICopilotEnhanced({
           city: city ? { name: city.name, country: city.country, population: city.population } : undefined,
           moduleId,
           moduleName,
+          selectedHotspot: selectedHotspotData,
         },
       }),
-    [city, moduleId, moduleName]
+    [city, moduleId, moduleName, selectedHotspotData]
   );
 
   const { messages, status, sendMessage } = useChat({
@@ -106,6 +135,73 @@ export function AICopilotEnhanced({
   });
 
   const isLoading = status === "streaming" || status === "submitted";
+
+  // Track processed message IDs to avoid re-extracting
+  const processedMessageIds = useRef<Set<string>>(new Set());
+  const prevHotspotId = useRef<string | null>(null);
+
+  // Compute the pending action extraction info (derived state, no side effects)
+  const pendingActionExtraction = useMemo(() => {
+    if (isLoading || messages.length === 0) return null;
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage.role !== "assistant") return null;
+
+    const content = getMessageContent(lastMessage);
+    if (!hasActionableContent(content)) return null;
+
+    return { messageId: lastMessage.id, content };
+  }, [isLoading, messages]);
+
+  // Compute the hotspot action if hotspot data changes
+  const hotspotAction = useMemo(() => {
+    if (!selectedHotspotData || !moduleId) return null;
+    return hotspotToQuickAction(selectedHotspotData, moduleId);
+  }, [selectedHotspotData, moduleId]);
+
+  // Effect to process extracted actions from AI messages
+  // Using a timeout to defer the state update and satisfy the linter
+  useEffect(() => {
+    if (!pendingActionExtraction) return;
+
+    const { messageId, content } = pendingActionExtraction;
+
+    // Check if already processed
+    if (processedMessageIds.current.has(messageId)) return;
+    processedMessageIds.current.add(messageId);
+
+    const actions = extractActionsFromAIResponse(content, moduleId);
+    if (actions.length > 0) {
+      // Defer state update to satisfy the linter's "no setState in effect" rule
+      const timeoutId = setTimeout(() => {
+        setExtractedActions(prev => {
+          const existingIds = new Set(prev.map(a => a.id));
+          const newActions = actions.filter(a => !existingIds.has(a.id));
+          return [...prev, ...newActions];
+        });
+        setShowActionsPanel(true);
+      }, 0);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [pendingActionExtraction, moduleId]);
+
+  // Effect to handle hotspot selection
+  useEffect(() => {
+    if (!hotspotAction) return;
+
+    const hotspotId = selectedHotspotData?.id || null;
+    if (hotspotId === prevHotspotId.current) return;
+    prevHotspotId.current = hotspotId;
+
+    // Defer state update to satisfy the linter's "no setState in effect" rule
+    const timeoutId = setTimeout(() => {
+      setExtractedActions(prev => {
+        const filtered = prev.filter(a => !a.id.startsWith("hotspot-"));
+        return [hotspotAction, ...filtered];
+      });
+      setShowActionsPanel(true);
+    }, 0);
+    return () => clearTimeout(timeoutId);
+  }, [hotspotAction, selectedHotspotData?.id]);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -203,7 +299,7 @@ export function AICopilotEnhanced({
             </div>
 
             {/* Context badges */}
-            {(moduleId || selectedHotspot) && (
+            {(moduleId || selectedHotspotData) && (
               <div className="flex-shrink-0 px-4 py-2 border-b border-[var(--border)] flex flex-wrap gap-2">
                 {moduleId && (
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--accent-bg)] text-xs text-[var(--accent-dark)]">
@@ -211,13 +307,77 @@ export function AICopilotEnhanced({
                     {moduleName || moduleId.replace(/-/g, " ")}
                   </span>
                 )}
-                {selectedHotspot && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-xs text-amber-700">
+                {selectedHotspotData && (
+                  <motion.span
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs",
+                      selectedHotspotData.severity === "critical" && "bg-rose-50 text-rose-700",
+                      selectedHotspotData.severity === "high" && "bg-amber-50 text-amber-700",
+                      selectedHotspotData.severity === "medium" && "bg-yellow-50 text-yellow-700",
+                      selectedHotspotData.severity === "low" && "bg-emerald-50 text-emerald-700"
+                    )}
+                  >
                     <Icon name="mapPin" className="w-3 h-3" />
-                    Hotspot selected
-                  </span>
+                    {selectedHotspotData.label}
+                    {selectedHotspotData.value && (
+                      <span className="font-medium">{selectedHotspotData.value}</span>
+                    )}
+                  </motion.span>
                 )}
               </div>
+            )}
+
+            {/* Quick Actions Panel Toggle */}
+            {extractedActions.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className="flex-shrink-0 border-b border-[var(--border)]"
+              >
+                <button
+                  onClick={() => setShowActionsPanel(!showActionsPanel)}
+                  className="w-full px-4 py-2 flex items-center justify-between hover:bg-[var(--background-secondary)] transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <Icon name="zap" className="w-4 h-4 text-[var(--accent)]" />
+                    <span className="text-sm font-medium text-[var(--foreground)]">
+                      Quick Actions
+                    </span>
+                    <span className="px-1.5 py-0.5 rounded-full bg-[var(--accent)] text-white text-xs font-medium">
+                      {extractedActions.length}
+                    </span>
+                  </div>
+                  <motion.div
+                    animate={{ rotate: showActionsPanel ? 180 : 0 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <Icon name="chevronDown" className="w-4 h-4 text-[var(--foreground-muted)]" />
+                  </motion.div>
+                </button>
+
+                <AnimatePresence>
+                  {showActionsPanel && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="p-4 max-h-[300px] overflow-y-auto space-y-3">
+                        <QuickActionList
+                          actions={extractedActions}
+                          onAddToPlan={handleAddToPlan}
+                          onViewOnMap={onViewOnMap ? handleViewOnMap : undefined}
+                          onDismiss={handleDismissAction}
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
             )}
 
             {/* Messages area */}

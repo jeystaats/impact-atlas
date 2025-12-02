@@ -2,7 +2,7 @@
  * Action Extractor - Parses AI responses and hotspot data into structured QuickAction objects
  */
 
-import { QuickAction, EffortLevel, ActionSource } from "@/components/copilot/QuickActionCard";
+import { QuickAction, EffortLevel } from "@/components/copilot/QuickActionCard";
 import { HotspotData } from "@/data/hotspots";
 
 // Patterns for extracting structured data from AI responses
