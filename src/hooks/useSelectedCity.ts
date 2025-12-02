@@ -14,8 +14,8 @@ export function useSelectedCity() {
   const { defaultCity, setDefaultCity } = usePreferencesStore();
   const [isHydrated, setIsHydrated] = useState(false);
 
-  // Try to get cities from Convex
-  const cities = useQuery(api.cities.list, { activeOnly: true });
+  // Try to get cities from Convex (include all, not just active, so newly created cities show up)
+  const cities = useQuery(api.cities.list, {});
 
   // Hydrate on mount
   useEffect(() => {
@@ -23,9 +23,9 @@ export function useSelectedCity() {
   }, []);
 
   // Determine the selected city slug from preferences store
-  const selectedCitySlug = isHydrated ? defaultCity : "amsterdam";
+  const selectedCitySlug = isHydrated ? defaultCity : "barcelona";
 
-  // Find the city object
+  // Find the city object - match by slug
   const selectedCity = cities?.find((c: { slug: string }) => c.slug === selectedCitySlug) ?? null;
 
   // Set city function - updates preferences store
@@ -33,16 +33,19 @@ export function useSelectedCity() {
     setDefaultCity(slug as City);
   }, [setDefaultCity]);
 
+  // If the selected city isn't found but we have cities, default to first available
+  const effectiveCity = selectedCity ?? (cities && cities.length > 0 ? cities[0] : null);
+
   return {
     // The selected city slug (string)
-    selectedCitySlug,
+    selectedCitySlug: effectiveCity?.slug ?? selectedCitySlug,
     // The full city document (or null if not loaded)
-    selectedCity,
+    selectedCity: effectiveCity,
     // The city ID (or undefined if not loaded)
-    selectedCityId: selectedCity?._id,
+    selectedCityId: effectiveCity?._id,
     // All available cities
     cities: cities ?? [],
-    // Loading state
+    // Loading state - true if we're still waiting for Convex data
     isLoading: cities === undefined,
     // Hydration state
     isHydrated,

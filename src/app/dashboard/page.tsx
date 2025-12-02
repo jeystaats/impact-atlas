@@ -330,7 +330,7 @@ export default function DashboardPage() {
             Showing data for {currentCity.name}
           </span>
         </div>
-        <CityOverviewMap cityId={selectedCitySlug} height={450} />
+        <CityOverviewMap key={selectedCitySlug} cityId={selectedCitySlug} height={450} />
       </motion.div>
     </div>
   );

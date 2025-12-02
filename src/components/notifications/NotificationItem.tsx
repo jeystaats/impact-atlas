@@ -12,6 +12,7 @@ const typeConfig: Record<NotificationType, { icon: IconName; color: string }> = 
   warning: { icon: "warning", color: "#F59E0B" },
   info: { icon: "info", color: "#3B82F6" },
   "ai-insight": { icon: "sparkles", color: "#8B5CF6" },
+  progress: { icon: "loader", color: "#0D9488" },
 };
 
 interface NotificationItemProps {

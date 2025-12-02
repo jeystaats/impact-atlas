@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export type City = "amsterdam" | "copenhagen" | "singapore" | "barcelona" | "melbourne";
+// City slug can be any string now to support dynamically added cities
+export type City = string;
 export type TemperatureUnit = "celsius" | "fahrenheit";
 export type MapStyle = "light" | "dark" | "satellite";
 
@@ -33,7 +34,7 @@ export const usePreferencesStore = create<PreferencesState>()(
   persist(
     (set) => ({
       // Default values
-      defaultCity: "amsterdam",
+      defaultCity: "barcelona",
       temperatureUnit: "celsius",
       mapStyle: "light",
       notifications: {

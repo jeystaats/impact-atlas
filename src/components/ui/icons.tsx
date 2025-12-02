@@ -60,6 +60,9 @@ import {
   CircleDot,
   Hexagon,
   Trash2,
+  Bell,
+  BellRing,
+  Minimize2,
   type LucideProps,
 } from "lucide-react";
 
@@ -125,6 +128,9 @@ export const Icons = {
   circleDot: CircleDot,
   hexagon: Hexagon,
   trash: Trash2,
+  bell: Bell,
+  bellRing: BellRing,
+  minimize: Minimize2,
 };
 
 export type IconName = keyof typeof Icons;

@@ -30,6 +30,21 @@ const typeConfig: Record<
     color: "#8B5CF6",
     bgColor: "rgba(139, 92, 246, 0.1)",
   },
+  progress: {
+    icon: "loader",
+    color: "#0D9488",
+    bgColor: "rgba(13, 148, 136, 0.1)",
+  },
+};
+
+// Module-specific icons and colors
+const moduleConfig: Record<string, { icon: IconName; color: string }> = {
+  "urban-heat": { icon: "thermometer", color: "#EF4444" },
+  "coastal-plastic": { icon: "waves", color: "#3B82F6" },
+  "ocean-plastic": { icon: "droplets", color: "#06B6D4" },
+  "port-emissions": { icon: "ship", color: "#6366F1" },
+  biodiversity: { icon: "leaf", color: "#22C55E" },
+  restoration: { icon: "trees", color: "#84CC16" },
 };
 
 interface ToastProps {
@@ -39,6 +54,15 @@ interface ToastProps {
 
 export function Toast({ notification, onDismiss }: ToastProps) {
   const config = typeConfig[notification.type];
+
+  // Use module-specific styling if available
+  const moduleStyle = notification.meta?.moduleSlug
+    ? moduleConfig[notification.meta.moduleSlug]
+    : null;
+  const iconName = moduleStyle?.icon || config.icon;
+  const iconColor = moduleStyle?.color || config.color;
+
+  const isProgress = notification.type === "progress";
 
   return (
     <motion.div
@@ -57,11 +81,11 @@ export function Toast({ notification, onDismiss }: ToastProps) {
         "shadow-lg backdrop-blur-sm"
       )}
     >
-      {/* Progress bar for auto-dismiss */}
-      {notification.duration !== 0 && (
+      {/* Progress bar for auto-dismiss (non-progress notifications) */}
+      {notification.duration !== 0 && !isProgress && (
         <motion.div
           className="absolute bottom-0 left-0 h-1 rounded-b-xl"
-          style={{ backgroundColor: config.color }}
+          style={{ backgroundColor: iconColor }}
           initial={{ width: "100%" }}
           animate={{ width: "0%" }}
           transition={{
@@ -71,17 +95,30 @@ export function Toast({ notification, onDismiss }: ToastProps) {
         />
       )}
 
+      {/* Colored accent line for progress type */}
+      {isProgress && (
+        <div
+          className="absolute left-0 top-0 bottom-0 w-1 rounded-l-xl"
+          style={{ backgroundColor: iconColor }}
+        />
+      )}
+
       <div className="flex gap-3">
         {/* Icon */}
         <div
           className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
-          style={{ backgroundColor: config.bgColor }}
+          style={{ backgroundColor: `${iconColor}20` }}
         >
-          <Icon
-            name={config.icon}
-            className="w-4 h-4"
-            style={{ color: config.color }}
-          />
+          {isProgress ? (
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            >
+              <Icon name="loader" className="w-4 h-4" style={{ color: iconColor }} />
+            </motion.div>
+          ) : (
+            <Icon name={iconName} className="w-4 h-4" style={{ color: iconColor }} />
+          )}
         </div>
 
         {/* Content */}
@@ -94,11 +131,25 @@ export function Toast({ notification, onDismiss }: ToastProps) {
               {notification.message}
             </p>
           )}
+
+          {/* Progress bar for progress notifications */}
+          {isProgress && notification.progress !== undefined && (
+            <div className="mt-2 h-1.5 bg-[var(--background-secondary)] rounded-full overflow-hidden">
+              <motion.div
+                className="h-full rounded-full"
+                style={{ backgroundColor: iconColor }}
+                initial={{ width: 0 }}
+                animate={{ width: `${notification.progress}%` }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
+          )}
+
           {notification.action && (
             <button
               onClick={notification.action.onClick}
               className="text-xs font-medium mt-2 hover:underline"
-              style={{ color: config.color }}
+              style={{ color: iconColor }}
             >
               {notification.action.label}
             </button>

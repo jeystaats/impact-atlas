@@ -10,6 +10,7 @@ interface NotificationStore {
   addNotification: (
     notification: Omit<Notification, "id" | "timestamp" | "read">
   ) => string;
+  updateNotification: (id: string, updates: Partial<Notification>) => void;
   removeNotification: (id: string) => void;
   markAsRead: (id: string) => void;
   markAllAsRead: () => void;
@@ -42,14 +43,25 @@ export const useNotificationStore = create<NotificationStore>()(
           toasts: [...state.toasts, newNotification],
         }));
 
-        // Auto-dismiss toast after duration
-        if (notification.duration !== 0) {
+        // Auto-dismiss toast after duration (skip for progress type or duration=0)
+        if (notification.duration !== 0 && notification.type !== "progress") {
           setTimeout(() => {
             get().dismissToast(id);
           }, notification.duration || 5000);
         }
 
         return id;
+      },
+
+      updateNotification: (id, updates) => {
+        set((state) => ({
+          notifications: state.notifications.map((n) =>
+            n.id === id ? { ...n, ...updates } : n
+          ),
+          toasts: state.toasts.map((t) =>
+            t.id === id ? { ...t, ...updates } : t
+          ),
+        }));
       },
 
       removeNotification: (id) =>

@@ -16,7 +16,7 @@ import { HotspotDetailDrawer } from "@/components/modules/HotspotDetailDrawer";
 import { ActionCard } from "@/components/modules/ActionCard";
 import { Icon } from "@/components/ui/icons";
 import { ModulePageSkeleton } from "@/components/modules/ModulePageSkeleton";
-import { modules } from "@/data/modules";
+import { modules, cities as fallbackCities } from "@/data/modules";
 import { moduleHotspots, moduleInsights, HotspotData } from "@/data/hotspots";
 import { notFound } from "next/navigation";
 import { ModuleActionBar } from "@/components/modules/ModuleActionBar";
@@ -85,7 +85,17 @@ export default function ModuleDetailPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Get selected city - this makes the page reactive to city changes
-  const { selectedCityId, selectedCity, isHydrated } = useSelectedCity();
+  const { selectedCityId, selectedCity, selectedCitySlug, isHydrated } = useSelectedCity();
+
+  // Get city coordinates for map center
+  const cityCoordinates = useMemo(() => {
+    if (selectedCity?.coordinates) {
+      return selectedCity.coordinates;
+    }
+    // Fallback to static city data
+    const fallbackCity = fallbackCities.find((c) => c.id === selectedCitySlug);
+    return fallbackCity?.coordinates || { lat: 52.3676, lng: 4.9041 }; // Amsterdam default
+  }, [selectedCity, selectedCitySlug]);
 
   // Fetch hotspots from Convex for the selected city and module
   const convexHotspots = useQuery(
@@ -285,15 +295,15 @@ export default function ModuleDetailPage() {
         <div className="lg:col-span-3">
           {/* Module-specific advanced visualizations */}
           {moduleId === "urban-heat" && (
-            <HeatmapOverlay height={560} className="mb-6" />
+            <HeatmapOverlay key={selectedCitySlug} cityId={selectedCitySlug} height={560} className="mb-6" />
           )}
 
           {moduleId === "port-emissions" && (
-            <ShipTracker height={560} className="mb-6" />
+            <ShipTracker key={selectedCitySlug} cityId={selectedCitySlug} height={560} className="mb-6" />
           )}
 
           {moduleId === "coastal-plastic" && (
-            <PlasticFlowMap height={560} className="mb-6" />
+            <PlasticFlowMap key={selectedCitySlug} cityId={selectedCitySlug} height={560} className="mb-6" />
           )}
 
           {/* Standard hotspot map for all modules */}
@@ -307,11 +317,13 @@ export default function ModuleDetailPage() {
             </div>
             <div className="h-[500px] relative">
               <MapVisualization
+                key={selectedCitySlug} // Force re-render when city changes
                 moduleId={moduleId}
                 hotspots={filteredHotspots}
                 selectedHotspot={selectedHotspot}
                 onHotspotClick={(hotspot) => setSelectedHotspot(hotspot.id)}
                 onViewDetails={handleViewDetails}
+                center={cityCoordinates}
               />
             </div>
           </div>

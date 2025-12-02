@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Icon, IconName } from "@/components/ui/icons";
 import { ModuleLoadingCard } from "./ModuleLoadingCard";
 import { DataStreamAnimation } from "./DataStreamAnimation";
 import { ProgressRing } from "./ProgressRing";
 import { AIActivityIndicator } from "./AIActivityIndicator";
+import { useNotifications } from "@/components/notifications/useNotifications";
 import { cn } from "@/lib/utils";
 
 // Generation stages with detailed info
@@ -101,6 +102,7 @@ interface EnhancedCityLoadingModalProps {
   progress: OnboardingProgress | null;
   onClose?: () => void;
   onEnterDashboard?: () => void;
+  onMinimize?: () => void;
 }
 
 export function EnhancedCityLoadingModal({
@@ -110,8 +112,12 @@ export function EnhancedCityLoadingModal({
   progress,
   onClose,
   onEnterDashboard,
+  onMinimize,
 }: EnhancedCityLoadingModalProps) {
   const [elapsedTime, setElapsedTime] = useState(0);
+  const { info, success, aiInsight } = useNotifications();
+  const lastNotifiedModuleCount = useRef(0);
+  const hasNotifiedCompletion = useRef(false);
 
   // Track elapsed time
   useEffect(() => {
@@ -126,8 +132,71 @@ export function EnhancedCityLoadingModal({
 
   // Reset elapsed time when modal opens
   useEffect(() => {
-    if (isOpen) setElapsedTime(0);
+    if (isOpen) {
+      setElapsedTime(0);
+      lastNotifiedModuleCount.current = 0;
+      hasNotifiedCompletion.current = false;
+    }
   }, [isOpen]);
+
+  // Send notifications for background progress updates
+  useEffect(() => {
+    if (!progress || isOpen) return; // Only notify when modal is closed (running in background)
+
+    const completedCount = progress.moduleProgress.filter(
+      (m) => m.status === "completed"
+    ).length;
+
+    // Notify when new modules complete
+    if (completedCount > lastNotifiedModuleCount.current) {
+      const newlyCompleted = progress.moduleProgress.filter(
+        (m) => m.status === "completed"
+      );
+      const latestModule = newlyCompleted[newlyCompleted.length - 1];
+
+      if (latestModule) {
+        const moduleName = latestModule.moduleSlug
+          .split("-")
+          .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(" ");
+
+        info(
+          `${moduleName} ready`,
+          `${latestModule.hotspotsCreated} hotspots, ${latestModule.quickWinsCreated} quick wins found for ${cityName}`,
+          { cityId: cityName, persistent: true }
+        );
+      }
+
+      lastNotifiedModuleCount.current = completedCount;
+    }
+
+    // Notify when fully complete
+    if (progress.status === "completed" && !hasNotifiedCompletion.current) {
+      const totalHotspots = progress.moduleProgress.reduce(
+        (sum, m) => sum + m.hotspotsCreated,
+        0
+      );
+      const totalQuickWins = progress.moduleProgress.reduce(
+        (sum, m) => sum + m.quickWinsCreated,
+        0
+      );
+
+      success(
+        `${cityName} is ready!`,
+        `All modules loaded: ${totalHotspots} hotspots and ${totalQuickWins} quick wins discovered`,
+        {
+          cityId: cityName,
+          persistent: true,
+          action: {
+            label: "View Dashboard",
+            onClick: () => onEnterDashboard?.(),
+          },
+        }
+      );
+
+      hasNotifiedCompletion.current = true;
+    }
+  }, [progress, isOpen, cityName, info, success, onEnterDashboard]);
 
   // Find current stage info
   const currentStageInfo = useMemo(
@@ -220,7 +289,27 @@ export function EnhancedCityLoadingModal({
             className="relative w-full max-w-2xl bg-[var(--background-tertiary)] rounded-2xl border border-[var(--border)] shadow-2xl overflow-hidden"
           >
             {/* Header */}
-            <div className="p-6 pb-4 text-center border-b border-[var(--border)]">
+            <div className="p-6 pb-4 border-b border-[var(--border)]">
+              {/* Close/Minimize button */}
+              {progress?.status === "generating" && (
+                <div className="absolute top-4 right-4 flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      info(
+                        `Loading ${cityName} in background`,
+                        `You'll be notified when modules complete. ${completedModules}/${totalModules} done so far.`,
+                        { cityId: cityName, persistent: true }
+                      );
+                      onClose?.();
+                    }}
+                    className="p-2 rounded-lg hover:bg-[var(--background-secondary)] text-[var(--foreground-muted)] hover:text-[var(--foreground)] transition-colors group"
+                    title="Continue in background"
+                  >
+                    <Icon name="x" className="w-5 h-5" />
+                  </button>
+                </div>
+              )}
+
               <div className="flex items-center justify-center gap-4">
                 {/* Progress ring */}
                 <ProgressRing
@@ -407,32 +496,53 @@ export function EnhancedCityLoadingModal({
                     <Icon name="arrowRight" className="w-4 h-4" />
                     Enter Early
                   </button>
-                  <div className="py-3 px-4 rounded-xl bg-[var(--background-secondary)] text-[var(--foreground-muted)] text-sm flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      info(
+                        `Loading ${cityName} in background`,
+                        `You'll be notified when modules complete. ${completedModules}/${totalModules} done so far.`,
+                        { cityId: cityName, persistent: true }
+                      );
+                      onClose?.();
+                    }}
+                    className="py-3 px-4 rounded-xl bg-[var(--background-secondary)] text-[var(--foreground-muted)] hover:text-[var(--foreground)] text-sm flex items-center gap-2 transition-colors"
+                  >
+                    <Icon name="bellRing" className="w-4 h-4" />
+                    Background
+                  </button>
+                </>
+              ) : (
+                <div className="flex-1 flex gap-3">
+                  <div className="flex-1 py-3 px-4 rounded-xl bg-[var(--background-secondary)] text-[var(--foreground-muted)] text-center text-sm flex items-center justify-center gap-2">
                     <motion.div
                       animate={{ rotate: 360 }}
                       transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                     >
                       <Icon name="loader" className="w-4 h-4" />
                     </motion.div>
-                    {completedModules}/{totalModules} ready
+                    <motion.span
+                      animate={{ opacity: [0.5, 1, 0.5] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      {progress?.status === "failed"
+                        ? "Generation failed"
+                        : "Generating city data..."}
+                    </motion.span>
                   </div>
-                </>
-              ) : (
-                <div className="flex-1 py-3 px-4 rounded-xl bg-[var(--background-secondary)] text-[var(--foreground-muted)] text-center text-sm flex items-center justify-center gap-2">
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  <button
+                    onClick={() => {
+                      info(
+                        `Loading ${cityName} in background`,
+                        `You'll be notified when modules complete. ${completedModules}/${totalModules} done so far.`,
+                        { cityId: cityName, persistent: true }
+                      );
+                      onClose?.();
+                    }}
+                    className="py-3 px-4 rounded-xl border border-[var(--border)] text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--background-secondary)] text-sm flex items-center gap-2 transition-colors"
                   >
-                    <Icon name="loader" className="w-4 h-4" />
-                  </motion.div>
-                  <motion.span
-                    animate={{ opacity: [0.5, 1, 0.5] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                  >
-                    {progress?.status === "failed"
-                      ? "Generation failed"
-                      : "Generating city data..."}
-                  </motion.span>
+                    <Icon name="bellRing" className="w-4 h-4" />
+                    Background
+                  </button>
                 </div>
               )}
             </div>
