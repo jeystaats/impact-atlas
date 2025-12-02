@@ -1,18 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { CitySelector } from "@/components/dashboard/CitySelector";
 import { ModuleCard } from "@/components/dashboard/ModuleCard";
 import { QuickWinsSummary } from "@/components/dashboard/QuickWinsSummary";
 import { StatCard } from "@/components/dashboard/StatCard";
+import { ImpactRadar } from "@/components/dashboard/ImpactRadar";
+import { CityOverviewMap } from "@/components/dashboard/CityOverviewMap";
 import { modules, cities } from "@/data/modules";
 import { dashboardStats, cityStats } from "@/data/dashboard";
+import { usePreferencesStore, type City } from "@/stores/usePreferencesStore";
 
 export default function DashboardPage() {
-  const [selectedCity, setSelectedCity] = useState(cities[0].id);
+  const { defaultCity, setDefaultCity } = usePreferencesStore();
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  const selectedCity = isHydrated ? defaultCity : "amsterdam";
   const currentCity = cities.find((c) => c.id === selectedCity) || cities[0];
+
+  const handleCityChange = (cityId: string) => {
+    setDefaultCity(cityId as City);
+  };
 
   return (
     <div className="p-6 lg:p-8">
@@ -35,7 +49,7 @@ export default function DashboardPage() {
             Here's what's happening in {currentCity.name}
           </motion.p>
         </div>
-        <CitySelector selectedCity={selectedCity} onCityChange={setSelectedCity} />
+        <CitySelector selectedCity={selectedCity} onCityChange={handleCityChange} />
       </div>
 
       {/* Stats row */}
@@ -62,13 +76,30 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Sidebar - Quick Wins Summary */}
-        <div className="lg:col-span-1">
-          <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">Quick Wins</h2>
-          <QuickWinsSummary />
+        {/* Sidebar - Quick Wins Summary + Impact Radar */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* Impact Radar */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="p-4 rounded-xl bg-[var(--background-tertiary)] border border-[var(--border)]"
+          >
+            <h3 className="text-sm font-medium text-[var(--foreground-muted)] uppercase tracking-wider mb-4">
+              Module Health
+            </h3>
+            <div className="flex justify-center">
+              <ImpactRadar size={240} />
+            </div>
+          </motion.div>
+
+          <div>
+            <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">Quick Wins</h2>
+            <QuickWinsSummary />
+          </div>
 
           {/* Recent activity */}
-          <div className="mt-6">
+          <div>
             <h3 className="text-sm font-medium text-[var(--foreground-muted)] uppercase tracking-wider mb-3">
               Recent Activity
             </h3>
@@ -98,6 +129,24 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* City Overview Map - Full Width */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="mt-8"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-[var(--foreground)]">
+            City Overview - All Hotspots
+          </h2>
+          <span className="text-sm text-[var(--foreground-muted)]">
+            Showing data for {currentCity.name}
+          </span>
+        </div>
+        <CityOverviewMap cityId={selectedCity} height={450} />
+      </motion.div>
     </div>
   );
 }

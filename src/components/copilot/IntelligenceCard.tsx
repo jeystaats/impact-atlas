@@ -8,44 +8,74 @@ import { cn } from "@/lib/utils";
 
 type CardType = "insight" | "recommendation" | "warning" | "success" | "general";
 
+type ActionType = "module" | "map" | "page" | "quickwin" | "plan";
+
+interface ExtractedAction {
+  label: string;
+  type: ActionType;
+  href: string;
+  icon: IconName;
+}
+
 // Extract action buttons from content
-function extractActions(content: string): { cleanContent: string; actions: Array<{ label: string; type: "module" | "map" | "external"; href: string }> } {
-  const actions: Array<{ label: string; type: "module" | "map" | "external"; href: string }> = [];
-
-  // Match patterns like "View this area in the Urban Heat module →" or "Explore tree planting sites →"
-  const actionPatterns = [
-    { regex: /View.*(?:Urban Heat|Heat).*module\s*→/gi, module: "urban-heat", label: "View in Urban Heat Module" },
-    { regex: /(?:Explore|Check).*(?:tree|planting).*→/gi, module: "urban-heat", label: "Explore Tree Planting Sites" },
-    { regex: /(?:Check|View).*(?:plastic|accumulation|coast).*→/gi, module: "coastal-plastic", label: "View Plastic Forecast" },
-    { regex: /(?:View|Check).*(?:emissions?|port).*→/gi, module: "port-emissions", label: "View Port Emissions" },
-    { regex: /(?:Explore|View).*(?:biodiversity|wildlife).*→/gi, module: "biodiversity", label: "Explore Biodiversity Data" },
-    { regex: /(?:Find|View).*(?:restoration|land).*→/gi, module: "restoration", label: "Find Restoration Sites" },
-  ];
-
+function extractActions(content: string): { cleanContent: string; actions: ExtractedAction[] } {
+  const actions: ExtractedAction[] = [];
   let cleanContent = content;
 
-  actionPatterns.forEach(({ regex, module, label }) => {
+  // Module-specific patterns
+  const modulePatterns = [
+    { regex: /(?:View|Check|Explore).*(?:Urban Heat|heat island|tree equity).*→?/gi, module: "urban-heat", label: "Urban Heat Module", icon: "thermometer" as IconName },
+    { regex: /(?:View|Check|Explore).*(?:tree|planting|canopy).*→?/gi, module: "urban-heat", label: "Tree Planting Sites", icon: "leaf" as IconName },
+    { regex: /(?:Check|View|Explore).*(?:plastic|accumulation|coast|beach).*→?/gi, module: "coastal-plastic", label: "Coastal Plastic Module", icon: "waves" as IconName },
+    { regex: /(?:View|Check|Monitor).*(?:emissions?|port|vessel|ship|maritime).*→?/gi, module: "port-emissions", label: "Port Emissions Module", icon: "anchor" as IconName },
+    { regex: /(?:Explore|View|Check).*(?:biodiversity|wildlife|species|habitat).*→?/gi, module: "biodiversity", label: "Biodiversity Module", icon: "bug" as IconName },
+    { regex: /(?:Find|View|Explore).*(?:restoration|degraded|land).*→?/gi, module: "restoration", label: "Restoration Finder", icon: "refresh" as IconName },
+    { regex: /(?:Track|View|Check).*(?:ocean plastic|marine debris|drift).*→?/gi, module: "ocean-plastic", label: "Ocean Plastic Tracker", icon: "globe" as IconName },
+  ];
+
+  modulePatterns.forEach(({ regex, module, label, icon }) => {
     if (regex.test(content)) {
-      actions.push({
-        label,
-        type: "module",
-        href: `/dashboard/modules/${module}`,
-      });
+      // Only add if not already added
+      if (!actions.find(a => a.href === `/dashboard/modules/${module}`)) {
+        actions.push({
+          label,
+          type: "module",
+          href: `/dashboard/modules/${module}`,
+          icon,
+        });
+      }
+      cleanContent = cleanContent.replace(regex, "");
+    }
+  });
+
+  // Page navigation patterns
+  const pagePatterns = [
+    { regex: /(?:see|view|check).*(?:all|your)?\s*quick wins?.*→?/gi, href: "/dashboard/quick-wins", label: "View All Quick Wins", icon: "zap" as IconName },
+    { regex: /(?:create|make|start).*(?:action)?\s*plan.*→?/gi, href: "/dashboard/plans", label: "Create Action Plan", icon: "clipboard" as IconName },
+    { regex: /(?:view|see|check).*dashboard.*→?/gi, href: "/dashboard", label: "Go to Dashboard", icon: "dashboard" as IconName },
+    { regex: /(?:compare|benchmark).*cities.*→?/gi, href: "/dashboard", label: "Compare Cities", icon: "chart" as IconName },
+  ];
+
+  pagePatterns.forEach(({ regex, href, label, icon }) => {
+    if (regex.test(content)) {
+      if (!actions.find(a => a.href === href)) {
+        actions.push({ label, type: "page", href, icon });
+      }
       cleanContent = cleanContent.replace(regex, "");
     }
   });
 
   // Extract location names for Google Maps links
   const locationPatterns = [
-    /(?:in|near|along|at)\s+(?:the\s+)?([A-Z][a-zA-Z\s]+(?:district|neighborhood|area|street|park|waterfront|quarter))/gi,
-    /([A-Z][a-zA-Z]+(?:straat|plein|gracht|weg|laan|park))/g, // Dutch street names
+    /(?:in|near|along|at)\s+(?:the\s+)?([A-Z][a-zA-Z\s]+(?:district|neighborhood|area|street|park|waterfront|quarter|centrum|oost|west|noord|zuid))/gi,
+    /([A-Z][a-zA-Z]+(?:straat|plein|gracht|weg|laan|park|kade|haven))/g, // Dutch street names
   ];
 
   const locations = new Set<string>();
   locationPatterns.forEach((pattern) => {
     const matches = content.matchAll(pattern);
     for (const match of matches) {
-      if (match[1] && match[1].length > 3) {
+      if (match[1] && match[1].length > 3 && match[1].length < 30) {
         locations.add(match[1].trim());
       }
     }
@@ -54,11 +84,23 @@ function extractActions(content: string): { cleanContent: string; actions: Array
   // Add first 2 locations as map links
   Array.from(locations).slice(0, 2).forEach((location) => {
     actions.push({
-      label: `View ${location} on Map`,
+      label: `${location}`,
       type: "map",
       href: `https://www.google.com/maps/search/${encodeURIComponent(location)}`,
+      icon: "mapPin",
     });
   });
+
+  // Detect if this is a "quick win" type response - add save action
+  const isQuickWin = /quick win|recommendation|suggest|should|priority|action item/i.test(content);
+  if (isQuickWin && actions.length < 4) {
+    actions.push({
+      label: "Save as Quick Win",
+      type: "quickwin",
+      href: "#save-quickwin",
+      icon: "plus",
+    });
+  }
 
   return { cleanContent: cleanContent.trim(), actions };
 }
@@ -238,31 +280,59 @@ export function IntelligenceCard({
         {/* Action Buttons */}
         {actions.length > 0 && !isStreaming && (
           <div className="mt-4 pt-3 border-t border-[var(--border)]/50 flex flex-wrap gap-2">
-            {actions.map((action, i) => (
-              action.type === "map" ? (
-                <a
-                  key={i}
-                  href={action.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--background-secondary)] text-[var(--foreground)] hover:bg-[var(--accent-bg)] hover:text-[var(--accent-dark)] transition-colors"
-                >
-                  <Icon name="mapPin" className="w-3.5 h-3.5" />
-                  {action.label}
-                  <Icon name="arrowUpRight" className="w-3 h-3 opacity-50" />
-                </a>
-              ) : (
+            {actions.map((action, i) => {
+              // External map links
+              if (action.type === "map") {
+                return (
+                  <a
+                    key={i}
+                    href={action.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--background-secondary)] text-[var(--foreground)] hover:bg-[var(--accent-bg)] hover:text-[var(--accent-dark)] transition-colors"
+                  >
+                    <Icon name={action.icon} className="w-3.5 h-3.5" />
+                    {action.label}
+                    <Icon name="arrowUpRight" className="w-3 h-3 opacity-50" />
+                  </a>
+                );
+              }
+
+              // Quick win save action (internal action, not navigation)
+              if (action.type === "quickwin") {
+                return (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      // TODO: Implement save to quick wins functionality
+                      console.log("Save as quick win:", content);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/20 transition-colors border border-emerald-200"
+                  >
+                    <Icon name={action.icon} className="w-3.5 h-3.5" />
+                    {action.label}
+                  </button>
+                );
+              }
+
+              // Module and page navigation links
+              return (
                 <Link
                   key={i}
                   href={action.href}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--accent)] text-white hover:bg-[var(--accent-dark)] transition-colors"
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                    action.type === "module"
+                      ? "bg-[var(--accent)] text-white hover:bg-[var(--accent-dark)]"
+                      : "bg-[var(--background-secondary)] text-[var(--foreground)] hover:bg-[var(--accent-bg)] hover:text-[var(--accent-dark)]"
+                  )}
                 >
-                  <Icon name="target" className="w-3.5 h-3.5" />
+                  <Icon name={action.icon} className="w-3.5 h-3.5" />
                   {action.label}
-                  <Icon name="arrowRight" className="w-3 h-3" />
+                  <Icon name="arrowRight" className="w-3 h-3 opacity-50" />
                 </Link>
-              )
-            ))}
+              );
+            })}
           </div>
         )}
 

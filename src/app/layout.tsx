@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Space_Grotesk, Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
+import { ConvexClientProvider } from "@/components/providers/ConvexClientProvider";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -61,7 +62,7 @@ export default function RootLayout({
         <body
           className={`${spaceGrotesk.variable} ${inter.variable} antialiased bg-ink`}
         >
-          {children}
+          <ConvexClientProvider>{children}</ConvexClientProvider>
         </body>
       </html>
     </ClerkProvider>

@@ -8,6 +8,7 @@ import { AICopilotEnhanced } from "@/components/copilot/AICopilotEnhanced";
 import { CommandPalette } from "@/components/copilot/CommandPalette";
 import { Icon } from "@/components/ui/icons";
 import { cities, modules } from "@/data/modules";
+import { usePreferencesStore } from "@/stores/usePreferencesStore";
 
 export default function DashboardLayout({
   children,
@@ -19,8 +20,15 @@ export default function DashboardLayout({
   const [copilotOpen, setCopilotOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [selectedCity] = useState(cities[0]);
   const [pendingAIQuestion, setPendingAIQuestion] = useState<string | null>(null);
+
+  // Get city from preferences store
+  const { defaultCity } = usePreferencesStore();
+  const [isHydrated, setIsHydrated] = useState(false);
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+  const selectedCity = cities.find(c => c.id === (isHydrated ? defaultCity : "amsterdam")) || cities[0];
 
   // Extract current module from pathname
   const moduleMatch = pathname.match(/\/dashboard\/modules\/([^/]+)/);

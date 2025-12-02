@@ -1,0 +1,111 @@
+// Seed data for modules
+export const modulesSeedData = [
+  {
+    slug: "urban-heat",
+    name: "Urban Heat & Tree Equity Mapper",
+    description:
+      "Identifies heat islands and tree planting opportunities to improve urban cooling and equity",
+    category: "climate" as const,
+    icon: "Thermometer",
+    color: "#EF4444",
+    gradient: "from-red-500 to-orange-400",
+    metrics: [
+      { key: "avgTemp", label: "Avg Temperature", unit: "°C" },
+      { key: "treeCoverage", label: "Tree Coverage", unit: "%" },
+      { key: "heatIslands", label: "Heat Islands", unit: "count" },
+    ],
+    dataSourceInfo: "Copernicus Climate Data, OpenStreetMap",
+    status: "active" as const,
+    sortOrder: 1,
+  },
+  {
+    slug: "coastal-plastic",
+    name: "Coastal Plastic Hotspot Predictor",
+    description:
+      "Predicts where ocean plastic will accumulate using weather, currents, and ML models",
+    category: "pollution" as const,
+    icon: "Waves",
+    color: "#3B82F6",
+    gradient: "from-blue-500 to-cyan-400",
+    metrics: [
+      { key: "plasticLoad", label: "Plastic Load", unit: "kg/week" },
+      { key: "hotspots", label: "Active Hotspots", unit: "count" },
+      { key: "cleanupEvents", label: "Cleanup Events", unit: "count" },
+    ],
+    dataSourceInfo: "NOAA Ocean Currents, Weather APIs",
+    status: "active" as const,
+    sortOrder: 2,
+  },
+  {
+    slug: "ocean-plastic",
+    name: "Ocean Plastic Classifier",
+    description:
+      "AI-powered citizen science tool for classifying beach debris from photos",
+    category: "pollution" as const,
+    icon: "Camera",
+    color: "#8B5CF6",
+    gradient: "from-purple-500 to-pink-400",
+    metrics: [
+      { key: "submissions", label: "Photo Submissions", unit: "count" },
+      { key: "classified", label: "Items Classified", unit: "count" },
+      { key: "accuracy", label: "Model Accuracy", unit: "%" },
+    ],
+    dataSourceInfo: "Citizen Science Data, ML Classification",
+    status: "active" as const,
+    sortOrder: 3,
+  },
+  {
+    slug: "port-emissions",
+    name: "Port Emissions Pulse",
+    description:
+      "Real-time tracking and attribution of maritime emissions at vessel level",
+    category: "pollution" as const,
+    icon: "Ship",
+    color: "#6366F1",
+    gradient: "from-indigo-500 to-blue-400",
+    metrics: [
+      { key: "co2Emissions", label: "CO2 Emissions", unit: "tons/day" },
+      { key: "activeVessels", label: "Active Vessels", unit: "count" },
+      { key: "compliance", label: "Compliance Rate", unit: "%" },
+    ],
+    dataSourceInfo: "AIS Data, Emissions Databases",
+    status: "active" as const,
+    sortOrder: 4,
+  },
+  {
+    slug: "biodiversity",
+    name: "Biodiversity Urban Design Copilot",
+    description:
+      "AI assistant for designing wildlife-friendly urban spaces with species connectivity",
+    category: "ecosystem" as const,
+    icon: "Bird",
+    color: "#10B981",
+    gradient: "from-emerald-500 to-teal-400",
+    metrics: [
+      { key: "speciesCount", label: "Species Recorded", unit: "count" },
+      { key: "greenCorridors", label: "Green Corridors", unit: "km" },
+      { key: "biodiversityScore", label: "Biodiversity Score", unit: "index" },
+    ],
+    dataSourceInfo: "GBIF, Local Biodiversity Records",
+    status: "active" as const,
+    sortOrder: 5,
+  },
+  {
+    slug: "restoration",
+    name: "Local Restoration Finder",
+    description:
+      "Identifies high-impact land restoration opportunities using satellite imagery and ecological models",
+    category: "ecosystem" as const,
+    icon: "TreePine",
+    color: "#14B8A6",
+    gradient: "from-teal-500 to-green-400",
+    metrics: [
+      { key: "restorationArea", label: "Potential Area", unit: "hectares" },
+      { key: "carbonSequestration", label: "Carbon Potential", unit: "tons/year" },
+      { key: "projectsActive", label: "Active Projects", unit: "count" },
+    ],
+    dataSourceInfo: "Global Forest Watch, Sentinel-2 Imagery",
+    status: "active" as const,
+    sortOrder: 6,
+  },
+];

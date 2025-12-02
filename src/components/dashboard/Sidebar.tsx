@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { useUser, UserButton } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import { Icon, ModuleIcon, IconName } from "@/components/ui/icons";
 import { modules } from "@/data/modules";
@@ -207,20 +207,9 @@ export function Sidebar({ onCopilotOpen }: SidebarProps) {
             "flex items-center gap-3 px-3 py-2",
             collapsed && "justify-center"
           )}>
-            {user ? (
-              <UserButton
-                afterSignOutUrl="/"
-                appearance={{
-                  elements: {
-                    avatarBox: "w-8 h-8",
-                  },
-                }}
-              />
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--accent-light)] to-[var(--accent)] flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
-                {userInitials}
-              </div>
-            )}
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--accent-light)] to-[var(--accent)] flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
+              {userInitials}
+            </div>
             <AnimatePresence>
               {!collapsed && (
                 <motion.div
@@ -234,6 +223,18 @@ export function Sidebar({ onCopilotOpen }: SidebarProps) {
                 </motion.div>
               )}
             </AnimatePresence>
+            {user && (
+              <Link
+                href="/sign-out"
+                className={cn(
+                  "p-2 rounded-lg text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--background-secondary)] transition-colors",
+                  collapsed && "absolute bottom-16 left-1/2 -translate-x-1/2"
+                )}
+                title="Sign out"
+              >
+                <Icon name="logOut" className="w-4 h-4" />
+              </Link>
+            )}
           </div>
         </div>
       </div>

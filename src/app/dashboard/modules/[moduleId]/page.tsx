@@ -5,6 +5,9 @@ import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { ModuleLayout } from "@/components/modules/ModuleLayout";
 import { MapVisualization } from "@/components/modules/MapVisualization";
+import { HeatmapOverlay } from "@/components/modules/HeatmapOverlay";
+import { ShipTracker } from "@/components/modules/ShipTracker";
+import { PlasticFlowMap } from "@/components/modules/PlasticFlowMap";
 import { ActionCard } from "@/components/modules/ActionCard";
 import { Icon } from "@/components/ui/icons";
 import { modules } from "@/data/modules";
@@ -31,6 +34,20 @@ export default function ModuleDetailPage() {
       <div className="grid lg:grid-cols-5 gap-6">
         {/* Map visualization - takes 3 columns */}
         <div className="lg:col-span-3">
+          {/* Module-specific advanced visualizations */}
+          {moduleId === "urban-heat" && (
+            <HeatmapOverlay height={560} className="mb-6" />
+          )}
+
+          {moduleId === "port-emissions" && (
+            <ShipTracker height={560} className="mb-6" />
+          )}
+
+          {moduleId === "coastal-plastic" && (
+            <PlasticFlowMap height={560} className="mb-6" />
+          )}
+
+          {/* Standard hotspot map for all modules */}
           <div className="rounded-xl border border-[var(--border)] overflow-hidden bg-[var(--background-tertiary)]">
             <div className="p-4 border-b border-[var(--border)] flex items-center justify-between">
               <h2 className="font-semibold text-[var(--foreground)]">Hotspot Map</h2>

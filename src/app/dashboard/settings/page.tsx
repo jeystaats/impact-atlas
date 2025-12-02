@@ -1,10 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUser, useClerk } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import { Icon } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
+import {
+  usePreferencesStore,
+  cityDisplayNames,
+  availableCities,
+  type City,
+  type TemperatureUnit,
+  type MapStyle,
+  type NotificationSettings,
+} from "@/stores/usePreferencesStore";
 
 type SettingsTab = "profile" | "security" | "notifications" | "preferences";
 
@@ -16,6 +25,24 @@ export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
+  // Preferences from store
+  const {
+    defaultCity,
+    temperatureUnit,
+    mapStyle,
+    notifications,
+    setDefaultCity,
+    setTemperatureUnit,
+    setMapStyle,
+    setNotification,
+  } = usePreferencesStore();
+
+  // Hydration state to prevent SSR mismatch
+  const [isHydrated, setIsHydrated] = useState(false);
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
   // Form state
   const [firstName, setFirstName] = useState(user?.firstName || "");
   const [lastName, setLastName] = useState(user?.lastName || "");
@@ -25,6 +52,55 @@ export default function SettingsPage() {
     setFirstName(user.firstName);
     setLastName(user.lastName || "");
   }
+
+  // Notification definitions for rendering
+  const notificationOptions: {
+    key: keyof NotificationSettings;
+    title: string;
+    description: string;
+  }[] = [
+    {
+      key: "hotspotAlerts",
+      title: "Hotspot Alerts",
+      description: "Get notified when new hotspots are detected",
+    },
+    {
+      key: "weeklyReports",
+      title: "Weekly Reports",
+      description: "Receive weekly summary of your city's climate data",
+    },
+    {
+      key: "quickWinUpdates",
+      title: "Quick Win Updates",
+      description: "Notifications when new quick wins are available",
+    },
+    {
+      key: "aiInsights",
+      title: "AI Insights",
+      description: "Get notified about important AI-generated insights",
+    },
+  ];
+
+  const handleNotificationToggle = (key: keyof NotificationSettings) => {
+    setNotification(key, !notifications[key]);
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 2000);
+  };
+
+  const handlePreferenceChange = (
+    type: "city" | "unit" | "mapStyle",
+    value: string
+  ) => {
+    if (type === "city") {
+      setDefaultCity(value as City);
+    } else if (type === "unit") {
+      setTemperatureUnit(value as TemperatureUnit);
+    } else if (type === "mapStyle") {
+      setMapStyle(value as MapStyle);
+    }
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 2000);
+  };
 
   const handleSaveProfile = async () => {
     if (!user) return;
@@ -407,55 +483,38 @@ export default function SettingsPage() {
                 </h2>
 
                 <div className="space-y-4">
-                  {[
-                    {
-                      title: "Hotspot Alerts",
-                      description: "Get notified when new hotspots are detected",
-                      enabled: true,
-                    },
-                    {
-                      title: "Weekly Reports",
-                      description: "Receive weekly summary of your city's climate data",
-                      enabled: true,
-                    },
-                    {
-                      title: "Quick Win Updates",
-                      description: "Notifications when new quick wins are available",
-                      enabled: false,
-                    },
-                    {
-                      title: "AI Insights",
-                      description: "Get notified about important AI-generated insights",
-                      enabled: true,
-                    },
-                  ].map((notification) => (
-                    <div
-                      key={notification.title}
-                      className="flex items-center justify-between p-4 rounded-lg bg-[var(--background-secondary)] border border-[var(--border)]"
-                    >
-                      <div>
-                        <h3 className="font-medium text-[var(--foreground)]">
-                          {notification.title}
-                        </h3>
-                        <p className="text-sm text-[var(--foreground-muted)] mt-1">
-                          {notification.description}
-                        </p>
-                      </div>
-                      <button
-                        className={`relative w-12 h-6 rounded-full transition-colors ${
-                          notification.enabled
-                            ? "bg-[var(--accent)]"
-                            : "bg-[var(--background-tertiary)]"
-                        }`}
+                  {notificationOptions.map((option) => {
+                    const isEnabled = isHydrated ? notifications[option.key] : false;
+                    return (
+                      <div
+                        key={option.key}
+                        className="flex items-center justify-between p-4 rounded-lg bg-[var(--background-secondary)] border border-[var(--border)]"
                       >
-                        <span
-                          className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
-                            notification.enabled ? "left-7" : "left-1"
+                        <div>
+                          <h3 className="font-medium text-[var(--foreground)]">
+                            {option.title}
+                          </h3>
+                          <p className="text-sm text-[var(--foreground-muted)] mt-1">
+                            {option.description}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleNotificationToggle(option.key)}
+                          className={`relative w-12 h-6 rounded-full transition-colors ${
+                            isEnabled
+                              ? "bg-[var(--accent)]"
+                              : "bg-[var(--background-tertiary)]"
                           }`}
-                        />
-                      </button>
-                    </div>
-                  ))}
+                        >
+                          <motion.span
+                            animate={{ x: isEnabled ? 24 : 4 }}
+                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                            className="absolute top-1 w-4 h-4 rounded-full bg-white"
+                          />
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -473,12 +532,16 @@ export default function SettingsPage() {
                     <label className="block text-sm font-medium text-[var(--foreground-secondary)] mb-1.5">
                       Default City
                     </label>
-                    <select className="w-full px-4 py-2.5 rounded-lg bg-[var(--background-secondary)] border border-[var(--border)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent transition-all">
-                      <option value="amsterdam">Amsterdam</option>
-                      <option value="copenhagen">Copenhagen</option>
-                      <option value="singapore">Singapore</option>
-                      <option value="barcelona">Barcelona</option>
-                      <option value="melbourne">Melbourne</option>
+                    <select
+                      value={isHydrated ? defaultCity : "amsterdam"}
+                      onChange={(e) => handlePreferenceChange("city", e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-lg bg-[var(--background-secondary)] border border-[var(--border)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent transition-all"
+                    >
+                      {availableCities.map((city) => (
+                        <option key={city} value={city}>
+                          {cityDisplayNames[city]}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
@@ -488,18 +551,22 @@ export default function SettingsPage() {
                       Temperature Unit
                     </label>
                     <div className="flex gap-2">
-                      {["Celsius", "Fahrenheit"].map((unit) => (
-                        <button
-                          key={unit}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                            unit === "Celsius"
-                              ? "bg-[var(--accent-bg)] text-[var(--accent)]"
-                              : "bg-[var(--background-secondary)] text-[var(--foreground-secondary)] hover:text-[var(--foreground)]"
-                          }`}
-                        >
-                          {unit}
-                        </button>
-                      ))}
+                      {(["celsius", "fahrenheit"] as const).map((unit) => {
+                        const isSelected = isHydrated ? temperatureUnit === unit : unit === "celsius";
+                        return (
+                          <button
+                            key={unit}
+                            onClick={() => handlePreferenceChange("unit", unit)}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              isSelected
+                                ? "bg-[var(--accent-bg)] text-[var(--accent)]"
+                                : "bg-[var(--background-secondary)] text-[var(--foreground-secondary)] hover:text-[var(--foreground)]"
+                            }`}
+                          >
+                            {unit === "celsius" ? "Celsius" : "Fahrenheit"}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -509,18 +576,22 @@ export default function SettingsPage() {
                       Map Style
                     </label>
                     <div className="flex gap-2">
-                      {["Light", "Dark", "Satellite"].map((style) => (
-                        <button
-                          key={style}
-                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                            style === "Light"
-                              ? "bg-[var(--accent-bg)] text-[var(--accent)]"
-                              : "bg-[var(--background-secondary)] text-[var(--foreground-secondary)] hover:text-[var(--foreground)]"
-                          }`}
-                        >
-                          {style}
-                        </button>
-                      ))}
+                      {(["light", "dark", "satellite"] as const).map((style) => {
+                        const isSelected = isHydrated ? mapStyle === style : style === "light";
+                        return (
+                          <button
+                            key={style}
+                            onClick={() => handlePreferenceChange("mapStyle", style)}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              isSelected
+                                ? "bg-[var(--accent-bg)] text-[var(--accent)]"
+                                : "bg-[var(--background-secondary)] text-[var(--foreground-secondary)] hover:text-[var(--foreground)]"
+                            }`}
+                          >
+                            {style.charAt(0).toUpperCase() + style.slice(1)}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>

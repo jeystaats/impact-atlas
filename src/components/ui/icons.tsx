@@ -41,6 +41,12 @@ import {
   Play,
   Calendar,
   Loader2,
+  Anchor,
+  Bug,
+  RefreshCw,
+  Plus,
+  ClipboardList,
+  BarChart3,
   type LucideProps,
 } from "lucide-react";
 
@@ -87,6 +93,12 @@ export const Icons = {
   play: Play,
   calendar: Calendar,
   loader: Loader2,
+  anchor: Anchor,
+  bug: Bug,
+  refresh: RefreshCw,
+  plus: Plus,
+  clipboard: ClipboardList,
+  chart: BarChart3,
 };
 
 export type IconName = keyof typeof Icons;
