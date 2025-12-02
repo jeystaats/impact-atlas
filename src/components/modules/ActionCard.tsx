@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Icon, IconName } from "@/components/ui/icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { AIGeneratedBadge } from "@/components/ui/AIGeneratedBadge";
 import { cn } from "@/lib/utils";
 
 interface ActionCardProps {
@@ -16,6 +17,7 @@ interface ActionCardProps {
   confidence?: number;
   location?: string;
   isSelected?: boolean;
+  isAIGenerated?: boolean;
   onClick?: () => void;
   actions?: Array<{ label: string; onClick: () => void }>;
 }
@@ -44,6 +46,7 @@ export function ActionCard({
   confidence,
   location,
   isSelected,
+  isAIGenerated,
   onClick,
   actions,
 }: ActionCardProps) {
@@ -76,6 +79,7 @@ export function ActionCard({
                 {severity}
               </Badge>
             )}
+            {isAIGenerated && <AIGeneratedBadge size="sm" />}
           </div>
           {location && (
             <p className="text-xs text-[var(--foreground-muted)] flex items-center gap-1 mt-0.5">

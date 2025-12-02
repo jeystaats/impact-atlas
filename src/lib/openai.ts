@@ -89,3 +89,132 @@ export function createModuleContext(moduleId: string, moduleName: string) {
 ## Current Module Focus: ${moduleName}
 The user is currently viewing the ${moduleName} module. Prioritize insights and recommendations related to this topic while still being able to answer general climate questions.`;
 }
+
+// Hotspot data interface matching the data structure
+export interface HotspotContextData {
+  id: string;
+  label: string;
+  location: string;
+  severity: "low" | "medium" | "high" | "critical";
+  value?: string;
+  description: string;
+  recommendations: string[];
+  trend?: "up" | "down" | "stable";
+  trendValue?: string;
+  lastUpdated?: string;
+  dataPoints?: number;
+  lat: number;
+  lng: number;
+}
+
+/**
+ * Create rich context from a selected hotspot for the AI
+ * This provides the AI with detailed data about the selected location
+ */
+export function createHotspotContext(hotspot: HotspotContextData, moduleId?: string): string {
+  const severityDescriptions: Record<string, string> = {
+    low: "Minor concern - opportunity for preventive action",
+    medium: "Moderate concern - action recommended within 3-6 months",
+    high: "Significant concern - prioritize action within 1-3 months",
+    critical: "Critical concern - immediate action required",
+  };
+
+  const trendDescriptions: Record<string, string> = {
+    up: "Getting worse over time",
+    down: "Improving over time",
+    stable: "Remaining steady",
+  };
+
+  let context = `
+## Selected Hotspot Data
+The user has selected a specific location. Use this data to provide highly targeted recommendations.
+
+### Location: ${hotspot.label}
+- **Area**: ${hotspot.location}
+- **Coordinates**: ${hotspot.lat.toFixed(4)}, ${hotspot.lng.toFixed(4)}
+
+### Current Status
+- **Severity Level**: ${hotspot.severity.toUpperCase()} - ${severityDescriptions[hotspot.severity]}
+- **Current Value**: ${hotspot.value || "No measurement available"}`;
+
+  if (hotspot.trend) {
+    context += `
+- **Trend**: ${trendDescriptions[hotspot.trend]}${hotspot.trendValue ? ` (${hotspot.trendValue})` : ""}`;
+  }
+
+  if (hotspot.lastUpdated) {
+    context += `
+- **Last Updated**: ${hotspot.lastUpdated}`;
+  }
+
+  if (hotspot.dataPoints) {
+    context += `
+- **Data Quality**: Based on ${hotspot.dataPoints.toLocaleString()} data points`;
+  }
+
+  context += `
+
+### Issue Description
+${hotspot.description}
+
+### Pre-identified Recommendations
+These are system-generated recommendations for this location. You can reference, expand on, or prioritize these:
+${hotspot.recommendations.map((rec, i) => `${i + 1}. ${rec}`).join("\n")}
+
+### Your Task
+1. Acknowledge the specific location the user selected
+2. Provide 2-3 targeted quick wins for THIS specific location
+3. Quantify potential impact where possible (temperature reduction, CO2 saved, etc.)
+4. Consider the severity and trend when prioritizing recommendations
+5. Keep response focused and actionable - the user wants to act on this hotspot`;
+
+  return context;
+}
+
+/**
+ * Create a summary context when multiple hotspots are relevant
+ */
+export function createMultiHotspotContext(hotspots: HotspotContextData[]): string {
+  if (hotspots.length === 0) return "";
+  if (hotspots.length === 1) return createHotspotContext(hotspots[0]);
+
+  const criticalCount = hotspots.filter(h => h.severity === "critical").length;
+  const highCount = hotspots.filter(h => h.severity === "high").length;
+
+  return `
+## Hotspot Summary
+There are ${hotspots.length} identified hotspots in the current view:
+- Critical: ${criticalCount}
+- High: ${highCount}
+- Medium/Low: ${hotspots.length - criticalCount - highCount}
+
+### Top Priority Hotspots
+${hotspots
+  .filter(h => h.severity === "critical" || h.severity === "high")
+  .slice(0, 3)
+  .map(h => `- **${h.label}** (${h.location}): ${h.value || h.severity} severity - ${h.description.slice(0, 100)}...`)
+  .join("\n")}
+
+Focus recommendations on the highest-severity hotspots first.`;
+}
+
+/**
+ * Format module-specific metrics for context
+ */
+export function createModuleMetricsContext(moduleId: string, metrics: Record<string, number | string>): string {
+  const moduleLabels: Record<string, string> = {
+    "urban-heat": "Urban Heat Analysis",
+    "coastal-plastic": "Coastal Plastic Monitoring",
+    "ocean-plastic": "Ocean Plastic Tracking",
+    "port-emissions": "Port Emissions Analysis",
+    "biodiversity": "Biodiversity Assessment",
+    "restoration": "Restoration Opportunities",
+  };
+
+  return `
+## ${moduleLabels[moduleId] || "Module"} Metrics
+Current measurements and analysis:
+${Object.entries(metrics).map(([key, value]) => `- **${key}**: ${value}`).join("\n")}
+
+Use these metrics to inform your recommendations.`;
+}

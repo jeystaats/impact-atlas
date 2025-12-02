@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Icon, ModuleIcon, IconName } from "@/components/ui/icons";
+import { AIGeneratedBadge, isAIGenerated } from "@/components/ui/AIGeneratedBadge";
 import { modules as fallbackModules } from "@/data/modules";
 import { useSelectedCity } from "@/hooks/useSelectedCity";
 import { useQuickWins, useModules, useCompleteQuickWin, useUncompleteQuickWin, useQuickWinProgress } from "@/hooks/useConvex";
@@ -133,13 +134,13 @@ export default function QuickWinsPage() {
 
   // Normalize modules
   const modules: NormalizedModule[] = convexModules
-    ? convexModules.map((m) => ({
+    ? convexModules.map((m: { slug: string; name: string; color: string }) => ({
         id: m.slug,
         title: m.name,
         color: m.color,
         quickWinsCount: 0, // Will be calculated from quickWins
       }))
-    : fallbackModules.map((m) => ({
+    : fallbackModules.map((m: { id: string; title: string; color: string; quickWinsCount: number }) => ({
         id: m.id,
         title: m.title,
         color: m.color,
@@ -148,8 +149,8 @@ export default function QuickWinsPage() {
 
   // Normalize quick wins
   const quickWinsData: NormalizedQuickWin[] = convexQuickWins
-    ? convexQuickWins.map((qw) => {
-        const module = convexModules?.find((m) => m._id === qw.moduleId);
+    ? convexQuickWins.map((qw: { _id: Id<"quickWins">; moduleId: Id<"modules">; title: string; description: string; impact: ImpactLevel; effort: EffortLevel; estimatedDays?: number; tags: string[] }) => {
+        const module = convexModules?.find((m: { _id: Id<"modules">; slug: string }) => m._id === qw.moduleId);
         return {
           id: qw._id,
           convexId: qw._id,
@@ -175,7 +176,7 @@ export default function QuickWinsPage() {
   // Get completed wins (from Convex or progress store for fallback data)
   const completedWinIds = useMemo(() => {
     const convexCompleted = new Set(
-      userProgress?.completedWins?.map((cw) => cw.quickWinId) ?? []
+      userProgress?.completedWins?.map((cw: { quickWinId: Id<"quickWins"> }) => cw.quickWinId) ?? []
     );
     // Use progress store for fallback data persistence
     const localCompleted = new Set(isStoreHydrated ? completedQuickWins : []);
@@ -201,9 +202,9 @@ export default function QuickWinsPage() {
   const stats = useMemo(() => {
     const total = quickWinsData.length;
     const highImpact = quickWinsData.filter((w) => w.impact === "high").length;
-    const quickStarts = quickWinsData.filter((w) => w.effort === "low").length;
+    const aiGenerated = quickWinsData.filter((w) => isAIGenerated(w.tags)).length;
     const completed = completedWinIds.size;
-    return { total, highImpact, quickStarts, completed };
+    return { total, highImpact, aiGenerated, completed };
   }, [quickWinsData, completedWinIds]);
 
   // Toggle complete handler
@@ -313,8 +314,8 @@ export default function QuickWinsPage() {
         {[
           { label: "Total Quick Wins", value: stats.total.toString(), icon: "zap" as const, color: "var(--accent)" },
           { label: "High Impact", value: stats.highImpact.toString(), icon: "trendingUp" as const, color: "#10B981" },
-          { label: "Quick Starts", value: stats.quickStarts.toString(), icon: "sparkles" as const, color: "#F59E0B" },
-          { label: "Completed", value: stats.completed.toString(), icon: "success" as const, color: "#8B5CF6" },
+          { label: "AI Generated", value: stats.aiGenerated.toString(), icon: "sparkles" as const, color: "#8B5CF6" },
+          { label: "Completed", value: stats.completed.toString(), icon: "success" as const, color: "#10B981" },
         ].map((stat, index) => (
           <motion.div
             key={stat.label}
@@ -561,6 +562,8 @@ export default function QuickWinsPage() {
                         >
                           {impactConfig[win.impact].label}
                         </div>
+                        {/* AI Generated badge */}
+                        {isAIGenerated(win.tags) && <AIGeneratedBadge size="sm" />}
                       </div>
                     </div>
                     <p

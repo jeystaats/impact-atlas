@@ -717,13 +717,13 @@ export default function ActionPlansPage() {
   // Normalize Convex plans to component format
   const plans: NormalizedActionPlan[] = useMemo(() => {
     if (convexPlans && convexPlans.length > 0) {
-      return convexPlans.map((plan) => {
+      return convexPlans.map((plan: { _id: Id<"actionPlans">; title: string; description?: string; status: string; progress: number; targetDate?: number; moduleIds?: string[]; quickWinIds?: string[]; createdAt: number; priority: "low" | "medium" | "high" }) => {
         // Map moduleIds to linked modules with colors
-        const linkedModules: LinkedModule[] = (plan.moduleIds || []).map((moduleId) => {
+        const linkedModules: LinkedModule[] = (plan.moduleIds || []).map((moduleId: string) => {
           const moduleInfo = moduleColorMap[moduleId];
           return {
             id: moduleId,
-            title: moduleInfo?.title || moduleId.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
+            title: moduleInfo?.title || moduleId.replace(/-/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase()),
             color: moduleInfo?.color || "#6B7280",
           };
         });

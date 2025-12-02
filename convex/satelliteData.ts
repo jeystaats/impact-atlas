@@ -603,13 +603,13 @@ export const fetchSentinel5PNO2AllCities = internalAction({
   args: {
     daysBack: v.optional(v.number()),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<Array<{ success: boolean; city: string; error?: string }>> => {
     // Get all active cities
     const cities = await ctx.runQuery(internal.cities.listActive, {});
 
-    const results = [];
+    const results: Array<{ success: boolean; city: string; error?: string }> = [];
 
-    for (const city of cities) {
+    for (const city of cities as Array<{ slug: string }>) {
       // Check if we have a bounding box for this city
       if (!CITY_BOUNDING_BOXES[city.slug]) {
         console.log(`Skipping ${city.slug}: no bounding box defined`);
@@ -623,7 +623,7 @@ export const fetchSentinel5PNO2AllCities = internalAction({
             citySlug: city.slug,
             daysBack: args.daysBack,
           }
-        );
+        ) as { success: boolean; city: string; error?: string };
         results.push(result);
       } catch (error) {
         console.error(`Error fetching data for ${city.slug}:`, error);

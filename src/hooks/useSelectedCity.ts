@@ -26,7 +26,7 @@ export function useSelectedCity() {
   const selectedCitySlug = isHydrated ? defaultCity : "amsterdam";
 
   // Find the city object
-  const selectedCity = cities?.find((c) => c.slug === selectedCitySlug) ?? null;
+  const selectedCity = cities?.find((c: { slug: string }) => c.slug === selectedCitySlug) ?? null;
 
   // Set city function - updates preferences store
   const setCity = useCallback((slug: string) => {

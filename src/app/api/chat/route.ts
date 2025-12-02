@@ -1,6 +1,13 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText, convertToModelMessages } from "ai";
-import { CLIMATE_DIRECTOR_SYSTEM_PROMPT, createCityContext, createModuleContext } from "@/lib/openai";
+import {
+  CLIMATE_DIRECTOR_SYSTEM_PROMPT,
+  createCityContext,
+  createModuleContext,
+  createHotspotContext,
+  createModuleMetricsContext,
+  HotspotContextData
+} from "@/lib/openai";
 
 export const runtime = "edge";
 
@@ -11,7 +18,14 @@ export async function POST(req: Request) {
       apiKey: process.env.OPENAI_API_KEY,
     });
 
-    const { messages, city, moduleId, moduleName } = await req.json();
+    const {
+      messages,
+      city,
+      moduleId,
+      moduleName,
+      selectedHotspot,
+      moduleMetrics
+    } = await req.json();
 
     // Build the system prompt with context
     let systemPrompt = CLIMATE_DIRECTOR_SYSTEM_PROMPT;
@@ -22,6 +36,16 @@ export async function POST(req: Request) {
 
     if (moduleId && moduleName) {
       systemPrompt += createModuleContext(moduleId, moduleName);
+    }
+
+    // Add hotspot context if a hotspot is selected
+    if (selectedHotspot) {
+      systemPrompt += createHotspotContext(selectedHotspot as HotspotContextData, moduleId);
+    }
+
+    // Add module-specific metrics if available
+    if (moduleMetrics && moduleId) {
+      systemPrompt += createModuleMetricsContext(moduleId, moduleMetrics);
     }
 
     // Convert UIMessages to ModelMessages for streamText

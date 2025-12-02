@@ -54,14 +54,14 @@ export function Sidebar({ onCopilotOpen }: SidebarProps) {
   // Normalize modules to sidebar format
   const modules: SidebarModule[] = useMemo(() => {
     if (modulesData && modulesData.length > 0) {
-      return modulesData.map((m) => ({
+      return modulesData.map((m: { slug: string; name: string; color: string; cityStats?: { totalQuickWins?: number } }) => ({
         id: m.slug,
         title: m.name,
         color: m.color,
         quickWinsCount: m.cityStats?.totalQuickWins ?? 0,
       }));
     }
-    return fallbackModules.map((m) => ({
+    return fallbackModules.map((m: { id: string; title: string; color: string; quickWinsCount: number }) => ({
       id: m.id,
       title: m.title,
       color: m.color,

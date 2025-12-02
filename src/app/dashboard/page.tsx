@@ -58,7 +58,7 @@ export default function DashboardPage() {
 
   // Get modules (from Convex or fallback)
   const modules = useConvexData && modulesData
-    ? modulesData.map((m) => ({
+    ? modulesData.map((m: { slug: string; name: string; description: string; icon: string; color: string; status: "active" | "beta" | "coming-soon"; cityStats?: { totalHotspots?: number; criticalHotspots?: number; totalQuickWins?: number } }) => ({
         id: m.slug,
         title: m.name,
         description: m.description,
@@ -227,7 +227,7 @@ export default function DashboardPage() {
             </Link>
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
-            {modules.map((module, index) => (
+            {modules.map((module: typeof modules[number], index: number) => (
               <ModuleCard key={module.id} module={module} index={index} />
             ))}
           </div>

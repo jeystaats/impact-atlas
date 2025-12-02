@@ -11,10 +11,17 @@ import { Button } from "@/components/ui/button";
 import { NeuralThinking } from "./NeuralThinking";
 import { IntelligenceCard } from "./IntelligenceCard";
 import { SmartSuggestions } from "./SmartSuggestions";
+import { QuickActionCard, QuickAction, QuickActionList } from "./QuickActionCard";
 import { cn } from "@/lib/utils";
 import { City } from "@/types";
 import { useSelectedCity } from "@/hooks/useSelectedCity";
 import { Id } from "../../../convex/_generated/dataModel";
+import { HotspotData } from "@/data/hotspots";
+import {
+  extractActionsFromAIResponse,
+  hotspotToQuickAction,
+  hasActionableContent
+} from "@/lib/actionExtractor";
 
 interface AICopilotEnhancedProps {
   isOpen: boolean;
@@ -23,6 +30,8 @@ interface AICopilotEnhancedProps {
   moduleId?: string;
   moduleName?: string;
   selectedHotspot?: string;
+  selectedHotspotData?: HotspotData;
+  onViewOnMap?: (lat: number, lng: number) => void;
 }
 
 function parseMessageType(content: string): "insight" | "recommendation" | "warning" | "general" {

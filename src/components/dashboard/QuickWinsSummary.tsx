@@ -17,20 +17,20 @@ export function QuickWinsSummary({ cityId }: QuickWinsSummaryProps) {
 
   // Normalize modules to a common format
   const modules = modulesData
-    ? modulesData.map((m) => ({
+    ? modulesData.map((m: { slug: string; name: string; color: string; cityStats?: { totalQuickWins?: number } }) => ({
         id: m.slug,
         title: m.name,
         color: m.color,
         quickWinsCount: m.cityStats?.totalQuickWins ?? 0,
       }))
-    : fallbackModules.map((m) => ({
+    : fallbackModules.map((m: { id: string; title: string; color: string; quickWinsCount: number }) => ({
         id: m.id,
         title: m.title,
         color: m.color,
         quickWinsCount: m.quickWinsCount,
       }));
 
-  const totalWins = modules.reduce((sum, m) => sum + m.quickWinsCount, 0);
+  const totalWins = modules.reduce((sum: number, m: { quickWinsCount: number }) => sum + m.quickWinsCount, 0);
   const topModules = [...modules].sort((a, b) => b.quickWinsCount - a.quickWinsCount).slice(0, 3);
 
   return (
