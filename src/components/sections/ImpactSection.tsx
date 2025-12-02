@@ -117,6 +117,56 @@ function FloatingParticle({
   );
 }
 
+// Connection lines SVG component
+function ConnectionLines({ showOrdered }: { showOrdered: boolean }) {
+  // Create connections between module icons (forming a hexagonal network)
+  const connections = [
+    { from: 0, to: 1 }, { from: 1, to: 2 }, { from: 2, to: 3 },
+    { from: 3, to: 4 }, { from: 4, to: 5 }, { from: 5, to: 0 },
+    // Cross connections
+    { from: 0, to: 3 }, { from: 1, to: 4 }, { from: 2, to: 5 },
+  ];
+
+  return (
+    <svg className="absolute inset-0 w-full h-full pointer-events-none">
+      {connections.map((conn, i) => {
+        const fromAngle = (conn.from / moduleIcons.length) * Math.PI * 2;
+        const toAngle = (conn.to / moduleIcons.length) * Math.PI * 2;
+        const radius = 35;
+        const fromX = 50 + Math.cos(fromAngle) * radius;
+        const fromY = 50 + Math.sin(fromAngle) * radius;
+        const toX = 50 + Math.cos(toAngle) * radius;
+        const toY = 50 + Math.sin(toAngle) * radius;
+
+        return (
+          <motion.line
+            key={i}
+            x1={`${fromX}%`}
+            y1={`${fromY}%`}
+            x2={`${toX}%`}
+            y2={`${toY}%`}
+            stroke="var(--ld-teal)"
+            strokeWidth={1}
+            initial={{ opacity: 0, pathLength: 0 }}
+            animate={showOrdered ? {
+              opacity: 0.4,
+              pathLength: 1,
+            } : {
+              opacity: 0,
+              pathLength: 0,
+            }}
+            transition={{
+              duration: 0.8,
+              delay: showOrdered ? 0.3 + i * 0.08 : 0,
+              ease: "easeOut",
+            }}
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
 // The main visualization showing transformation
 function TransformationVisualization({ isInView, showOrdered }: { isInView: boolean; showOrdered: boolean }) {
   const particles = Array.from({ length: 24 }, (_, i) => ({
@@ -131,7 +181,7 @@ function TransformationVisualization({ isInView, showOrdered }: { isInView: bool
   }));
 
   return (
-    <div className="relative w-full h-64 md:h-80 overflow-hidden rounded-2xl" style={{ background: "var(--ld-navy-mid)" }}>
+    <div className="relative w-full h-48 md:h-64 overflow-hidden rounded-2xl" style={{ background: "var(--ld-navy-mid)" }}>
       {/* Gradient overlay */}
       <div
         className="absolute inset-0 opacity-50"
@@ -145,6 +195,9 @@ function TransformationVisualization({ isInView, showOrdered }: { isInView: bool
         <FloatingParticle key={i} {...p} isOrdered={showOrdered} />
       ))}
 
+      {/* Connection lines between icons when ordered */}
+      {isInView && <ConnectionLines showOrdered={showOrdered} />}
+
       {/* Center icon showing state */}
       <AnimatePresence mode="wait">
         <motion.div
@@ -156,9 +209,9 @@ function TransformationVisualization({ isInView, showOrdered }: { isInView: bool
           transition={{ duration: 0.5 }}
         >
           {showOrdered ? (
-            <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-col items-center gap-2">
               <motion.div
-                className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                className="w-14 h-14 rounded-2xl flex items-center justify-center"
                 style={{
                   background: "var(--ld-teal-subtle)",
                   border: "1px solid var(--ld-teal)",
@@ -168,16 +221,16 @@ function TransformationVisualization({ isInView, showOrdered }: { isInView: bool
                 }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                <svg className="w-8 h-8" style={{ color: "var(--ld-teal)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-7 h-7" style={{ color: "var(--ld-teal)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </motion.div>
-              <span className="text-sm font-medium" style={{ color: "var(--ld-teal)" }}>Priorities Ranked</span>
+              <span className="text-xs font-medium" style={{ color: "var(--ld-teal)" }}>Priorities Ranked</span>
             </div>
           ) : (
-            <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-col items-center gap-2">
               <motion.div
-                className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                className="w-14 h-14 rounded-2xl flex items-center justify-center"
                 style={{
                   background: "var(--ld-white-5)",
                   border: "1px solid var(--ld-white-10)",
@@ -185,11 +238,11 @@ function TransformationVisualization({ isInView, showOrdered }: { isInView: bool
                 animate={{ rotate: [0, 5, -5, 0] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                <svg className="w-8 h-8" style={{ color: "var(--ld-white-50)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-7 h-7" style={{ color: "var(--ld-white-50)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
                 </svg>
               </motion.div>
-              <span className="text-sm font-medium" style={{ color: "var(--ld-white-50)" }}>Analyzing Data...</span>
+              <span className="text-xs font-medium" style={{ color: "var(--ld-white-50)" }}>Analyzing Data...</span>
             </div>
           )}
         </motion.div>
@@ -286,7 +339,7 @@ function ValuePillars({ isInView }: { isInView: boolean }) {
       title: "Clarity",
       description: "See your city's environmental challenges unified in one view",
       icon: (
-        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
@@ -296,7 +349,7 @@ function ValuePillars({ isInView }: { isInView: boolean }) {
       title: "Prioritization",
       description: "Know which actions deliver the highest impact for your budget",
       icon: (
-        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h9.75m4.5-4.5v12m0 0l-3.75-3.75M17.25 21l3.75-3.75" />
         </svg>
       ),
@@ -305,7 +358,7 @@ function ValuePillars({ isInView }: { isInView: boolean }) {
       title: "Action",
       description: "Get implementation-ready playbooks with timelines and costs",
       icon: (
-        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
         </svg>
       ),
@@ -313,7 +366,7 @@ function ValuePillars({ isInView }: { isInView: boolean }) {
   ];
 
   return (
-    <div className="grid md:grid-cols-3 gap-6 mt-16">
+    <div className="grid md:grid-cols-3 gap-4 mt-10">
       {pillars.map((pillar, i) => (
         <motion.div
           key={pillar.title}
@@ -322,7 +375,7 @@ function ValuePillars({ isInView }: { isInView: boolean }) {
           transition={{ duration: 0.6, delay: 0.8 + i * 0.15 }}
           className="group"
         >
-          <div className="ld-card p-6 md:p-8 h-full text-center relative overflow-hidden transition-all duration-300 hover:border-[var(--ld-teal)]">
+          <div className="ld-card p-5 md:p-6 h-full text-center relative overflow-hidden transition-all duration-300 hover:border-[var(--ld-teal)]">
             {/* Hover glow effect */}
             <div
               className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
@@ -332,7 +385,7 @@ function ValuePillars({ isInView }: { isInView: boolean }) {
             />
 
             <motion.div
-              className="relative w-14 h-14 mx-auto mb-5 rounded-2xl flex items-center justify-center"
+              className="relative w-12 h-12 mx-auto mb-4 rounded-xl flex items-center justify-center"
               style={{
                 background: "var(--ld-teal-subtle)",
                 color: "var(--ld-teal)",
@@ -343,7 +396,7 @@ function ValuePillars({ isInView }: { isInView: boolean }) {
               {pillar.icon}
             </motion.div>
 
-            <h3 className="ld-heading mb-3 relative">{pillar.title}</h3>
+            <h3 className="ld-heading mb-2 relative">{pillar.title}</h3>
             <p className="ld-body-sm relative">{pillar.description}</p>
           </div>
         </motion.div>
@@ -366,9 +419,9 @@ function TrustSignals({ isInView }: { isInView: boolean }) {
       initial={{ opacity: 0, y: 20 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, delay: 1.2 }}
-      className="mt-16 text-center"
+      className="mt-10 text-center"
     >
-      <p className="ld-body-sm mb-6">Built on trusted data foundations</p>
+      <p className="ld-body-sm mb-4">Built on trusted data foundations</p>
       <div className="flex flex-wrap justify-center gap-4 md:gap-6">
         {signals.map((signal, i) => (
           <motion.div
@@ -455,12 +508,12 @@ export default function ImpactSection() {
 
       <div className="ld-section-content relative z-10">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <motion.p
             initial={{ opacity: 0 }}
             animate={isInView ? { opacity: 1 } : {}}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="ld-caption mb-4"
+            className="ld-caption mb-3"
           >
             The Transformation
           </motion.p>
@@ -469,7 +522,7 @@ export default function ImpactSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="ld-display-lg mb-4"
+            className="ld-display-lg mb-3"
           >
             From data chaos to{" "}
             <span className="ld-gradient-text">clear action.</span>
@@ -479,7 +532,7 @@ export default function ImpactSection() {
             initial={{ opacity: 0 }}
             animate={isInView ? { opacity: 1 } : {}}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="ld-body-lg max-w-2xl mx-auto"
+            className="ld-body max-w-2xl mx-auto"
           >
             Watch how Impact Atlas transforms scattered environmental data
             into prioritized, actionable climate strategies.
@@ -491,7 +544,7 @@ export default function ImpactSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.6 }}
-          className="mb-8"
+          className="mb-6"
         >
           <TransformationVisualization
             isInView={isInView}
@@ -504,7 +557,7 @@ export default function ImpactSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.7 }}
-          className="mb-8"
+          className="mb-4"
         >
           <TransformationProgress
             currentStage={currentStage}

@@ -287,6 +287,69 @@ export const updateCityStats = internalMutation({
 });
 
 /**
+ * Seed data sources
+ */
+export const seedDataSources = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const now = Date.now();
+
+    // Get air-quality module
+    const airQualityModule = await ctx.db
+      .query("modules")
+      .withIndex("by_slug", (q) => q.eq("slug", "air-quality"))
+      .unique();
+
+    const dataSources = [
+      {
+        slug: "sentinel-5p",
+        name: "Copernicus Sentinel-5P TROPOMI",
+        description:
+          "European Space Agency satellite providing atmospheric composition data including NO2, SO2, O3, CO, and aerosols",
+        provider: "European Space Agency / Copernicus",
+        url: "https://dataspace.copernicus.eu/",
+        updateFrequency: "daily",
+        moduleIds: airQualityModule ? [airQualityModule._id] : [],
+      },
+      {
+        slug: "sentinel-3",
+        name: "Copernicus Sentinel-3 SLSTR",
+        description:
+          "Sea and Land Surface Temperature Radiometer providing land surface temperature data for urban heat island detection",
+        provider: "European Space Agency / Copernicus",
+        url: "https://dataspace.copernicus.eu/",
+        updateFrequency: "daily",
+        moduleIds: [],
+      },
+    ];
+
+    let seededCount = 0;
+    for (const source of dataSources) {
+      const existing = await ctx.db
+        .query("dataSources")
+        .withIndex("by_slug", (q) => q.eq("slug", source.slug))
+        .unique();
+
+      if (existing) {
+        console.log(`Data source ${source.name} already exists, skipping...`);
+        continue;
+      }
+
+      await ctx.db.insert("dataSources", {
+        ...source,
+        isActive: true,
+        createdAt: now,
+      });
+
+      seededCount++;
+      console.log(`Seeded data source: ${source.name}`);
+    }
+
+    return { seeded: seededCount };
+  },
+});
+
+/**
  * Run full seed process
  */
 export const runFullSeed = action({
@@ -306,14 +369,18 @@ export const runFullSeed = action({
     console.log("Seeding quick wins...");
     await ctx.runMutation(internal.seed.seedQuickWins, {});
 
-    // Step 4: Seed hotspots for each city
+    // Step 4: Seed data sources
+    console.log("Seeding data sources...");
+    await ctx.runMutation(internal.seed.seedDataSources, {});
+
+    // Step 5: Seed hotspots for each city
     console.log("Seeding hotspots...");
     const cities = ["amsterdam", "copenhagen", "singapore", "barcelona", "melbourne"];
     for (const citySlug of cities) {
       await ctx.runMutation(internal.seed.seedHotspots, { citySlug });
     }
 
-    // Step 5: Update city stats
+    // Step 6: Update city stats
     console.log("Updating city stats...");
     await ctx.runMutation(internal.seed.updateCityStats, {});
 
@@ -343,6 +410,8 @@ export const clearAllData = internalMutation({
       "actionPlans",
       "quickWins",
       "hotspots",
+      "satelliteData",
+      "dataIngestionLog",
       "modules",
       "cities",
       "dataSources",

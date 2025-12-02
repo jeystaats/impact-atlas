@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { query, mutation, internalMutation } from "./_generated/server";
+import { query, mutation, internalMutation, internalQuery } from "./_generated/server";
 
 /**
  * List all cities
@@ -86,6 +86,32 @@ export const updateStats = internalMutation({
       stats: args.stats,
       updatedAt: Date.now(),
     });
+  },
+});
+
+/**
+ * Internal: Get city by slug (for actions)
+ */
+export const getBySlugInternal = internalQuery({
+  args: { slug: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("cities")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
+      .unique();
+  },
+});
+
+/**
+ * Internal: List all active cities (for scheduled jobs)
+ */
+export const listActive = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("cities")
+      .withIndex("by_active", (q) => q.eq("isActive", true))
+      .collect();
   },
 });
 

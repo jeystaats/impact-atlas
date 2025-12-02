@@ -9,13 +9,17 @@
  */
 
 import type * as actionPlans from "../actionPlans.js";
+import type * as aiDirector from "../aiDirector.js";
 import type * as aiInsights from "../aiInsights.js";
 import type * as cities from "../cities.js";
+import type * as cityOnboarding from "../cityOnboarding.js";
+import type * as crons from "../crons.js";
 import type * as hotspots from "../hotspots.js";
 import type * as http from "../http.js";
 import type * as model_auth from "../model/auth.js";
 import type * as modules from "../modules.js";
 import type * as quickWins from "../quickWins.js";
+import type * as satelliteData from "../satelliteData.js";
 import type * as seed from "../seed.js";
 import type * as seed_cities from "../seed/cities.js";
 import type * as seed_modules from "../seed/modules.js";
@@ -31,13 +35,17 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   actionPlans: typeof actionPlans;
+  aiDirector: typeof aiDirector;
   aiInsights: typeof aiInsights;
   cities: typeof cities;
+  cityOnboarding: typeof cityOnboarding;
+  crons: typeof crons;
   hotspots: typeof hotspots;
   http: typeof http;
   "model/auth": typeof model_auth;
   modules: typeof modules;
   quickWins: typeof quickWins;
+  satelliteData: typeof satelliteData;
   seed: typeof seed;
   "seed/cities": typeof seed_cities;
   "seed/modules": typeof seed_modules;

@@ -500,6 +500,155 @@ export default defineSchema({
     .index("by_user_created", ["userId", "createdAt"]),
 
   // ============================================
+  // CITY ONBOARDING (tracks AI data generation progress)
+  // ============================================
+  cityOnboarding: defineTable({
+    // Reference
+    cityId: v.id("cities"),
+
+    // Overall status
+    status: v.union(
+      v.literal("pending"),
+      v.literal("generating"),
+      v.literal("completed"),
+      v.literal("failed")
+    ),
+
+    // Current stage for display
+    currentStage: v.string(), // "locating", "urban-heat", "coastal-plastic", etc.
+    currentStageLabel: v.string(), // "Scanning urban heat patterns..."
+
+    // Overall progress (0-100)
+    progress: v.number(),
+
+    // Per-module status
+    moduleProgress: v.array(
+      v.object({
+        moduleSlug: v.string(),
+        status: v.union(
+          v.literal("pending"),
+          v.literal("generating"),
+          v.literal("completed"),
+          v.literal("failed")
+        ),
+        hotspotsCreated: v.number(),
+        quickWinsCreated: v.number(),
+        error: v.optional(v.string()),
+      })
+    ),
+
+    // Error tracking
+    error: v.optional(v.string()),
+
+    // Who initiated
+    initiatedBy: v.optional(v.string()), // user ID or "system"
+
+    // Timestamps
+    startedAt: v.number(),
+    completedAt: v.optional(v.number()),
+  })
+    .index("by_city", ["cityId"])
+    .index("by_status", ["status"]),
+
+  // ============================================
+  // SATELLITE DATA (Real-time environmental measurements)
+  // ============================================
+  satelliteData: defineTable({
+    // Geographic reference
+    cityId: v.id("cities"),
+    moduleId: v.id("modules"),
+    hotspotId: v.optional(v.id("hotspots")),
+
+    // Location
+    coordinates: v.object({
+      lat: v.number(),
+      lng: v.number(),
+    }),
+    boundingBox: v.optional(
+      v.object({
+        north: v.number(),
+        south: v.number(),
+        east: v.number(),
+        west: v.number(),
+      })
+    ),
+
+    // Data source
+    dataSourceSlug: v.string(), // "sentinel-5p", "sentinel-3", etc.
+    satelliteId: v.string(), // e.g., "S5P_NRTI_L2__NO2"
+    productType: v.string(), // e.g., "NO2", "SO2", "LST"
+
+    // Measurements
+    measurements: v.array(
+      v.object({
+        key: v.string(), // e.g., "NO2_column_density"
+        value: v.number(),
+        unit: v.string(), // e.g., "mol/m²", "µg/m³"
+        qualityFlag: v.optional(v.number()), // 0-100 quality percentage
+      })
+    ),
+
+    // Processing info
+    processingLevel: v.optional(v.string()), // "L2", "L3", etc.
+    cloudCoverage: v.optional(v.number()), // 0-100 percentage
+
+    // Time
+    measurementDate: v.number(), // When satellite captured data
+    ingestionDate: v.number(), // When we fetched it
+
+    // Raw reference (for debugging/auditing)
+    sourceUrl: v.optional(v.string()),
+    rawMetadata: v.optional(v.any()),
+  })
+    .index("by_city", ["cityId"])
+    .index("by_city_module", ["cityId", "moduleId"])
+    .index("by_hotspot", ["hotspotId"])
+    .index("by_measurement_date", ["measurementDate"])
+    .index("by_city_date", ["cityId", "measurementDate"])
+    .index("by_source", ["dataSourceSlug", "measurementDate"]),
+
+  // ============================================
+  // DATA INGESTION LOG (Track satellite data fetches)
+  // ============================================
+  dataIngestionLog: defineTable({
+    // What was fetched
+    dataSourceSlug: v.string(),
+    cityId: v.id("cities"),
+    moduleId: v.optional(v.id("modules")),
+
+    // Status
+    status: v.union(
+      v.literal("pending"),
+      v.literal("fetching"),
+      v.literal("processing"),
+      v.literal("completed"),
+      v.literal("failed")
+    ),
+
+    // Results
+    recordsFetched: v.number(),
+    recordsStored: v.number(),
+    hotspotsCreated: v.number(),
+    hotspotsUpdated: v.number(),
+
+    // Time range of data
+    dataStartDate: v.optional(v.number()),
+    dataEndDate: v.optional(v.number()),
+
+    // Error tracking
+    error: v.optional(v.string()),
+    retryCount: v.number(),
+
+    // Timestamps
+    startedAt: v.number(),
+    completedAt: v.optional(v.number()),
+  })
+    .index("by_source", ["dataSourceSlug"])
+    .index("by_city", ["cityId"])
+    .index("by_status", ["status"])
+    .index("by_started", ["startedAt"]),
+
+  // ============================================
   // DATA SOURCES
   // ============================================
   dataSources: defineTable({

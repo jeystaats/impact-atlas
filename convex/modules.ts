@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalQuery } from "./_generated/server";
 
 /**
  * List all modules
@@ -104,6 +104,19 @@ export const getForCity = query({
     );
 
     return modulesWithStats.sort((a, b) => a.sortOrder - b.sortOrder);
+  },
+});
+
+/**
+ * Internal: Get module by slug (for actions)
+ */
+export const getBySlugInternal = internalQuery({
+  args: { slug: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("modules")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
+      .unique();
   },
 });
 

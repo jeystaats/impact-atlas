@@ -1,14 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { CitySelector } from "@/components/dashboard/CitySelector";
+import { CitySearchInput } from "@/components/dashboard/CitySearchInput";
+import { CityOnboardingModal } from "@/components/dashboard/CityOnboardingModal";
 import { ModuleCard } from "@/components/dashboard/ModuleCard";
 import { QuickWinsSummary } from "@/components/dashboard/QuickWinsSummary";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { CityOverviewMap } from "@/components/dashboard/CityOverviewMap";
 import { useSelectedCity } from "@/hooks/useSelectedCity";
 import { useModulesForCity, useDashboardStats } from "@/hooks/useConvex";
+import { useCityOnboarding } from "@/hooks/useCityOnboarding";
 import { DashboardSkeleton } from "@/components/dashboard/DashboardSkeleton";
 
 // Fallback data for when Convex is loading or unavailable
@@ -16,6 +19,7 @@ import { modules as fallbackModules, cities as fallbackCities } from "@/data/mod
 import { dashboardStats as fallbackStats, cityStats as fallbackCityStats } from "@/data/dashboard";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const {
     selectedCitySlug,
     selectedCity,
@@ -25,6 +29,18 @@ export default function DashboardPage() {
     isHydrated,
     setCity
   } = useSelectedCity();
+
+  // City onboarding hook for new cities
+  const {
+    isOnboarding,
+    cityId: onboardingCityId,
+    cityName: onboardingCityName,
+    country: onboardingCountry,
+    progress: onboardingProgress,
+    startOnboarding,
+    closeOnboarding,
+    isComplete: onboardingComplete,
+  } = useCityOnboarding();
 
   // Fetch modules with city-specific stats from Convex
   const modulesData = useModulesForCity(selectedCityId);
@@ -106,8 +122,47 @@ export default function DashboardPage() {
       ]
     : (fallbackCityStats[selectedCitySlug] || fallbackStats);
 
-  const handleCityChange = (citySlug: string) => {
-    setCity(citySlug);
+  // Handle selecting an existing city
+  const handleCitySelect = (city: { slug: string }) => {
+    setCity(city.slug);
+  };
+
+  // Handle selecting a new city (starts onboarding)
+  const handleNewCitySelect = async (city: {
+    slug: string;
+    name: string;
+    country: string;
+    coordinates?: { lat: number; lng: number };
+    population: number;
+  }) => {
+    if (!city.coordinates) {
+      console.error("City coordinates required for onboarding");
+      return;
+    }
+
+    try {
+      const newCityId = await startOnboarding({
+        slug: city.slug,
+        name: city.name,
+        country: city.country,
+        coordinates: city.coordinates,
+        population: city.population,
+      });
+
+      // After onboarding completes, switch to the new city
+      if (newCityId) {
+        setCity(city.slug);
+      }
+    } catch (error) {
+      console.error("Failed to start city onboarding:", error);
+    }
+  };
+
+  // Handle entering dashboard after onboarding
+  const handleEnterDashboard = () => {
+    closeOnboarding();
+    // Refresh the page to load new city data
+    router.refresh();
   };
 
   // Show skeleton while hydrating
@@ -117,6 +172,16 @@ export default function DashboardPage() {
 
   return (
     <div className="p-6 lg:p-8">
+      {/* City Onboarding Modal */}
+      <CityOnboardingModal
+        isOpen={isOnboarding}
+        cityName={onboardingCityName}
+        country={onboardingCountry}
+        progress={onboardingProgress}
+        onClose={closeOnboarding}
+        onEnterDashboard={handleEnterDashboard}
+      />
+
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
         <div>
@@ -136,10 +201,11 @@ export default function DashboardPage() {
             Here's what's happening in {currentCity.name}
           </motion.p>
         </div>
-        <CitySelector
+        <CitySearchInput
           selectedCity={selectedCitySlug}
-          onCityChange={handleCityChange}
-          cities={cities.length > 0 ? cities : undefined}
+          onCitySelect={handleCitySelect}
+          onNewCitySelect={handleNewCitySelect}
+          existingCities={cities}
         />
       </div>
 

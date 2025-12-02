@@ -73,6 +73,26 @@ export const modulesSeedData = [
     sortOrder: 4,
   },
   {
+    slug: "air-quality",
+    name: "Air Quality Monitor",
+    description:
+      "Real-time air pollution tracking using Sentinel-5P satellite data for NO2, SO2, and other pollutants",
+    category: "pollution" as const,
+    icon: "Wind",
+    color: "#F59E0B",
+    gradient: "from-amber-500 to-yellow-400",
+    metrics: [
+      { key: "no2Level", label: "NO2 Level", unit: "µmol/m²" },
+      { key: "so2Level", label: "SO2 Level", unit: "µmol/m²" },
+      { key: "aqiIndex", label: "AQI Index", unit: "index" },
+      { key: "pollutionHotspots", label: "Pollution Hotspots", unit: "count" },
+    ],
+    dataSourceInfo: "Copernicus Sentinel-5P TROPOMI",
+    dataSourceUrl: "https://dataspace.copernicus.eu/",
+    status: "active" as const,
+    sortOrder: 7,
+  },
+  {
     slug: "biodiversity",
     name: "Biodiversity Urban Design Copilot",
     description:
