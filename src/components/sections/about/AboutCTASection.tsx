@@ -61,28 +61,6 @@ export default function AboutCTASection() {
             </Link>
           </motion.div>
 
-          {/* Quick links */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={isInView ? { opacity: 1 } : {}}
-            transition={{ duration: 0.6, delay: 0.8 }}
-            className="mt-12 flex flex-wrap justify-center gap-6"
-          >
-            {[
-              { label: "See Impact Metrics", href: "/impact" },
-            ].map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                className="text-sm transition-colors duration-200"
-                style={{ color: "var(--ld-white-50)" }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "var(--ld-teal)")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "var(--ld-white-50)")}
-              >
-                {link.label} →
-              </Link>
-            ))}
-          </motion.div>
         </div>
       </div>
     </section>

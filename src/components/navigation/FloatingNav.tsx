@@ -7,7 +7,6 @@ import Link from "next/link";
 const navLinks = [
   { name: "About", href: "/about" },
   { name: "Team", href: "/team" },
-  { name: "Impact", href: "/impact" },
 ];
 
 export default function FloatingNav() {

@@ -288,7 +288,7 @@ export function Sidebar({ onCopilotOpen }: SidebarProps) {
                 </motion.div>
               )}
             </AnimatePresence>
-            {user && !collapsed && (
+            {isHydrated && user && !collapsed && (
               <Link
                 href="/sign-out"
                 className="p-2 rounded-lg text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--background-secondary)] transition-colors"
