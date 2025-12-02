@@ -15,6 +15,7 @@ import { PlasticFlowMap } from "@/components/modules/PlasticFlowMap";
 import { HotspotDetailDrawer } from "@/components/modules/HotspotDetailDrawer";
 import { ActionCard } from "@/components/modules/ActionCard";
 import { Icon } from "@/components/ui/icons";
+import { ModulePageSkeleton } from "@/components/modules/ModulePageSkeleton";
 import { modules } from "@/data/modules";
 import { moduleHotspots, moduleInsights, HotspotData } from "@/data/hotspots";
 import { notFound } from "next/navigation";
@@ -84,7 +85,7 @@ export default function ModuleDetailPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Get selected city - this makes the page reactive to city changes
-  const { selectedCityId, selectedCity } = useSelectedCity();
+  const { selectedCityId, selectedCity, isHydrated } = useSelectedCity();
 
   // Fetch hotspots from Convex for the selected city and module
   const convexHotspots = useQuery(
@@ -98,16 +99,15 @@ export default function ModuleDetailPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdated] = useState(new Date());
 
+  // Find module (used in useMemo hooks below)
   const module = modules.find((m) => m.id === moduleId);
-  if (!module) {
-    notFound();
-  }
 
   // Use Convex data if available, fallback to static data
   const fallbackHotspots = moduleHotspots[moduleId] || [];
   const insights = moduleInsights[moduleId] || [];
 
   // Convert Convex hotspots to HotspotData format for compatibility
+  // All hooks must be called before any conditional returns
   const allHotspots: HotspotData[] = useMemo(() => {
     if (convexHotspots && convexHotspots.length > 0) {
       return convexHotspots.map((h) => ({
@@ -230,6 +230,19 @@ export default function ModuleDetailPage() {
       toast.success("Data refreshed", { description: "Latest data loaded successfully" });
     }, 1500);
   }, []);
+
+  // Early returns after all hooks have been called
+  if (!module) {
+    notFound();
+  }
+
+  // Show skeleton while loading
+  // 1. Not hydrated yet (localStorage loading)
+  // 2. We have a selected city ID but Convex data is still loading
+  const isConvexLoading = selectedCityId && convexHotspots === undefined;
+  if (!isHydrated || isConvexLoading) {
+    return <ModulePageSkeleton />;
+  }
 
   return (
     <ModuleLayout module={module}>
