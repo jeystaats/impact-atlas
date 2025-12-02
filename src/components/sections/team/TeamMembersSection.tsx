@@ -13,7 +13,7 @@ const teamMembers = [
     expertise: ["Sustainability", "Corporate ESG", "Strategy"],
     imagePath: "/team/ola.jpeg",
     color: "--ld-teal",
-    linkedin: "",
+    linkedin: "https://www.linkedin.com/in/aleksandra-adamska/",
     website: "",
   },
   {
@@ -24,7 +24,7 @@ const teamMembers = [
     expertise: ["Product Management", "Data Products", "Strategy"],
     imagePath: "/team/jesper.jpeg",
     color: "--ld-bio",
-    linkedin: "",
+    linkedin: "https://www.linkedin.com/in/jesperlindvall/",
     website: "",
   },
   {
@@ -35,7 +35,7 @@ const teamMembers = [
     expertise: ["React/Next.js", "Design Systems", "Data Viz", "AI"],
     imagePath: "/team/jasper.png",
     color: "--ld-ocean",
-    linkedin: "",
+    linkedin: "https://www.linkedin.com/in/jasperstaats/",
     website: "https://www.staats.dev/",
   },
 ];

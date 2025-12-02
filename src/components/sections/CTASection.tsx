@@ -75,14 +75,6 @@ export default function CTASection() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
           </a>
-          <a
-            href="https://www.linkedin.com/in/jasperstaats/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ld-btn-secondary"
-          >
-            Contact Us
-          </a>
         </motion.div>
 
         {/* Hackathon badge */}
