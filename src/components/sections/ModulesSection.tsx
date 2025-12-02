@@ -313,7 +313,7 @@ export default function ModulesSection() {
           animate={isInView ? { opacity: 1, scale: 1 } : {}}
           transition={{ duration: 0.8, delay: 0.6 }}
           className="relative mx-auto"
-          style={{ width: radarRadius * 2 + 200, height: radarRadius * 2 + 200 }}
+          style={{ width: radarRadius * 2 + 200, height: radarRadius * 2 + 280 }}
         >
           {/* Radar circles */}
           {[0.33, 0.66, 1].map((scale, i) => (
@@ -387,7 +387,7 @@ export default function ModulesSection() {
 
           {/* Status text */}
           <div
-            className="absolute bottom-0 left-1/2 -translate-x-1/2 text-center"
+            className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-center"
             style={{ color: "var(--ld-white-50)" }}
           >
             <motion.p
@@ -403,7 +403,7 @@ export default function ModulesSection() {
           </div>
         </motion.div>
 
-        {/* Module legend - refined, minimal */}
+        {/* Module legend - with colors */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -426,15 +426,15 @@ export default function ModulesSection() {
               className="flex items-center gap-2 px-3 py-1.5 rounded-full transition-all"
               style={{
                 background: scannedModules.has(module.id)
-                  ? "var(--ld-white-5)"
+                  ? `color-mix(in srgb, var(${module.color}) 10%, transparent)`
                   : "transparent",
-                border: "1px solid var(--ld-white-10)",
+                border: `1px solid ${scannedModules.has(module.id) ? `color-mix(in srgb, var(${module.color}) 30%, transparent)` : "var(--ld-white-10)"}`,
               }}
             >
               <span
                 className="w-1.5 h-1.5 rounded-full transition-colors"
                 style={{
-                  background: scannedModules.has(module.id) ? "var(--ld-teal)" : "var(--ld-silver-muted)",
+                  background: scannedModules.has(module.id) ? `var(${module.color})` : "var(--ld-silver-muted)",
                 }}
               />
               <span

@@ -4,10 +4,10 @@ import { useRef, useEffect, useState } from "react";
 import { motion, useInView } from "framer-motion";
 
 const metrics = [
-  { value: 47, suffix: "", label: "Heat hotspots identified" },
-  { value: 23, suffix: "", label: "Quick wins prioritized" },
-  { value: 2.3, suffix: "M", label: "Projected savings", prefix: "$" },
-  { value: 850, suffix: "", label: "Hectares restoration potential" },
+  { value: 47, suffix: "", label: "Heat hotspots identified", color: "--ld-heat" },
+  { value: 23, suffix: "", label: "Quick wins prioritized", color: "--ld-teal" },
+  { value: 2.3, suffix: "M", label: "Projected savings", prefix: "$", color: "--ld-bio" },
+  { value: 850, suffix: "", label: "Hectares restoration potential", color: "--ld-restore" },
 ];
 
 function AnimatedNumber({
@@ -116,11 +116,16 @@ export default function ImpactSection() {
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.5 + i * 0.1 }}
-              className="ld-card p-5 text-center"
+              className="ld-card p-5 text-center relative overflow-hidden"
             >
+              {/* Subtle color accent at top */}
+              <div
+                className="absolute top-0 left-0 right-0 h-px"
+                style={{ background: `var(${metric.color})` }}
+              />
               <p
                 className="ld-data mb-2"
-                style={{ color: "var(--ld-white)" }}
+                style={{ color: `var(${metric.color})` }}
               >
                 <AnimatedNumber
                   value={metric.value}

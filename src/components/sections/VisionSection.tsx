@@ -4,11 +4,11 @@ import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 
 const cities = [
-  { name: "Singapore", x: 75, y: 55, delay: 0.4 },
-  { name: "Rotterdam", x: 48, y: 28, delay: 0.6 },
-  { name: "Copenhagen", x: 50, y: 24, delay: 0.8 },
-  { name: "Lagos", x: 47, y: 52, delay: 1.0 },
-  { name: "Mumbai", x: 68, y: 45, delay: 1.2 },
+  { name: "Singapore", x: 75, y: 55, color: "--ld-heat", delay: 0.4 },
+  { name: "Rotterdam", x: 48, y: 28, color: "--ld-ocean", delay: 0.6 },
+  { name: "Copenhagen", x: 50, y: 24, color: "--ld-bio", delay: 0.8 },
+  { name: "Lagos", x: 47, y: 52, color: "--ld-air", delay: 1.0 },
+  { name: "Mumbai", x: 68, y: 45, color: "--ld-restore", delay: 1.2 },
 ];
 
 export default function VisionSection() {
@@ -115,7 +115,7 @@ export default function VisionSection() {
               />
             </svg>
 
-            {/* Hotspots - unified teal */}
+            {/* Hotspots - with module colors */}
             {cities.map((city) => (
               <motion.div
                 key={city.name}
@@ -127,14 +127,14 @@ export default function VisionSection() {
                   left: `${city.x}%`,
                   top: `${city.y}%`,
                   transform: "translate(-50%, -50%)",
-                  color: "var(--ld-teal)",
+                  color: `var(${city.color})`,
                 }}
               >
                 <div
-                  className="w-2 h-2 rounded-full"
+                  className="w-2.5 h-2.5 rounded-full"
                   style={{
-                    backgroundColor: "var(--ld-teal)",
-                    boxShadow: "0 0 10px var(--ld-teal-glow)",
+                    backgroundColor: `var(${city.color})`,
+                    boxShadow: `0 0 12px color-mix(in srgb, var(${city.color}) 50%, transparent)`,
                   }}
                 />
               </motion.div>

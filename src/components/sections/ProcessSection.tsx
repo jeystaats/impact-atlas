@@ -2,37 +2,26 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import Image from "next/image";
 
 const steps = [
   {
     number: "01",
     title: "Connect Your Data",
     description: "Integrate existing city datasets — sensors, satellites, surveys — in hours, not months.",
-    icon: (
-      <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>
-    ),
+    icon: "/icons/connect.png",
   },
   {
     number: "02",
     title: "AI Analyzes",
     description: "Our models identify highest-ROI interventions across all six environmental domains.",
-    icon: (
-      <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-      </svg>
-    ),
+    icon: "/icons/analyze.png",
   },
   {
     number: "03",
     title: "Act on Quick Wins",
     description: "Receive prioritized action playbooks with cost estimates, timelines, and projected impact.",
-    icon: (
-      <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-      </svg>
-    ),
+    icon: "/icons/action.png",
   },
 ];
 
@@ -56,6 +45,12 @@ export default function ProcessSection() {
       className="ld-section relative"
       style={{ background: "var(--ld-navy-dark)" }}
     >
+      {/* Subtle gradient accent */}
+      <div
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full blur-[150px] opacity-[0.03]"
+        style={{ background: "var(--ld-teal)" }}
+      />
+
       <div className="ld-section-content relative z-10">
         {/* Header */}
         <div className="text-center mb-16">
@@ -79,44 +74,58 @@ export default function ProcessSection() {
           </motion.h2>
         </div>
 
-        {/* Steps */}
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
+        {/* Steps - Visual cards with 3D icons */}
+        <div className="grid md:grid-cols-3 gap-6 mb-16">
           {steps.map((step, i) => (
             <motion.div
               key={step.number}
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.4 + i * 0.15 }}
-              className="relative"
+              className="relative group"
             >
               {/* Connector line (not on last item) */}
               {i < steps.length - 1 && (
                 <div
-                  className="hidden md:block absolute top-10 left-full w-full h-[2px]"
+                  className="hidden md:block absolute top-16 left-full w-full h-px z-0"
                   style={{
-                    background: "linear-gradient(to right, var(--ld-white-30), transparent)",
+                    background: "linear-gradient(to right, var(--ld-white-10), transparent)",
                   }}
                 />
               )}
 
-              <div className="ld-card p-8 h-full">
-                {/* Step number */}
+              <div className="ld-card p-8 h-full text-center relative overflow-hidden">
+                {/* Background number - large and subtle */}
                 <div
-                  className="inline-flex items-center justify-center w-10 h-10 rounded-full mb-6 text-sm font-semibold"
-                  style={{
-                    background: "var(--ld-teal)",
-                    color: "var(--ld-navy-deep)",
-                  }}
+                  className="absolute top-4 right-4 text-6xl font-bold opacity-[0.03] select-none"
+                  style={{ fontFamily: "var(--font-display)" }}
                 >
                   {step.number}
                 </div>
 
-                {/* Icon */}
-                <div
-                  className="mb-4"
-                  style={{ color: "var(--ld-teal)" }}
+                {/* 3D Icon */}
+                <motion.div
+                  className="relative w-20 h-20 mx-auto mb-6"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  transition={{ type: "spring", stiffness: 300 }}
                 >
-                  {step.icon}
+                  <Image
+                    src={step.icon}
+                    alt={step.title}
+                    fill
+                    className="object-contain drop-shadow-lg"
+                  />
+                </motion.div>
+
+                {/* Step indicator */}
+                <div
+                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full mb-4 text-xs font-medium"
+                  style={{
+                    background: "var(--ld-teal-subtle)",
+                    color: "var(--ld-teal)",
+                  }}
+                >
+                  Step {step.number}
                 </div>
 
                 {/* Title */}
@@ -142,10 +151,10 @@ export default function ProcessSection() {
               <motion.span
                 key={partner}
                 initial={{ opacity: 0 }}
-                animate={isInView ? { opacity: 0.5 } : {}}
+                animate={isInView ? { opacity: 0.4 } : {}}
                 transition={{ duration: 0.4, delay: 0.9 + i * 0.05 }}
-                whileHover={{ opacity: 1 }}
-                className="text-sm font-medium cursor-default"
+                whileHover={{ opacity: 0.8 }}
+                className="text-sm font-medium cursor-default transition-opacity"
                 style={{ color: "var(--ld-white-50)" }}
               >
                 {partner}
