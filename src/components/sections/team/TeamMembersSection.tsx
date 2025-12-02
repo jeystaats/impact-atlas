@@ -12,9 +12,10 @@ const teamMembers = [
     role: "Sustainability Lead",
     bio: "Global Sustainability expert at Unilever. Bringing corporate sustainability experience to urban climate action.",
     expertise: ["Sustainability", "Corporate ESG", "Strategy"],
-    imagePath: "/team/ola.jpeg",
+    imagePath: "/team/ola.png",
     color: "--ld-teal",
     linkedin: "https://www.linkedin.com/in/aleksandra-adamska/",
+    facePosition: "center 20%", // Adjust to center face
   },
   {
     id: "jesper",
@@ -25,6 +26,7 @@ const teamMembers = [
     imagePath: "/team/jesper.png",
     color: "--ld-bio",
     linkedin: "https://www.linkedin.com/in/jesperlindvall/",
+    facePosition: "center 20%", // Adjust to center face
   },
   {
     id: "jasper",
@@ -36,6 +38,7 @@ const teamMembers = [
     color: "--ld-ocean",
     linkedin: "https://www.linkedin.com/in/jasperstaats/",
     website: "https://www.staats.dev/",
+    facePosition: "center 20%", // Adjust to center face
   },
 ];
 
@@ -215,6 +218,7 @@ function FeaturedMember({ member }: { member: typeof teamMembers[0] }) {
             alt={member.name}
             fill
             className="object-cover"
+            style={{ objectPosition: member.facePosition }}
             priority
           />
           {/* Color overlay on image */}
@@ -432,6 +436,7 @@ function MemberBadge({
             alt={member.name}
             fill
             className="object-cover"
+            style={{ objectPosition: member.facePosition }}
           />
         </div>
         {/* Active indicator dot */}
