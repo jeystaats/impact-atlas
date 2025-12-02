@@ -26,12 +26,12 @@ const steps = [
 ];
 
 const partners = [
-  "Google Earth Engine",
-  "NVIDIA",
-  "Copernicus",
-  "NOAA",
-  "Global Forest Watch",
-  "GBIF",
+  { name: "Google Earth Engine", logo: "/logos/google-earth-engine.svg", width: 140 },
+  { name: "NVIDIA", logo: "/logos/nvidia.svg", width: 100 },
+  { name: "Copernicus", logo: "/logos/copernicus.svg", width: 130 },
+  { name: "NOAA", logo: "/logos/noaa.svg", width: 90 },
+  { name: "Global Forest Watch", logo: "/logos/global-forest-watch.svg", width: 130 },
+  { name: "GBIF", logo: "/logos/gbif.svg", width: 80 },
 ];
 
 export default function ProcessSection() {
@@ -145,20 +145,25 @@ export default function ProcessSection() {
           transition={{ duration: 0.6, delay: 0.8 }}
           className="text-center"
         >
-          <p className="ld-body-sm mb-6">Powered by trusted data sources</p>
-          <div className="flex flex-wrap justify-center gap-8">
+          <p className="ld-body-sm mb-8">Powered by trusted data sources</p>
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
             {partners.map((partner, i) => (
-              <motion.span
-                key={partner}
+              <motion.div
+                key={partner.name}
                 initial={{ opacity: 0 }}
-                animate={isInView ? { opacity: 0.4 } : {}}
+                animate={isInView ? { opacity: 1 } : {}}
                 transition={{ duration: 0.4, delay: 0.9 + i * 0.05 }}
-                whileHover={{ opacity: 0.8 }}
-                className="text-sm font-medium cursor-default transition-opacity"
-                style={{ color: "var(--ld-white-50)" }}
+                whileHover={{ scale: 1.08 }}
+                className="cursor-default transition-all duration-300 [filter:brightness(0)_invert(1)_opacity(0.5)] hover:[filter:none]"
               >
-                {partner}
-              </motion.span>
+                <Image
+                  src={partner.logo}
+                  alt={partner.name}
+                  width={partner.width}
+                  height={40}
+                  className="h-8 md:h-10 w-auto object-contain"
+                />
+              </motion.div>
             ))}
           </div>
         </motion.div>

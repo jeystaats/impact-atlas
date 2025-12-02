@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useId } from "react";
 import { motion } from "framer-motion";
 
 interface SparklineProps {
@@ -20,8 +20,12 @@ export function Sparkline({
   className = "",
   animated = true,
 }: SparklineProps) {
-  const { path, fillPath, gradientId } = useMemo(() => {
-    if (data.length < 2) return { path: "", fillPath: "", gradientId: "" };
+  // Use React's useId for SSR-safe unique IDs
+  const id = useId();
+  const gradientId = `sparkline-gradient-${id}`;
+
+  const { path, fillPath } = useMemo(() => {
+    if (data.length < 2) return { path: "", fillPath: "" };
 
     const min = Math.min(...data);
     const max = Math.max(...data);
@@ -52,9 +56,7 @@ export function Sparkline({
     // Create fill path (closed shape for gradient)
     const fillPathD = `${pathD} L ${points[points.length - 1].x} ${height} L ${points[0].x} ${height} Z`;
 
-    const id = `sparkline-gradient-${Math.random().toString(36).substr(2, 9)}`;
-
-    return { path: pathD, fillPath: fillPathD, gradientId: id };
+    return { path: pathD, fillPath: fillPathD };
   }, [data, width, height]);
 
   const trendColors = {

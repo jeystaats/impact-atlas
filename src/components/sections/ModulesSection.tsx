@@ -102,7 +102,7 @@ function RadarBlip({
 
   return (
     <motion.div
-      className="absolute cursor-pointer"
+      className="absolute cursor-pointer z-10"
       style={{
         left: "50%",
         top: "50%",
@@ -114,19 +114,19 @@ function RadarBlip({
     >
       {/* Pulse rings when scanned - subtle */}
       <AnimatePresence>
-        {isScanned && (
+        {isScanned && !isHovered && (
           <motion.div
             initial={{ scale: 0.8, opacity: 0.3 }}
-            animate={{ scale: 2, opacity: 0 }}
+            animate={{ scale: 2.5, opacity: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 1.2, ease: "easeOut" }}
-            className="absolute inset-0 rounded-full border"
+            className="absolute rounded-full border"
             style={{
-              borderColor: "var(--ld-teal)",
-              width: 40,
-              height: 40,
-              marginLeft: -20,
-              marginTop: -20,
+              borderColor: `var(${module.color})`,
+              width: 16,
+              height: 16,
+              left: -8,
+              top: -8,
             }}
           />
         )}
@@ -135,77 +135,83 @@ function RadarBlip({
       {/* Blip dot */}
       <motion.div
         animate={{
-          scale: isHovered ? 1.2 : isScanned ? 1 : 0.7,
+          scale: isHovered ? 1.5 : isScanned ? 1 : 0.7,
           opacity: isScanned ? 1 : 0.4,
         }}
         transition={{ duration: 0.3 }}
-        className="relative z-10 w-3 h-3 rounded-full"
+        className="relative w-3 h-3 rounded-full"
         style={{
           background: isScanned ? `var(${module.color})` : "var(--ld-silver-muted)",
-          boxShadow: isScanned ? `0 0 12px color-mix(in srgb, var(${module.color}) 40%, transparent)` : "none",
+          boxShadow: isHovered
+            ? `0 0 20px var(${module.color}), 0 0 40px color-mix(in srgb, var(${module.color}) 50%, transparent)`
+            : isScanned
+              ? `0 0 12px color-mix(in srgb, var(${module.color}) 40%, transparent)`
+              : "none",
         }}
       />
+    </motion.div>
+  );
+}
 
-      {/* Module card - appears on scan/hover */}
-      <AnimatePresence>
-        {(isScanned || isHovered) && (
-          <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 5, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className="absolute left-1/2 -translate-x-1/2 mt-4 w-44 p-3 rounded-lg z-20"
+// Separate component for the detail card that appears on hover
+function ModuleDetailCard({
+  module,
+  isVisible
+}: {
+  module: typeof modules[0] | null;
+  isVisible: boolean;
+}) {
+  return (
+    <AnimatePresence mode="wait">
+      {isVisible && module && (
+        <motion.div
+          key={module.id}
+          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 10, scale: 0.95 }}
+          transition={{ duration: 0.25 }}
+          className="absolute left-1/2 -translate-x-1/2 bottom-16 w-64 p-4 rounded-xl z-30"
+          style={{
+            background: "var(--ld-navy-dark)",
+            border: `1px solid color-mix(in srgb, var(${module.color}) 30%, transparent)`,
+            boxShadow: `0 20px 60px rgba(0,0,0,0.6), 0 0 40px color-mix(in srgb, var(${module.color}) 10%, transparent)`,
+          }}
+        >
+          {/* Icon */}
+          <div
+            className="w-10 h-10 rounded-lg flex items-center justify-center mb-3"
             style={{
-              background: "var(--ld-navy-dark)",
-              border: "1px solid var(--ld-white-10)",
-              boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
+              background: `color-mix(in srgb, var(${module.color}) 15%, transparent)`,
+              color: `var(${module.color})`,
             }}
           >
-            {/* Icon */}
-            <div
-              className="w-8 h-8 rounded-md flex items-center justify-center mb-2"
-              style={{
-                background: `color-mix(in srgb, var(${module.color}) 15%, transparent)`,
-                color: `var(${module.color})`,
-              }}
-            >
-              {module.icon}
-            </div>
+            {module.icon}
+          </div>
 
-            {/* Title */}
-            <motion.h3
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.1 }}
-              className="text-sm font-medium mb-1"
-              style={{ color: "var(--ld-white)" }}
-            >
-              {module.title}
-            </motion.h3>
+          {/* Title */}
+          <h3
+            className="text-base font-semibold mb-2"
+            style={{ color: "var(--ld-white)" }}
+          >
+            {module.title}
+          </h3>
 
-            {/* Description */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.15 }}
-              className="text-xs leading-relaxed"
-              style={{ color: "var(--ld-white-50)" }}
-            >
-              {module.description}
-            </motion.p>
+          {/* Description */}
+          <p
+            className="text-sm leading-relaxed"
+            style={{ color: "var(--ld-white-60)" }}
+          >
+            {module.description}
+          </p>
 
-            {/* Subtle line */}
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: "100%" }}
-              transition={{ duration: 0.4, delay: 0.1 }}
-              className="mt-2 h-px"
-              style={{ background: "var(--ld-white-10)" }}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+          {/* Accent line at top */}
+          <div
+            className="absolute top-0 left-4 right-4 h-px"
+            style={{ background: `var(${module.color})` }}
+          />
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
@@ -313,7 +319,7 @@ export default function ModulesSection() {
           animate={isInView ? { opacity: 1, scale: 1 } : {}}
           transition={{ duration: 0.8, delay: 0.6 }}
           className="relative mx-auto"
-          style={{ width: radarRadius * 2 + 200, height: radarRadius * 2 + 280 }}
+          style={{ width: radarRadius * 2 + 100, height: radarRadius * 2 + 100 }}
         >
           {/* Radar circles */}
           {[0.33, 0.66, 1].map((scale, i) => (
@@ -342,7 +348,7 @@ export default function ModulesSection() {
           <motion.div
             className="absolute left-1/2 top-1/2 origin-center"
             style={{
-              width: radarRadius + 80,
+              width: radarRadius + 50,
               height: 1,
               marginLeft: 0,
               marginTop: 0,
@@ -356,8 +362,8 @@ export default function ModulesSection() {
           <div
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
             style={{
-              width: radarRadius * 2 + 50,
-              height: radarRadius * 2 + 50,
+              width: radarRadius * 2 + 20,
+              height: radarRadius * 2 + 20,
               background: `conic-gradient(from ${scanAngle - 20}deg, transparent, rgba(45, 212, 191, 0.06), transparent 20deg)`,
             }}
           />
@@ -385,22 +391,31 @@ export default function ModulesSection() {
             />
           ))}
 
-          {/* Status text */}
-          <div
-            className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-center"
-            style={{ color: "var(--ld-white-50)" }}
+          {/* Module detail card - fixed position below radar */}
+          <ModuleDetailCard
+            module={hoveredModule ? modules.find(m => m.id === hoveredModule) || null : null}
+            isVisible={!!hoveredModule}
+          />
+        </motion.div>
+
+        {/* Status text - outside radar container */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.6, delay: 0.8 }}
+          className="text-center mt-6"
+          style={{ color: "var(--ld-white-50)" }}
+        >
+          <motion.p
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="text-xs font-mono uppercase tracking-wider"
           >
-            <motion.p
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="text-xs font-mono uppercase tracking-wider"
-            >
-              {scannedModules.size < 6 ? "Scanning..." : "All modules detected"}
-            </motion.p>
-            <p className="text-xs font-mono mt-1" style={{ color: "var(--ld-teal)" }}>
-              {scannedModules.size}/6 modules active
-            </p>
-          </div>
+            {scannedModules.size < 6 ? "Scanning..." : "All modules detected"}
+          </motion.p>
+          <p className="text-xs font-mono mt-1" style={{ color: "var(--ld-teal)" }}>
+            {scannedModules.size}/6 modules active
+          </p>
         </motion.div>
 
         {/* Module legend - with colors */}

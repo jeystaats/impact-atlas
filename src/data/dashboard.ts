@@ -1,34 +1,17 @@
 import { StatCardData } from "@/components/dashboard/StatCard";
 
-// Generate realistic-looking sparkline data
-function generateSparklineData(
-  trend: "up" | "down" | "neutral",
-  baseValue: number,
-  variance: number = 0.15
-): number[] {
-  const points = 7; // 7 days
-  const data: number[] = [];
-
-  let current = baseValue * (1 - variance);
-
-  for (let i = 0; i < points; i++) {
-    // Add some randomness
-    const noise = (Math.random() - 0.5) * baseValue * variance * 0.5;
-
-    // Apply trend
-    if (trend === "up") {
-      current += (baseValue * variance * 2) / points + noise;
-    } else if (trend === "down") {
-      current -= (baseValue * variance * 2) / points - noise;
-    } else {
-      current += noise;
-    }
-
-    data.push(Math.max(0, current));
-  }
-
-  return data;
-}
+// Static sparkline data to avoid hydration mismatches
+// Pre-generated data that looks natural but is deterministic
+const sparklinePresets = {
+  upSmall: [42, 44, 47, 49, 52, 55, 57],
+  upMedium: [65, 68, 72, 78, 82, 85, 89],
+  upLarge: [22, 24, 27, 30, 35, 39, 41],
+  downSmall: [155, 152, 148, 145, 143, 140, 142],
+  downMedium: [108, 105, 102, 100, 98, 96, 98],
+  downLarge: [220, 215, 210, 205, 200, 198, 201],
+  neutralSmall: [134, 135, 133, 136, 134, 135, 134],
+  neutralStatic: [6, 6, 6, 6, 6, 6, 6],
+};
 
 export const dashboardStats: StatCardData[] = [
   {
@@ -46,7 +29,7 @@ export const dashboardStats: StatCardData[] = [
     color: "#10B981", // emerald
     trend: "up",
     trendValue: "+8",
-    sparklineData: generateSparklineData("up", 50, 0.2),
+    sparklineData: sparklinePresets.upSmall,
   },
   {
     label: "Hotspots",
@@ -55,7 +38,7 @@ export const dashboardStats: StatCardData[] = [
     color: "#F59E0B", // amber
     trend: "down",
     trendValue: "-12",
-    sparklineData: generateSparklineData("down", 150, 0.15),
+    sparklineData: sparklinePresets.downSmall,
   },
   {
     label: "AI Insights",
@@ -64,7 +47,7 @@ export const dashboardStats: StatCardData[] = [
     color: "#8B5CF6", // violet
     trend: "up",
     trendValue: "+5",
-    sparklineData: generateSparklineData("up", 25, 0.25),
+    sparklineData: sparklinePresets.upLarge,
   },
 ];
 
@@ -78,7 +61,7 @@ export const cityStats: Record<string, StatCardData[]> = {
       icon: "dashboard",
       color: "#0D9488",
       trend: "neutral",
-      sparklineData: [6, 6, 6, 6, 6, 6, 6],
+      sparklineData: sparklinePresets.neutralStatic,
     },
     {
       label: "Quick Wins",
@@ -87,7 +70,7 @@ export const cityStats: Record<string, StatCardData[]> = {
       color: "#10B981",
       trend: "up",
       trendValue: "+5",
-      sparklineData: generateSparklineData("up", 40, 0.2),
+      sparklineData: [35, 37, 38, 40, 41, 42, 43],
     },
     {
       label: "Hotspots",
@@ -96,7 +79,7 @@ export const cityStats: Record<string, StatCardData[]> = {
       color: "#F59E0B",
       trend: "down",
       trendValue: "-8",
-      sparklineData: generateSparklineData("down", 105, 0.12),
+      sparklineData: sparklinePresets.downMedium,
     },
     {
       label: "AI Insights",
@@ -105,7 +88,7 @@ export const cityStats: Record<string, StatCardData[]> = {
       color: "#8B5CF6",
       trend: "up",
       trendValue: "+3",
-      sparklineData: generateSparklineData("up", 18, 0.2),
+      sparklineData: [14, 15, 16, 17, 17, 18, 19],
     },
   ],
   singapore: [
@@ -115,7 +98,7 @@ export const cityStats: Record<string, StatCardData[]> = {
       icon: "dashboard",
       color: "#0D9488",
       trend: "neutral",
-      sparklineData: [6, 6, 6, 6, 6, 6, 6],
+      sparklineData: sparklinePresets.neutralStatic,
     },
     {
       label: "Quick Wins",
@@ -124,7 +107,7 @@ export const cityStats: Record<string, StatCardData[]> = {
       color: "#10B981",
       trend: "up",
       trendValue: "+12",
-      sparklineData: generateSparklineData("up", 65, 0.18),
+      sparklineData: sparklinePresets.upMedium,
     },
     {
       label: "Hotspots",
@@ -133,7 +116,7 @@ export const cityStats: Record<string, StatCardData[]> = {
       color: "#F59E0B",
       trend: "down",
       trendValue: "-23",
-      sparklineData: generateSparklineData("down", 200, 0.15),
+      sparklineData: sparklinePresets.downLarge,
     },
     {
       label: "AI Insights",
@@ -142,7 +125,7 @@ export const cityStats: Record<string, StatCardData[]> = {
       color: "#8B5CF6",
       trend: "up",
       trendValue: "+9",
-      sparklineData: generateSparklineData("up", 35, 0.22),
+      sparklineData: [32, 34, 36, 37, 39, 40, 41],
     },
   ],
   barcelona: [
@@ -161,7 +144,7 @@ export const cityStats: Record<string, StatCardData[]> = {
       color: "#10B981",
       trend: "up",
       trendValue: "+7",
-      sparklineData: generateSparklineData("up", 55, 0.2),
+      sparklineData: [52, 54, 55, 57, 59, 60, 61],
     },
     {
       label: "Hotspots",
@@ -169,7 +152,7 @@ export const cityStats: Record<string, StatCardData[]> = {
       icon: "target",
       color: "#F59E0B",
       trend: "neutral",
-      sparklineData: generateSparklineData("neutral", 135, 0.08),
+      sparklineData: sparklinePresets.neutralSmall,
     },
     {
       label: "AI Insights",
@@ -178,7 +161,7 @@ export const cityStats: Record<string, StatCardData[]> = {
       color: "#8B5CF6",
       trend: "up",
       trendValue: "+4",
-      sparklineData: generateSparklineData("up", 30, 0.2),
+      sparklineData: [28, 29, 30, 31, 31, 32, 33],
     },
   ],
   melbourne: [
@@ -188,7 +171,7 @@ export const cityStats: Record<string, StatCardData[]> = {
       icon: "dashboard",
       color: "#0D9488",
       trend: "neutral",
-      sparklineData: [6, 6, 6, 6, 6, 6, 6],
+      sparklineData: sparklinePresets.neutralStatic,
     },
     {
       label: "Quick Wins",
@@ -197,7 +180,7 @@ export const cityStats: Record<string, StatCardData[]> = {
       color: "#10B981",
       trend: "up",
       trendValue: "+15",
-      sparklineData: generateSparklineData("up", 78, 0.2),
+      sparklineData: [72, 75, 78, 82, 85, 87, 89],
     },
     {
       label: "Hotspots",
@@ -206,7 +189,7 @@ export const cityStats: Record<string, StatCardData[]> = {
       color: "#F59E0B",
       trend: "down",
       trendValue: "-18",
-      sparklineData: generateSparklineData("down", 215, 0.12),
+      sparklineData: [222, 218, 214, 210, 206, 203, 201],
     },
     {
       label: "AI Insights",
@@ -215,7 +198,7 @@ export const cityStats: Record<string, StatCardData[]> = {
       color: "#8B5CF6",
       trend: "up",
       trendValue: "+11",
-      sparklineData: generateSparklineData("up", 45, 0.25),
+      sparklineData: [40, 43, 45, 47, 49, 51, 52],
     },
   ],
 };

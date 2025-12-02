@@ -13,16 +13,29 @@ interface ModuleHealth {
   alerts: number;
 }
 
-// Generate mock health data for each module
+// Static health data for each module (deterministic to avoid hydration mismatches)
+const moduleHealthData: Record<string, { health: number; activity: number; alerts: number }> = {
+  "urban-heat": { health: 78, activity: 65, alerts: 2 },
+  "coastal-plastic": { health: 85, activity: 72, alerts: 1 },
+  "ocean-plastic": { health: 92, activity: 88, alerts: 0 },
+  "port-emissions": { health: 71, activity: 55, alerts: 3 },
+  "biodiversity": { health: 89, activity: 78, alerts: 1 },
+  "restoration": { health: 95, activity: 92, alerts: 0 },
+};
+
+// Generate health data for each module using static values
 function generateModuleHealth(): ModuleHealth[] {
-  return modules.map((module) => ({
-    id: module.id,
-    title: module.title.split(" ")[0] + " " + (module.title.split(" ")[1] || ""), // Short name
-    color: module.color,
-    health: 60 + Math.random() * 40, // 60-100
-    activity: 40 + Math.random() * 60, // 40-100
-    alerts: Math.floor(Math.random() * 5),
-  }));
+  return modules.map((module) => {
+    const data = moduleHealthData[module.id] || { health: 80, activity: 60, alerts: 0 };
+    return {
+      id: module.id,
+      title: module.title.split(" ")[0] + " " + (module.title.split(" ")[1] || ""), // Short name
+      color: module.color,
+      health: data.health,
+      activity: data.activity,
+      alerts: data.alerts,
+    };
+  });
 }
 
 interface ImpactRadarProps {
