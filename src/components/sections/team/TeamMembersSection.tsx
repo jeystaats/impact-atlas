@@ -12,7 +12,7 @@ const teamMembers = [
     role: "Sustainability Lead",
     bio: "Global Sustainability expert at Unilever. Bringing corporate sustainability experience to urban climate action.",
     expertise: ["Sustainability", "Corporate ESG", "Strategy"],
-    imagePath: "/team/ola.png",
+    imagePath: "/team/ola.jpeg",
     color: "--ld-teal",
     linkedin: "https://www.linkedin.com/in/aleksandra-adamska/",
     facePosition: "center 20%", // Adjust to center face
@@ -217,7 +217,7 @@ function FeaturedMember({ member }: { member: typeof teamMembers[0] }) {
             src={member.imagePath}
             alt={member.name}
             fill
-            className="object-cover"
+            className="object-cover grayscale"
             style={{ objectPosition: member.facePosition }}
             priority
           />
@@ -435,7 +435,7 @@ function MemberBadge({
             src={member.imagePath}
             alt={member.name}
             fill
-            className="object-cover"
+            className="object-cover grayscale"
             style={{ objectPosition: member.facePosition }}
           />
         </div>
