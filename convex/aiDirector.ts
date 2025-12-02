@@ -505,7 +505,18 @@ export const generateCityData = action({
         });
 
         if (!module) {
-          console.log(`Module ${moduleSlug} not found, skipping`);
+          console.error(`[AI Director] ERROR: Module "${moduleSlug}" not found in database!`);
+          console.error(`[AI Director] Run 'npx convex run seed:seedModules' to seed modules.`);
+          // Mark as failed with clear message
+          await ctx.runMutation(internal.aiDirector.updateOnboardingProgress, {
+            onboardingId,
+            currentStage: moduleSlug,
+            currentStageLabel: `Module ${moduleSlug} not found`,
+            progress: Math.round(5 + (i + 1) * progressPerModule),
+            moduleSlug,
+            moduleStatus: "failed",
+            error: `Module "${moduleSlug}" not in database. Run seedModules.`,
+          });
           continue;
         }
 
@@ -700,13 +711,26 @@ Return JSON only.`,
   });
 
   if (!response.ok) {
-    throw new Error(`OpenAI API error: ${response.statusText}`);
+    const errorBody = await response.text().catch(() => "Could not read error body");
+    console.error(`[AI Director] OpenAI API error for hotspots:`, {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorBody,
+      module: moduleSlug,
+      city: cityName,
+    });
+    throw new Error(`OpenAI API error (${response.status}): ${response.statusText}`);
   }
 
   const data = await response.json();
   const content = data.choices[0]?.message?.content;
 
   if (!content) {
+    console.error(`[AI Director] Empty OpenAI response for hotspots:`, {
+      module: moduleSlug,
+      city: cityName,
+      response: JSON.stringify(data).slice(0, 500),
+    });
     throw new Error("No content in OpenAI response");
   }
 
@@ -730,8 +754,13 @@ Return JSON only.`,
         displayValue: String(h.displayValue || ""),
         metrics: Array.isArray(h.metrics) ? h.metrics : [],
       }));
-  } catch {
-    console.error("Failed to parse hotspots JSON:", content);
+  } catch (parseError) {
+    console.error(`[AI Director] Failed to parse hotspots JSON:`, {
+      module: moduleSlug,
+      city: cityName,
+      error: parseError instanceof Error ? parseError.message : "Unknown parse error",
+      content: content.slice(0, 500),
+    });
     return [];
   }
 }
@@ -796,13 +825,26 @@ Return JSON with a "quickWins" array.`,
   });
 
   if (!response.ok) {
-    throw new Error(`OpenAI API error: ${response.statusText}`);
+    const errorBody = await response.text().catch(() => "Could not read error body");
+    console.error(`[AI Director] OpenAI API error for quick wins:`, {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorBody,
+      module: moduleSlug,
+      city: cityName,
+    });
+    throw new Error(`OpenAI API error (${response.status}): ${response.statusText}`);
   }
 
   const data = await response.json();
   const content = data.choices[0]?.message?.content;
 
   if (!content) {
+    console.error(`[AI Director] Empty OpenAI response for quick wins:`, {
+      module: moduleSlug,
+      city: cityName,
+      response: JSON.stringify(data).slice(0, 500),
+    });
     throw new Error("No content in OpenAI response");
   }
 
@@ -827,8 +869,13 @@ Return JSON with a "quickWins" array.`,
         tags: Array.isArray(qw.tags) ? qw.tags.map(String) : [moduleSlug],
         steps: Array.isArray(qw.steps) ? qw.steps.map(String) : undefined,
       }));
-  } catch {
-    console.error("Failed to parse quick wins JSON:", content);
+  } catch (parseError) {
+    console.error(`[AI Director] Failed to parse quick wins JSON:`, {
+      module: moduleSlug,
+      city: cityName,
+      error: parseError instanceof Error ? parseError.message : "Unknown parse error",
+      content: content.slice(0, 500),
+    });
     return [];
   }
 }
