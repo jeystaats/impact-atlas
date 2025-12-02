@@ -55,8 +55,8 @@ export default function TeamCTASection() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </Link>
-            <Link href="/how-it-works" className="ld-btn-secondary">
-              How It Works
+            <Link href="/about" className="ld-btn-secondary">
+              About the Project
             </Link>
           </motion.div>
 
@@ -68,7 +68,6 @@ export default function TeamCTASection() {
             className="mt-12 flex flex-wrap justify-center gap-6"
           >
             {[
-              { label: "About the Project", href: "/about" },
               { label: "See Impact Metrics", href: "/impact" },
             ].map((link) => (
               <Link

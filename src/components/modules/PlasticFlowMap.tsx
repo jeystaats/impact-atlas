@@ -357,6 +357,7 @@ export function PlasticFlowMap({
       {/* Map */}
       <div style={{ height: height - 160 }}>
         <Map
+          ref={mapRef}
           initialViewState={{
             longitude: city.coordinates.lng + 0.03,
             latitude: city.coordinates.lat,
