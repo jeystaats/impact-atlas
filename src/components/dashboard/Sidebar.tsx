@@ -17,6 +17,7 @@ const mainNavItems: { icon: IconName; label: string; href: string }[] = [
   { icon: "home", label: "Overview", href: "/dashboard" },
   { icon: "zap", label: "Quick Wins", href: "/dashboard/quick-wins" },
   { icon: "target", label: "Action Plans", href: "/dashboard/plans" },
+  { icon: "settings", label: "Settings", href: "/dashboard/settings" },
 ];
 
 export function Sidebar({ onCopilotOpen }: SidebarProps) {
