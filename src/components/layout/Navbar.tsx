@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icons";
 
@@ -45,14 +46,27 @@ export function Navbar() {
 
             {/* Desktop CTA */}
             <div className="hidden md:flex items-center gap-3">
-              <Button variant="ghost" size="sm">
-                Sign In
-              </Button>
-              <Button size="sm" asChild>
-                <Link href="/dashboard">
-                  Get Started
-                </Link>
-              </Button>
+              <SignedOut>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/sign-in">Sign In</Link>
+                </Button>
+                <Button size="sm" asChild>
+                  <Link href="/sign-up">Get Started</Link>
+                </Button>
+              </SignedOut>
+              <SignedIn>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/dashboard">Dashboard</Link>
+                </Button>
+                <UserButton
+                  afterSignOutUrl="/"
+                  appearance={{
+                    elements: {
+                      avatarBox: "w-8 h-8",
+                    },
+                  }}
+                />
+              </SignedIn>
             </div>
 
             {/* Mobile menu button */}
@@ -87,14 +101,19 @@ export function Navbar() {
                   </Link>
                 ))}
                 <div className="pt-4 mt-4 border-t border-[var(--border)] flex flex-col gap-2">
-                  <Button variant="ghost" className="justify-center">
-                    Sign In
-                  </Button>
-                  <Button className="justify-center" asChild>
-                    <Link href="/dashboard">
-                      Get Started
-                    </Link>
-                  </Button>
+                  <SignedOut>
+                    <Button variant="ghost" className="justify-center" asChild>
+                      <Link href="/sign-in">Sign In</Link>
+                    </Button>
+                    <Button className="justify-center" asChild>
+                      <Link href="/sign-up">Get Started</Link>
+                    </Button>
+                  </SignedOut>
+                  <SignedIn>
+                    <Button className="justify-center" asChild>
+                      <Link href="/dashboard">Dashboard</Link>
+                    </Button>
+                  </SignedIn>
                 </div>
               </div>
             </motion.div>

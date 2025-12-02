@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useUser, UserButton } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import { Icon, ModuleIcon, IconName } from "@/components/ui/icons";
 import { modules } from "@/data/modules";
@@ -21,6 +22,14 @@ const mainNavItems: { icon: IconName; label: string; href: string }[] = [
 export function Sidebar({ onCopilotOpen }: SidebarProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const { user } = useUser();
+
+  const userInitials = user?.firstName && user?.lastName
+    ? `${user.firstName[0]}${user.lastName[0]}`
+    : user?.firstName?.[0] || user?.emailAddresses?.[0]?.emailAddress?.[0]?.toUpperCase() || "U";
+
+  const userName = user?.fullName || user?.firstName || "User";
+  const userRole = "Climate Officer";
 
   return (
     <aside
@@ -197,9 +206,20 @@ export function Sidebar({ onCopilotOpen }: SidebarProps) {
             "flex items-center gap-3 px-3 py-2",
             collapsed && "justify-center"
           )}>
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--accent-light)] to-[var(--accent)] flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
-              JD
-            </div>
+            {user ? (
+              <UserButton
+                afterSignOutUrl="/"
+                appearance={{
+                  elements: {
+                    avatarBox: "w-8 h-8",
+                  },
+                }}
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--accent-light)] to-[var(--accent)] flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
+                {userInitials}
+              </div>
+            )}
             <AnimatePresence>
               {!collapsed && (
                 <motion.div
@@ -208,8 +228,8 @@ export function Sidebar({ onCopilotOpen }: SidebarProps) {
                   exit={{ opacity: 0 }}
                   className="flex-1 min-w-0"
                 >
-                  <p className="text-sm font-medium text-[var(--foreground)] truncate">Jane Doe</p>
-                  <p className="text-xs text-[var(--foreground-muted)] truncate">Climate Officer</p>
+                  <p className="text-sm font-medium text-[var(--foreground)] truncate">{userName}</p>
+                  <p className="text-xs text-[var(--foreground-muted)] truncate">{userRole}</p>
                 </motion.div>
               )}
             </AnimatePresence>

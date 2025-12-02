@@ -183,20 +183,49 @@ export function IntelligenceCard({
           </div>
         </div>
 
-        {/* Content with Markdown rendering */}
-        <div className="text-sm text-[var(--foreground)] leading-relaxed prose prose-sm prose-neutral dark:prose-invert max-w-none
-          prose-headings:text-[var(--foreground)] prose-headings:font-semibold prose-headings:mt-4 prose-headings:mb-2
-          prose-h1:text-base prose-h2:text-sm prose-h3:text-sm
-          prose-p:my-3 prose-p:text-[var(--foreground)] prose-p:leading-relaxed
-          prose-strong:text-[var(--foreground)] prose-strong:font-semibold
-          prose-ul:my-3 prose-ul:pl-5 prose-li:my-1.5 prose-li:leading-relaxed
-          prose-ol:my-3 prose-ol:pl-5
-          prose-a:text-[var(--accent)] prose-a:no-underline hover:prose-a:underline
-          prose-code:text-[var(--accent-dark)] prose-code:bg-[var(--accent-bg)] prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs
-          prose-pre:bg-[var(--background-secondary)] prose-pre:p-3 prose-pre:rounded-lg prose-pre:my-3
-          [&>*:first-child]:mt-0 [&>*:last-child]:mb-0
-        ">
-          <ReactMarkdown>{cleanContent}</ReactMarkdown>
+        {/* Content with Markdown rendering - ChatGPT-like styling */}
+        <div className="ai-markdown text-sm text-[var(--foreground)] leading-relaxed">
+          <ReactMarkdown
+            components={{
+              h1: ({ children }) => <h2 className="text-base font-semibold mt-4 mb-2 first:mt-0">{children}</h2>,
+              h2: ({ children }) => <h3 className="text-sm font-semibold mt-4 mb-2 first:mt-0">{children}</h3>,
+              h3: ({ children }) => <h4 className="text-sm font-medium mt-3 mb-1.5 first:mt-0">{children}</h4>,
+              p: ({ children }) => <p className="mb-3 last:mb-0 leading-relaxed">{children}</p>,
+              ul: ({ children }) => <ul className="mb-4 last:mb-0 space-y-2 ml-1">{children}</ul>,
+              ol: ({ children }) => <ol className="mb-4 last:mb-0 space-y-2 ml-1 list-decimal list-inside">{children}</ol>,
+              li: ({ children }) => (
+                <li className="flex gap-2 leading-relaxed">
+                  <span className="text-[var(--accent)] mt-1.5 flex-shrink-0">•</span>
+                  <span>{children}</span>
+                </li>
+              ),
+              strong: ({ children }) => <strong className="font-semibold text-[var(--foreground)]">{children}</strong>,
+              em: ({ children }) => <em className="italic">{children}</em>,
+              a: ({ href, children }) => (
+                <a href={href} className="text-[var(--accent)] hover:underline" target="_blank" rel="noopener noreferrer">
+                  {children}
+                </a>
+              ),
+              code: ({ children }) => (
+                <code className="px-1.5 py-0.5 bg-[var(--background-secondary)] text-[var(--accent-dark)] text-xs rounded font-mono">
+                  {children}
+                </code>
+              ),
+              pre: ({ children }) => (
+                <pre className="my-3 p-3 bg-[var(--background-secondary)] rounded-lg overflow-x-auto text-xs">
+                  {children}
+                </pre>
+              ),
+              blockquote: ({ children }) => (
+                <blockquote className="border-l-2 border-[var(--accent)] pl-3 my-3 italic text-[var(--foreground-secondary)]">
+                  {children}
+                </blockquote>
+              ),
+              hr: () => <hr className="my-4 border-[var(--border)]" />,
+            }}
+          >
+            {cleanContent}
+          </ReactMarkdown>
           {isStreaming && (
             <motion.span
               animate={{ opacity: [1, 0] }}

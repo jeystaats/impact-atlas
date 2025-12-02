@@ -1,23 +1,21 @@
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
-import { Hero } from "@/components/landing/Hero";
-import { ModulesGrid } from "@/components/landing/ModulesGrid";
-import { DataStory } from "@/components/landing/DataStory";
-import { SocialProof } from "@/components/landing/SocialProof";
-import { CTA } from "@/components/landing/CTA";
+"use client";
 
-export default function HomePage() {
+import HeroSection from "@/components/sections/HeroSection";
+import VisionSection from "@/components/sections/VisionSection";
+import ModulesSection from "@/components/sections/ModulesSection";
+import ProcessSection from "@/components/sections/ProcessSection";
+import ImpactSection from "@/components/sections/ImpactSection";
+import CTASection from "@/components/sections/CTASection";
+
+export default function LandingPage() {
   return (
-    <main className="min-h-screen">
-      <Navbar />
-      <div className="pt-20">
-        <Hero />
-        <ModulesGrid />
-        <DataStory />
-        <SocialProof />
-        <CTA />
-      </div>
-      <Footer />
-    </main>
+    <div className="landing-dark">
+      <HeroSection />
+      <VisionSection />
+      <ModulesSection />
+      <ProcessSection />
+      <ImpactSection />
+      <CTASection />
+    </div>
   );
 }

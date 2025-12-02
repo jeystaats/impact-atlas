@@ -1,7 +1,7 @@
 export interface HotspotData {
   id: string;
-  x: number;
-  y: number;
+  lat: number;
+  lng: number;
   severity: "low" | "medium" | "high" | "critical";
   label: string;
   value?: string;
@@ -10,12 +10,13 @@ export interface HotspotData {
   recommendations: string[];
 }
 
+// Amsterdam-centered hotspots (default city)
 export const moduleHotspots: Record<string, HotspotData[]> = {
   "urban-heat": [
     {
       id: "uh-1",
-      x: 35,
-      y: 25,
+      lat: 52.3702,
+      lng: 4.8952,
       severity: "critical",
       label: "Downtown Core",
       value: "+5.2°C",
@@ -29,8 +30,8 @@ export const moduleHotspots: Record<string, HotspotData[]> = {
     },
     {
       id: "uh-2",
-      x: 55,
-      y: 40,
+      lat: 52.3849,
+      lng: 4.9028,
       severity: "high",
       label: "Industrial Zone",
       value: "+4.1°C",
@@ -43,8 +44,8 @@ export const moduleHotspots: Record<string, HotspotData[]> = {
     },
     {
       id: "uh-3",
-      x: 25,
-      y: 55,
+      lat: 52.3589,
+      lng: 4.8721,
       severity: "medium",
       label: "Shopping District",
       value: "+2.8°C",
@@ -57,8 +58,8 @@ export const moduleHotspots: Record<string, HotspotData[]> = {
     },
     {
       id: "uh-4",
-      x: 70,
-      y: 30,
+      lat: 52.3812,
+      lng: 4.9215,
       severity: "low",
       label: "Residential North",
       value: "+1.2°C",
@@ -73,8 +74,8 @@ export const moduleHotspots: Record<string, HotspotData[]> = {
   "coastal-plastic": [
     {
       id: "cp-1",
-      x: 80,
-      y: 65,
+      lat: 52.3915,
+      lng: 4.9395,
       severity: "critical",
       label: "Marina Beach",
       value: "2,400 kg/week",
@@ -88,8 +89,8 @@ export const moduleHotspots: Record<string, HotspotData[]> = {
     },
     {
       id: "cp-2",
-      x: 60,
-      y: 75,
+      lat: 52.3756,
+      lng: 4.9462,
       severity: "high",
       label: "River Mouth",
       value: "1,800 kg/week",
@@ -102,8 +103,8 @@ export const moduleHotspots: Record<string, HotspotData[]> = {
     },
     {
       id: "cp-3",
-      x: 40,
-      y: 80,
+      lat: 52.3621,
+      lng: 4.9158,
       severity: "medium",
       label: "Tourist Beach",
       value: "600 kg/week",
@@ -118,8 +119,8 @@ export const moduleHotspots: Record<string, HotspotData[]> = {
   "ocean-plastic": [
     {
       id: "op-1",
-      x: 45,
-      y: 35,
+      lat: 52.3695,
+      lng: 4.8812,
       severity: "high",
       label: "Beach Survey Zone A",
       value: "342 items/100m",
@@ -132,8 +133,8 @@ export const moduleHotspots: Record<string, HotspotData[]> = {
     },
     {
       id: "op-2",
-      x: 65,
-      y: 50,
+      lat: 52.3758,
+      lng: 4.9075,
       severity: "medium",
       label: "Beach Survey Zone B",
       value: "128 items/100m",
@@ -148,8 +149,8 @@ export const moduleHotspots: Record<string, HotspotData[]> = {
   "port-emissions": [
     {
       id: "pe-1",
-      x: 70,
-      y: 45,
+      lat: 52.3895,
+      lng: 4.9125,
       severity: "critical",
       label: "Container Terminal",
       value: "850 tonnes CO2/day",
@@ -163,8 +164,8 @@ export const moduleHotspots: Record<string, HotspotData[]> = {
     },
     {
       id: "pe-2",
-      x: 55,
-      y: 55,
+      lat: 52.3778,
+      lng: 4.9245,
       severity: "high",
       label: "Cruise Terminal",
       value: "320 tonnes CO2/day",
@@ -177,8 +178,8 @@ export const moduleHotspots: Record<string, HotspotData[]> = {
     },
     {
       id: "pe-3",
-      x: 40,
-      y: 60,
+      lat: 52.3645,
+      lng: 4.8925,
       severity: "medium",
       label: "Fishing Harbor",
       value: "45 tonnes CO2/day",
@@ -193,8 +194,8 @@ export const moduleHotspots: Record<string, HotspotData[]> = {
   "biodiversity": [
     {
       id: "bd-1",
-      x: 30,
-      y: 35,
+      lat: 52.3612,
+      lng: 4.8795,
       severity: "high",
       label: "Corridor Gap",
       value: "500m break",
@@ -208,8 +209,8 @@ export const moduleHotspots: Record<string, HotspotData[]> = {
     },
     {
       id: "bd-2",
-      x: 50,
-      y: 50,
+      lat: 52.3725,
+      lng: 4.8985,
       severity: "medium",
       label: "Urban Meadow Site",
       value: "12 species gap",
@@ -222,8 +223,8 @@ export const moduleHotspots: Record<string, HotspotData[]> = {
     },
     {
       id: "bd-3",
-      x: 75,
-      y: 40,
+      lat: 52.3856,
+      lng: 4.9168,
       severity: "low",
       label: "Street Tree Opportunity",
       value: "8 nesting sites",
@@ -238,8 +239,8 @@ export const moduleHotspots: Record<string, HotspotData[]> = {
   "restoration": [
     {
       id: "rs-1",
-      x: 25,
-      y: 65,
+      lat: 52.3545,
+      lng: 4.8652,
       severity: "high",
       label: "Wetland Site",
       value: "4,200 tonnes CO2/yr",
@@ -253,8 +254,8 @@ export const moduleHotspots: Record<string, HotspotData[]> = {
     },
     {
       id: "rs-2",
-      x: 60,
-      y: 30,
+      lat: 52.3825,
+      lng: 4.8875,
       severity: "medium",
       label: "Urban Forest",
       value: "2,100 tonnes CO2/yr",
@@ -267,8 +268,8 @@ export const moduleHotspots: Record<string, HotspotData[]> = {
     },
     {
       id: "rs-3",
-      x: 45,
-      y: 70,
+      lat: 52.3665,
+      lng: 4.9285,
       severity: "medium",
       label: "Riparian Zone",
       value: "1,500 tonnes CO2/yr",

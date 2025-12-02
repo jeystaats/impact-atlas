@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Icon, ModuleIcon } from "@/components/ui/icons";
 import { modules } from "@/data/modules";
+import { DemoVideoModal } from "@/components/modals/DemoVideoModal";
 import Link from "next/link";
 
 type Severity = "low" | "medium" | "high";
@@ -26,6 +27,7 @@ const severityColors: Record<Severity, string> = {
 export function Hero() {
   const [activeHotspot, setActiveHotspot] = useState<number | null>(null);
   const [isMapView, setIsMapView] = useState(true);
+  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -86,10 +88,12 @@ export function Hero() {
                   <Icon name="arrowUpRight" className="w-4 h-4" />
                 </Link>
               </Button>
-              <Button variant="outline" size="lg">
+              <Button variant="outline" size="lg" onClick={() => setIsDemoModalOpen(true)}>
                 Watch Demo
               </Button>
             </div>
+
+            <DemoVideoModal isOpen={isDemoModalOpen} onClose={() => setIsDemoModalOpen(false)} />
 
             {/* Trust indicators */}
             <div className="mt-12 pt-8 border-t border-[var(--border)]">

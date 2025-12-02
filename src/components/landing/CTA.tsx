@@ -1,11 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icons";
+import { ScheduleDemoModal } from "@/components/modals/ScheduleDemoModal";
 import Link from "next/link";
 
 export function CTA() {
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+
   return (
     <section className="py-24 bg-gradient-to-br from-[var(--accent-bg)] via-[var(--background)] to-[var(--background)]">
       <div className="max-w-4xl mx-auto px-6 lg:px-8 text-center">
@@ -29,7 +33,7 @@ export function CTA() {
                 <Icon name="arrowUpRight" className="w-5 h-5" />
               </Link>
             </Button>
-            <Button variant="outline" size="xl">
+            <Button variant="outline" size="xl" onClick={() => setIsScheduleModalOpen(true)}>
               Schedule a Demo
             </Button>
           </div>
@@ -38,6 +42,8 @@ export function CTA() {
             No credit card required. Free for cities and public agencies.
           </p>
         </motion.div>
+
+        <ScheduleDemoModal isOpen={isScheduleModalOpen} onClose={() => setIsScheduleModalOpen(false)} />
       </div>
     </section>
   );
