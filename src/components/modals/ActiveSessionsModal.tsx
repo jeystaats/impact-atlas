@@ -65,7 +65,7 @@ function parseUserAgent(userAgent: string): { device: string; deviceType: "deskt
 }
 
 export function ActiveSessionsModal({ isOpen, onClose }: ActiveSessionsModalProps) {
-  const { signOut } = useClerk();
+  const { signOut: _signOut } = useClerk();
   const { session: currentSession } = useSession();
   const [sessions, setSessions] = useState<SessionInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);

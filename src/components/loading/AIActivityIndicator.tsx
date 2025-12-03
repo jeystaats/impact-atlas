@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Icon } from "@/components/ui/icons";
 
 interface AIActivityIndicatorProps {
   stage: "thinking" | "processing" | "streaming" | "complete";

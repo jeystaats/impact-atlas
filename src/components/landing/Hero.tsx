@@ -26,7 +26,7 @@ const severityColors: Record<Severity, string> = {
 
 export function Hero() {
   const [activeHotspot, setActiveHotspot] = useState<number | null>(null);
-  const [isMapView, setIsMapView] = useState(true);
+  const [_isMapView, setIsMapView] = useState(true);
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
 
   useEffect(() => {
@@ -146,7 +146,7 @@ export function Hero() {
                   {/* Animated hotspots */}
                   <AnimatePresence>
                     {hotspots.map((hotspot) => {
-                      const module = modules.find(m => m.id === hotspot.module);
+                      const matchedModule = modules.find(m => m.id === hotspot.module);
                       const isActive = activeHotspot === hotspot.id;
 
                       return (
@@ -200,9 +200,9 @@ export function Hero() {
                                 <div className="flex items-center gap-2 mb-2">
                                   <div
                                     className="w-6 h-6 rounded-md flex items-center justify-center"
-                                    style={{ backgroundColor: module?.color + "20" }}
+                                    style={{ backgroundColor: matchedModule?.color + "20" }}
                                   >
-                                    <ModuleIcon moduleId={hotspot.module} className="w-3.5 h-3.5" style={{ color: module?.color }} />
+                                    <ModuleIcon moduleId={hotspot.module} className="w-3.5 h-3.5" style={{ color: matchedModule?.color }} />
                                   </div>
                                   <span className="text-xs font-medium text-[var(--foreground)]">{hotspot.label}</span>
                                 </div>

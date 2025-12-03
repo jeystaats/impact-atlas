@@ -74,7 +74,7 @@ export function SocialProof() {
                 ))}
               </div>
               <blockquote className="text-lg text-[var(--foreground)] mb-6 leading-relaxed">
-                "{testimonial.quote}"
+                &quot;{testimonial.quote}&quot;
               </blockquote>
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--accent-light)] to-[var(--accent)] flex items-center justify-center text-white font-semibold">

@@ -81,7 +81,7 @@ const itemVariants: Variants = {
 export function MapPopup({
   hotspot,
   onViewDetails,
-  onClose,
+  onClose: _onClose,
   compact = false,
 }: MapPopupProps) {
   const config = severityConfig[hotspot.severity];

@@ -137,7 +137,7 @@ export const BaseMap = forwardRef<BaseMapRef, BaseMapProps>(
       scrollZoom = true,
       dragPan = true,
       cooperativeGestures = false,
-      padding,
+      padding: _padding,
       children,
       onLoad,
       onMove,

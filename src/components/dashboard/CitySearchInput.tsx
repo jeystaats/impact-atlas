@@ -700,7 +700,7 @@ export function CitySearchInput({
                     </motion.div>
                     <p className="text-lg font-semibold text-[var(--foreground)]">No cities found</p>
                     <p className="text-sm text-[var(--foreground-muted)] mt-2 text-center max-w-xs">
-                      We could not find any cities matching "{search}". Try a different search term.
+                      We could not find any cities matching &quot;{search}&quot;. Try a different search term.
                     </p>
                   </motion.div>
                 )}

@@ -94,7 +94,7 @@ export default function FixathonFitSection() {
             transition={{ duration: 0.6, delay: 0.5 }}
             className="ld-body-lg"
           >
-            Impact Atlas directly addresses both challenge tracks of the World's Largest Fixathon.
+            Impact Atlas directly addresses both challenge tracks of the World&apos;s Largest Fixathon.
           </motion.p>
         </div>
 
@@ -212,7 +212,7 @@ export default function FixathonFitSection() {
           className="mt-16 text-center"
         >
           <p className="ld-body mb-6" style={{ color: "var(--ld-white-50)" }}>
-            We're not just addressing these challenges — we're providing the{" "}
+            We&apos;re not just addressing these challenges — we&apos;re providing the{" "}
             <span style={{ color: "var(--ld-teal)" }}>intelligence layer</span>{" "}
             cities need to act on them.
           </p>

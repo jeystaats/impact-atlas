@@ -10,7 +10,7 @@ const dataNodes = [
   { id: "data", label: "Real World Data", x: 80, y: 80, color: "--ld-heat" },
 ];
 
-const connections = [
+const _connections = [
   { from: "planetary", to: "center" },
   { from: "sdgs", to: "center" },
   { from: "policies", to: "center" },

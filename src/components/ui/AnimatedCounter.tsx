@@ -49,7 +49,7 @@ export function AnimatedCounter({
     hasAnimated.current = true;
 
     const startTime = performance.now() + delay * 1000;
-    const endTime = startTime + duration * 1000;
+    const _endTime = startTime + duration * 1000;
 
     function animate(currentTime: number) {
       if (currentTime < startTime) {

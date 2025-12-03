@@ -8,7 +8,6 @@ import { DataStreamAnimation } from "./DataStreamAnimation";
 import { ProgressRing } from "@/components/ui/ProgressRing";
 import { AIActivityIndicator } from "./AIActivityIndicator";
 import { useNotifications } from "@/components/notifications/useNotifications";
-import { cn } from "@/lib/utils";
 
 // Generation stages with detailed info
 const GENERATION_STAGES = [
@@ -112,10 +111,10 @@ export function EnhancedCityLoadingModal({
   progress,
   onClose,
   onEnterDashboard,
-  onMinimize,
+  onMinimize: _onMinimize,
 }: EnhancedCityLoadingModalProps) {
   const [elapsedTime, setElapsedTime] = useState(0);
-  const { info, success, aiInsight } = useNotifications();
+  const { info, success } = useNotifications();
   const lastNotifiedModuleCount = useRef(0);
   const hasNotifiedCompletion = useRef(false);
 

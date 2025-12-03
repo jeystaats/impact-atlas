@@ -201,7 +201,7 @@ export function DeleteAccountModal({ isOpen, onClose, userEmail }: DeleteAccount
                         animate={{ opacity: 1 }}
                         className="text-xs text-red-400"
                       >
-                        Text doesn't match. Please type exactly: {expectedConfirmText}
+                        Text doesn&apos;t match. Please type exactly: {expectedConfirmText}
                       </motion.p>
                     )}
                   </motion.div>

@@ -30,7 +30,7 @@ export default function TeamCTASection() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="ld-display-md mb-6"
           >
-            Ready to see what we've{" "}
+            Ready to see what we&apos;ve{" "}
             <span className="ld-gradient-text">built?</span>
           </motion.h2>
 

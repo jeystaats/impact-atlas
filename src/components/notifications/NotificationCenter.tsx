@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Icon } from "@/components/ui/icons";
 import { useNotificationStore } from "@/stores/useNotificationStore";
 import { NotificationItem } from "./NotificationItem";
 import { cn } from "@/lib/utils";

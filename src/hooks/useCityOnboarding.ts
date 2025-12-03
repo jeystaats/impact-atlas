@@ -90,23 +90,23 @@ export function useCityOnboarding() {
       }
 
       // Show individual module completion notifications
-      for (const module of onboardingProgress.moduleProgress) {
-        const prevStatus = lastModuleStatus.current[module.moduleSlug];
-        if (module.status === "completed" && prevStatus !== "completed") {
+      for (const moduleProgress of onboardingProgress.moduleProgress) {
+        const prevStatus = lastModuleStatus.current[moduleProgress.moduleSlug];
+        if (moduleProgress.status === "completed" && prevStatus !== "completed") {
           addNotification({
             type: "success",
-            title: `${MODULE_NAMES[module.moduleSlug] || module.moduleSlug} ready`,
-            message: `${module.hotspotsCreated} hotspots, ${module.quickWinsCreated} quick wins`,
+            title: `${MODULE_NAMES[moduleProgress.moduleSlug] || moduleProgress.moduleSlug} ready`,
+            message: `${moduleProgress.hotspotsCreated} hotspots, ${moduleProgress.quickWinsCreated} quick wins`,
             persistent: false,
             duration: 4000,
             meta: {
-              moduleSlug: module.moduleSlug,
+              moduleSlug: moduleProgress.moduleSlug,
               cityName: onboardingState.cityName,
               aiGenerated: true,
             },
           });
         }
-        lastModuleStatus.current[module.moduleSlug] = module.status;
+        lastModuleStatus.current[moduleProgress.moduleSlug] = moduleProgress.status;
       }
     }
 

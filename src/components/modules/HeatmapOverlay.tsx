@@ -90,12 +90,12 @@ export function HeatmapOverlay({
   showControls = true,
 }: HeatmapOverlayProps) {
   const [heatIntensity, setHeatIntensity] = useState(0.8);
-  const [showLabels, setShowLabels] = useState(true);
+  const [_showLabels, setShowLabels] = useState(true);
   const [timeOfDay, setTimeOfDay] = useState<"morning" | "afternoon" | "evening">("afternoon");
   const [animatedIntensity, setAnimatedIntensity] = useState(0);
   const mapRef = useRef<MapRef>(null);
   const { mapStyleUrl } = useMapStyle();
-  const { formatTemperature, unitSymbol } = useTemperature();
+  const { formatTemperature } = useTemperature();
 
   const city = cities.find((c) => c.id === cityId) || cities[0];
 

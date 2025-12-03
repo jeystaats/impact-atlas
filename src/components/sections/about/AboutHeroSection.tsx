@@ -169,7 +169,7 @@ export default function AboutHeroSection() {
               "Satellite & Open Data",
               "AI Decision Copilot",
               "Quick Win Hotspots",
-            ].map((item, i) => (
+            ].map((item) => (
               <div
                 key={item}
                 className="flex items-center gap-2 px-4 py-2 rounded-full"

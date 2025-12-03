@@ -45,7 +45,15 @@
       "Bash(npm run test:run:*)",
       "WebFetch(domain:www.storyblok.com)",
       "WebFetch(domain:focusreactive.com)",
-      "WebFetch(domain:blog.maximeheckel.com)"
+      "WebFetch(domain:blog.maximeheckel.com)",
+      "WebFetch(domain:mini.gmshaders.com)",
+      "WebFetch(domain:www.xordev.com)",
+      "WebFetch(domain:www.shadertoy.com)",
+      "WebFetch(domain:tympanus.net)",
+      "WebFetch(domain:x.com)",
+      "WebFetch(domain:xorshaders.weebly.com)",
+      "WebFetch(domain:www.8awake.com)",
+      "Bash(1)"
     ],
     "deny": [],
     "ask": []

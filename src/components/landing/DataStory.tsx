@@ -26,7 +26,7 @@ export function DataStory() {
             </h2>
 
             <p className="text-lg text-[var(--foreground-secondary)] mb-8 leading-relaxed">
-              Impact Atlas synthesizes data from the world's leading environmental monitoring systems. Our AI processes satellite imagery, sensor networks, and citizen science contributions to surface opportunities that would take teams months to discover manually.
+              Impact Atlas synthesizes data from the world&apos;s leading environmental monitoring systems. Our AI processes satellite imagery, sensor networks, and citizen science contributions to surface opportunities that would take teams months to discover manually.
             </p>
 
             <div className="space-y-4">

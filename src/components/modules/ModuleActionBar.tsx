@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence, type Transition } from "framer-motion";
 import { Icon, IconName } from "@/components/ui/icons";
 import { ExportMenu, ExportType } from "./ExportMenu";
