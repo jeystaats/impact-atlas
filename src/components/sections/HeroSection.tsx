@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { trackCTAClick } from "@/lib/analytics";
 
 export default function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -148,13 +149,21 @@ export default function HeroSection() {
             transition={getTransition(1)}
             className="flex flex-wrap gap-4"
           >
-            <a href="#vision" className="ld-btn-primary">
+            <a
+              href="#vision"
+              className="ld-btn-primary"
+              onClick={() => trackCTAClick("see_how_it_works", "hero")}
+            >
               See How It Works
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
               </svg>
             </a>
-            <a href="/dashboard" className="ld-btn-secondary">
+            <a
+              href="/dashboard"
+              className="ld-btn-secondary"
+              onClick={() => trackCTAClick("view_live_demo", "hero")}
+            >
               View Live Demo
             </a>
           </motion.div>

@@ -103,6 +103,7 @@ export default function LandingPage() {
       <ProcessSection />
       <ImpactSection />
       <CTASection />
+      <LandingScrollTracker />
     </div>
   );
 }

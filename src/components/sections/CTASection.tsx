@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { trackCTAClick, trackExternalLink } from "@/lib/analytics";
 
 export default function CTASection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -77,7 +78,11 @@ export default function CTASection() {
           transition={getTransition(0.7)}
           className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
         >
-          <a href="/dashboard" className="ld-btn-primary">
+          <a
+            href="/dashboard"
+            className="ld-btn-primary"
+            onClick={() => trackCTAClick("explore_demo", "cta_section")}
+          >
             Explore the Demo
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -95,6 +100,13 @@ export default function CTASection() {
             href="https://www.norrsken.org/fixathon"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() =>
+              trackExternalLink(
+                "norrsken_fixathon",
+                "cta_section",
+                "https://www.norrsken.org/fixathon"
+              )
+            }
             className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm ${prefersReducedMotion ? "" : "hover:scale-105"} transition-transform`}
             style={{
               background: "var(--ld-white-5)",

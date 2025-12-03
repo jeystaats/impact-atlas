@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Icon, ModuleIcon } from "@/components/ui/icons";
 import { Module } from "@/types";
+import { trackModuleView } from "@/lib/analytics";
 
 interface ModuleCardProps {
   module: Module;
@@ -13,13 +14,17 @@ interface ModuleCardProps {
 }
 
 export function ModuleCard({ module, index }: ModuleCardProps) {
+  const handleClick = () => {
+    trackModuleView(module.id);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
     >
-      <Link href={`/dashboard/modules/${module.id}`}>
+      <Link href={`/dashboard/modules/${module.id}`} onClick={handleClick}>
         <Card interactive className="h-full group">
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">

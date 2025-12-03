@@ -12,6 +12,7 @@ import {
   AISuggestionModal,
   defaultAISuggestion,
 } from "@/components/modals/AISuggestionModal";
+import { trackEvent, trackPlanCreate, AnalyticsEvents } from "@/lib/analytics";
 import {
   ActionPlanCard,
   CreatePlanCard,
@@ -152,6 +153,19 @@ export default function ActionPlansPage() {
       active: "Active",
       completed: "Completed",
     };
+
+    // Track analytics
+    if (newStatus === "completed") {
+      trackEvent(AnalyticsEvents.PLAN_COMPLETE, {
+        planId: id,
+        title: plan?.title,
+      });
+    } else {
+      trackEvent(AnalyticsEvents.PLAN_UPDATE, {
+        planId: id,
+        newStatus,
+      });
+    }
 
     // If we have a Convex ID, update via Convex
     if (convexId) {
@@ -337,7 +351,13 @@ export default function ActionPlansPage() {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setIsAISuggestionModalOpen(true)}
+                  onClick={() => {
+                    trackEvent(AnalyticsEvents.COPILOT_SUGGESTION, {
+                      suggestionType: "ai_plan_recommendation",
+                      action: "view",
+                    });
+                    setIsAISuggestionModalOpen(true);
+                  }}
                   className="px-4 py-2 rounded-lg text-sm font-medium bg-[var(--accent)] text-white"
                 >
                   View Suggestion

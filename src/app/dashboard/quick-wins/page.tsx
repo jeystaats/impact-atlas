@@ -16,6 +16,7 @@ import {
 } from "@/hooks/useConvex";
 import { useProgressStore } from "@/stores/useProgressStore";
 import { useUIStore } from "@/stores/useUIStore";
+import { trackQuickWinComplete, trackEvent, AnalyticsEvents } from "@/lib/analytics";
 import {
   QuickWinCard,
   QuickWinStats,
@@ -179,6 +180,17 @@ export default function QuickWinsPage() {
   // Toggle complete handler
   const handleToggleComplete = async (win: NormalizedQuickWin) => {
     const isCompleted = completedWinIds.has(win.id);
+
+    // Track analytics
+    if (!isCompleted) {
+      trackQuickWinComplete(String(win.id), win.moduleId);
+    } else {
+      trackEvent(AnalyticsEvents.QUICK_WIN_VIEW, {
+        quickWinId: String(win.id),
+        moduleId: win.moduleId,
+        action: "uncomplete",
+      });
+    }
 
     if (win.convexId) {
       try {

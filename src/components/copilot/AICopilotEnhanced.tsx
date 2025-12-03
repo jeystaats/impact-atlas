@@ -22,6 +22,7 @@ import {
   hotspotToQuickAction,
   hasActionableContent
 } from "@/lib/actionExtractor";
+import { trackCopilotInteraction } from "@/lib/analytics";
 
 interface AICopilotEnhancedProps {
   isOpen: boolean;
@@ -84,6 +85,7 @@ export function AICopilotEnhanced({
 
   // Handler to save AI response as quick win
   const handleSaveQuickWin = useCallback(async (content: string) => {
+    trackCopilotInteraction("save_quick_win", { moduleId });
     await createQuickWin({
       content,
       moduleSlug: moduleId,
@@ -206,6 +208,10 @@ export function AICopilotEnhanced({
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (input.trim()) {
+      trackCopilotInteraction("message", {
+        moduleId,
+        messageLength: input.length,
+      });
       sendMessage({ text: input });
       setInput("");
     }
@@ -220,12 +226,13 @@ export function AICopilotEnhanced({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Focus input when panel opens
+  // Focus input when panel opens and track analytics
   useEffect(() => {
     if (isOpen) {
+      trackCopilotInteraction("open", { moduleId });
       setTimeout(() => inputRef.current?.focus(), 300);
     }
-  }, [isOpen]);
+  }, [isOpen, moduleId]);
 
   // Handle escape key
   useEffect(() => {
