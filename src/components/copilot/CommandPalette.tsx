@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import { Icon, IconName, ModuleIcon } from "@/components/ui/icons";
 import { modules } from "@/data/modules";
 import { cn } from "@/lib/utils";
@@ -84,7 +85,12 @@ export function CommandPalette({ isOpen, onClose, onAskAI, onNavigate }: Command
       label: "Export insights",
       icon: "download",
       category: "action",
-      action: () => console.log("Export"),
+      action: () => {
+        toast.info("Export feature", {
+          description: "Use the export menu on the module page for detailed exports",
+        });
+        onClose();
+      },
       shortcut: "E",
     },
     {
@@ -92,7 +98,12 @@ export function CommandPalette({ isOpen, onClose, onAskAI, onNavigate }: Command
       label: "Share view",
       icon: "share",
       category: "action",
-      action: () => console.log("Share"),
+      action: () => {
+        toast.info("Share feature", {
+          description: "Use the share menu on the module page to share insights",
+        });
+        onClose();
+      },
       shortcut: "S",
     },
   ];

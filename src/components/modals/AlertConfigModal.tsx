@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { Icon } from "@/components/ui/icons";
 import { Bell, BellRing, Mail, MessageSquare, TrendingUp, TrendingDown, AlertTriangle } from "lucide-react";
+import { overlayVariants, modalVariants } from "./modalAnimations";
 
 interface AlertConfig {
   id: string;
@@ -24,27 +25,6 @@ interface AlertConfigModalProps {
   moduleName: string;
   onSaveAlert?: (alert: AlertConfig) => void;
 }
-
-const overlayVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1 },
-};
-
-const modalVariants = {
-  hidden: { opacity: 0, scale: 0.95, y: 20 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    transition: { type: "spring" as const, stiffness: 300, damping: 25 },
-  },
-  exit: {
-    opacity: 0,
-    scale: 0.95,
-    y: 20,
-    transition: { duration: 0.2 },
-  },
-};
 
 // Metric presets based on module type
 const metricPresets: Record<string, Array<{ id: string; name: string; unit: string; defaultThreshold: number }>> = {

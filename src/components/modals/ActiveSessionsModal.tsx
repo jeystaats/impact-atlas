@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useClerk, useSession } from "@clerk/nextjs";
 import { Icon } from "@/components/ui/icons";
 import { Monitor, Smartphone, Tablet, Globe, MapPin, Clock, Shield, LogOut } from "lucide-react";
+import { overlayVariants, modalVariants } from "./modalAnimations";
 
 interface SessionInfo {
   id: string;
@@ -22,27 +23,6 @@ interface ActiveSessionsModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
-const overlayVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1 },
-};
-
-const modalVariants = {
-  hidden: { opacity: 0, scale: 0.95, y: 20 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    transition: { type: "spring" as const, stiffness: 300, damping: 25 },
-  },
-  exit: {
-    opacity: 0,
-    scale: 0.95,
-    y: 20,
-    transition: { duration: 0.2 },
-  },
-};
 
 const deviceIcons = {
   desktop: Monitor,
