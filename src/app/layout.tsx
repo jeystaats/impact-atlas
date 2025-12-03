@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Space_Grotesk, Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
@@ -89,6 +90,14 @@ export default function RootLayout({
       }}
     >
       <html lang="en" className="scroll-smooth">
+        <head>
+          <Script
+            defer
+            src="https://cloud.umami.is/script.js"
+            data-website-id="036139bc-a7e5-40fb-9ddd-82cad70eb855"
+            strategy="afterInteractive"
+          />
+        </head>
         <body
           className={`${spaceGrotesk.variable} ${inter.variable} antialiased bg-ink`}
         >

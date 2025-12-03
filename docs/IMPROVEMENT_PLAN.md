@@ -543,6 +543,55 @@ useKeyboardShortcuts({
 
 ---
 
+### Analytics (Umami)
+
+**Current State:** Umami script added via Next.js `Script` component
+
+#### Best Practices Checklist
+
+| Practice | Status | Notes |
+|----------|--------|-------|
+| Use Next.js `Script` component | ✅ Done | Using `strategy="afterInteractive"` |
+| Defer loading | ✅ Done | `defer` attribute included |
+| Script in `<head>` | ✅ Done | Placed in layout.tsx head |
+| CSP headers configured | ⬜ TODO | Add `cloud.umami.is` to script-src |
+| Self-hosted consideration | ⬜ Review | Evaluate for GDPR compliance |
+| Event tracking setup | ⬜ TODO | Add custom events for CRO |
+| Goals configured in Umami | ⬜ TODO | Define conversion goals |
+| Funnel tracking | ⬜ TODO | Track user journey funnels |
+
+#### Required Custom Events (CRO)
+
+```typescript
+// src/lib/analytics.ts
+export const trackEvent = (name: string, data?: object) => {
+  if (typeof window !== 'undefined' && window.umami) {
+    window.umami.track(name, data);
+  }
+};
+
+// Key events to track:
+// - module_view: User views a module
+// - hotspot_click: User clicks on a hotspot
+// - quick_win_save: User saves a quick win
+// - plan_create: User creates an action plan
+// - plan_complete: User completes an action plan
+// - cta_click: User clicks a call-to-action
+// - signup_start: User begins signup flow
+// - signup_complete: User completes signup
+```
+
+#### Implementation Priority
+
+1. **Add Content Security Policy header** for `cloud.umami.is`
+2. **Create analytics utility** (`/src/lib/analytics.ts`)
+3. **Add type declarations** for `window.umami`
+4. **Implement key conversion events**
+5. **Configure goals and funnels** in Umami dashboard
+6. **Add A/B testing capability** for CRO experiments
+
+---
+
 ### Convex Backend
 
 #### Strengths
@@ -585,6 +634,8 @@ useKeyboardShortcuts({
 - [ ] Add structured data (JSON-LD)
 - [ ] Create sitemap.ts and robots.ts
 - [ ] Add horizontal scroll for mobile stats
+- [ ] Set up Umami analytics utility with event tracking
+- [ ] Add CSP headers for Umami
 
 ### Week 4 (Polish)
 - [ ] Refactor remaining map components
