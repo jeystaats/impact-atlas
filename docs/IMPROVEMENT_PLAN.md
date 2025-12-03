@@ -668,7 +668,7 @@ export function FixathonBadge() {
 - [x] Create BaseMap system ✅
 - [x] Refactor AirQualityMap to use BaseMap ✅
 - [x] Remove type duplication (use Convex types) ✅
-- [ ] Convert landing page to Server Component
+- [x] Convert landing page to Server Component ✅
 - [x] Create OG images ✅
 
 ### Week 3 (Medium Priority)
