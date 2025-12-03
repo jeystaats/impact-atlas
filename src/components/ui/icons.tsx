@@ -166,3 +166,36 @@ export function ModuleIcon({ moduleId, className, style }: ModuleIconProps) {
   const iconName = iconMap[moduleId] || "globe";
   return <Icon name={iconName} className={className} style={style} />;
 }
+
+// IconButton with 44px minimum touch target for accessibility
+interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  icon: IconName;
+  iconClassName?: string;
+  label: string; // Required for accessibility
+}
+
+export function IconButton({
+  icon,
+  iconClassName = "w-4 h-4",
+  label,
+  className,
+  ...props
+}: IconButtonProps) {
+  return (
+    <button
+      aria-label={label}
+      className={`
+        min-h-[44px] min-w-[44px]
+        flex items-center justify-center
+        p-2 rounded-lg
+        hover:bg-[var(--background-tertiary)]
+        transition-colors
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]
+        ${className || ""}
+      `.trim()}
+      {...props}
+    >
+      <Icon name={icon} className={iconClassName} />
+    </button>
+  );
+}
