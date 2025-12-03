@@ -105,7 +105,15 @@ export function Footer() {
           <p className="text-sm text-gray-500">
             &copy; {new Date().getFullYear()} Impact Atlas. All rights reserved.
           </p>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
+            <a
+              href="https://www.norrsken.org/fixathon"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-gray-500 hover:text-[var(--accent-light)] transition-colors"
+            >
+              Built at <span className="font-semibold">Norrsken Fixathon</span>
+            </a>
             <span className="text-xs text-gray-500 flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               All systems operational

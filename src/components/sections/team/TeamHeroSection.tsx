@@ -48,15 +48,18 @@ export default function TeamHeroSection() {
             className="flex items-center justify-center gap-3 mb-6"
           >
             <span className="ld-caption">The Team</span>
-            <span
-              className="px-3 py-1 text-xs font-medium rounded-full"
+            <a
+              href="https://www.norrsken.org/fixathon"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1 text-xs font-medium rounded-full hover:scale-105 transition-transform"
               style={{
                 background: "var(--ld-teal-subtle)",
                 color: "var(--ld-teal)",
               }}
             >
               Fixathon 2025
-            </span>
+            </a>
           </motion.div>
 
           {/* Main Headline */}

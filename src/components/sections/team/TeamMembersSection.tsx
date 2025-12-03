@@ -701,8 +701,11 @@ export default function TeamMembersSection() {
           transition={{ duration: 0.6, delay: 0.8 }}
           className="mt-16 text-center"
         >
-          <motion.div
-            className="inline-flex items-center gap-4 px-6 py-4 rounded-2xl"
+          <motion.a
+            href="https://www.norrsken.org/fixathon"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-4 px-6 py-4 rounded-2xl cursor-pointer"
             style={{
               background: "var(--ld-navy-deep)",
               border: "1px solid var(--ld-white-10)",
@@ -710,6 +713,7 @@ export default function TeamMembersSection() {
             whileHover={{
               borderColor: "var(--ld-teal)",
               boxShadow: "0 0 30px var(--ld-teal-glow)",
+              scale: 1.02,
             }}
             transition={{ duration: 0.3 }}
           >
@@ -734,7 +738,7 @@ export default function TeamMembersSection() {
                 December 1-2, 2025 - World&apos;s Largest Fixathon
               </p>
             </div>
-          </motion.div>
+          </motion.a>
         </motion.div>
       </div>
     </section>

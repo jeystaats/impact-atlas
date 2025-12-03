@@ -56,11 +56,14 @@ export default function FixathonFitSection() {
       <div className="ld-section-content relative z-10">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <motion.div
+          <motion.a
+            href="https://www.norrsken.org/fixathon"
+            target="_blank"
+            rel="noopener noreferrer"
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="inline-flex items-center gap-3 px-4 py-2 rounded-full mb-6"
+            className="inline-flex items-center gap-3 px-4 py-2 rounded-full mb-6 hover:scale-105 transition-transform"
             style={{
               background: "var(--ld-white-5)",
               border: "1px solid var(--ld-white-10)",
@@ -73,7 +76,7 @@ export default function FixathonFitSection() {
             <span className="text-sm font-medium" style={{ color: "var(--ld-white-70)" }}>
               Norrsken Fixathon Barcelona • Dec 1-2, 2025
             </span>
-          </motion.div>
+          </motion.a>
 
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
