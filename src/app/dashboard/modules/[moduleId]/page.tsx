@@ -38,6 +38,8 @@ import {
   createShareableLink,
 } from "@/lib/export";
 import type { Hotspot, Module } from "@/types";
+import { AlertConfigModal } from "@/components/modals/AlertConfigModal";
+import { AICopilotDrawer } from "@/components/modules/AICopilotDrawer";
 
 // Convert HotspotData to Hotspot format for export utilities
 function convertToHotspot(data: HotspotData, moduleId: string): Hotspot {
@@ -87,6 +89,8 @@ export default function ModuleDetailPage() {
   const [selectedHotspot, setSelectedHotspot] = useState<string | null>(null);
   const [drawerHotspot, setDrawerHotspot] = useState<HotspotData | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
+  const [isAICopilotOpen, setIsAICopilotOpen] = useState(false);
 
   // Get selected city - this makes the page reactive to city changes
   const { selectedCityId, selectedCity, selectedCitySlug, isHydrated } = useSelectedCity();
@@ -431,8 +435,27 @@ export default function ModuleDetailPage() {
                 actions={
                   insight.type === "recommendation"
                     ? [
-                        { label: "Create Action Plan", onClick: () => {} },
-                        { label: "Learn More", onClick: () => {} },
+                        {
+                          label: "Create Action Plan",
+                          onClick: () => {
+                            toast.success("Creating action plan...", {
+                              description: insight.title,
+                              action: {
+                                label: "Go to Plans",
+                                onClick: () => window.location.href = "/dashboard/plans",
+                              },
+                            });
+                          },
+                        },
+                        {
+                          label: "Learn More",
+                          onClick: () => {
+                            toast.info(insight.title, {
+                              description: insight.description,
+                              duration: 8000,
+                            });
+                          },
+                        },
                       ]
                     : undefined
                 }
@@ -444,20 +467,60 @@ export default function ModuleDetailPage() {
           <div className="p-4 rounded-xl bg-[var(--background-secondary)] border border-[var(--border)]">
             <h3 className="text-sm font-medium text-[var(--foreground)] mb-3">Quick Actions</h3>
             <div className="grid grid-cols-2 gap-2">
-              {[
-                { icon: "download" as const, label: "Export Report" },
-                { icon: "share" as const, label: "Share View" },
-                { icon: "chat" as const, label: "Ask AI" },
-                { icon: "target" as const, label: "Set Alert" },
-              ].map((action) => (
-                <button
-                  key={action.label}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--background-tertiary)] border border-[var(--border)] hover:border-[var(--accent-muted)] transition-colors text-sm text-[var(--foreground-secondary)] hover:text-[var(--foreground)]"
-                >
-                  <Icon name={action.icon} className="w-4 h-4" />
-                  {action.label}
-                </button>
-              ))}
+              <button
+                onClick={() => {
+                  exportToCSV(
+                    filteredHotspots.map((h) => ({
+                      ID: h.id,
+                      Label: h.label,
+                      Location: h.location,
+                      Severity: h.severity,
+                      Value: h.value || "N/A",
+                      Description: h.description,
+                      Trend: h.trend || "N/A",
+                    })),
+                    `${moduleId}-hotspots-report`
+                  );
+                  toast.success("Report exported", { description: `${filteredHotspots.length} hotspots exported to CSV` });
+                }}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--background-tertiary)] border border-[var(--border)] hover:border-[var(--accent-muted)] transition-colors text-sm text-[var(--foreground-secondary)] hover:text-[var(--foreground)]"
+              >
+                <Icon name="download" className="w-4 h-4" />
+                Export Report
+              </button>
+              <button
+                onClick={async () => {
+                  const shareUrl = createShareableLink({
+                    moduleId,
+                    view: "map",
+                    filters: { city: selectedCitySlug },
+                  });
+                  const result = await copyToClipboard(shareUrl);
+                  if (result.success) {
+                    toast.success("Link copied!", { description: "Share this link to show this view" });
+                  } else {
+                    toast.error("Failed to copy link");
+                  }
+                }}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--background-tertiary)] border border-[var(--border)] hover:border-[var(--accent-muted)] transition-colors text-sm text-[var(--foreground-secondary)] hover:text-[var(--foreground)]"
+              >
+                <Icon name="share" className="w-4 h-4" />
+                Share View
+              </button>
+              <button
+                onClick={() => setIsAICopilotOpen(true)}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--background-tertiary)] border border-[var(--border)] hover:border-[var(--accent-muted)] transition-colors text-sm text-[var(--foreground-secondary)] hover:text-[var(--foreground)]"
+              >
+                <Icon name="chat" className="w-4 h-4" />
+                Ask AI
+              </button>
+              <button
+                onClick={() => setIsAlertModalOpen(true)}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--background-tertiary)] border border-[var(--border)] hover:border-[var(--accent-muted)] transition-colors text-sm text-[var(--foreground-secondary)] hover:text-[var(--foreground)]"
+              >
+                <Icon name="target" className="w-4 h-4" />
+                Set Alert
+              </button>
             </div>
           </div>
         </div>
@@ -484,6 +547,26 @@ export default function ModuleDetailPage() {
         resultsCount={filteredHotspots.length}
         totalCount={allHotspots.length}
         valueRangeConfig={getValueRangeConfig(moduleId)}
+      />
+
+      {/* Alert Config Modal */}
+      <AlertConfigModal
+        isOpen={isAlertModalOpen}
+        onClose={() => setIsAlertModalOpen(false)}
+        moduleId={moduleId}
+        moduleName={module.title}
+      />
+
+      {/* AI Copilot Drawer */}
+      <AICopilotDrawer
+        isOpen={isAICopilotOpen}
+        onClose={() => setIsAICopilotOpen(false)}
+        moduleId={moduleId}
+        moduleName={module.title}
+        context={{
+          hotspotCount: filteredHotspots.length,
+          cityName: selectedCity?.name || "Selected Area",
+        }}
       />
     </ModuleLayout>
   );

@@ -19,13 +19,42 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Impact Atlas | Climate Intelligence for Cities",
-  description: "Discover your city's fastest, highest-impact climate and health wins. AI-powered platform revealing hotspots and quick wins across urban heat, air pollution, coastal plastic, port emissions, biodiversity and restoration.",
-  keywords: ["climate", "sustainability", "AI", "cities", "urban planning", "environment", "urban heat", "air quality", "biodiversity"],
+  metadataBase: new URL("https://impact.staats.dev"),
+  title: {
+    default: "Impact Atlas | Climate Intelligence for Cities",
+    template: "%s | Impact Atlas",
+  },
+  description:
+    "Discover your city's fastest, highest-impact climate and health wins. AI-powered platform revealing hotspots and quick wins across urban heat, air pollution, coastal plastic, port emissions, biodiversity and restoration.",
+  keywords: [
+    "climate",
+    "sustainability",
+    "AI",
+    "cities",
+    "urban planning",
+    "environment",
+    "urban heat",
+    "air quality",
+    "biodiversity",
+  ],
+  authors: [{ name: "Impact Atlas Team" }],
+  creator: "Impact Atlas",
   openGraph: {
     title: "Impact Atlas | Climate Intelligence for Cities",
     description: "Discover your city's fastest, highest-impact climate and health wins.",
+    url: "https://impact.staats.dev",
+    siteName: "Impact Atlas",
+    locale: "en_US",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Impact Atlas | Climate Intelligence for Cities",
+    description: "Discover your city's fastest, highest-impact climate and health wins.",
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 

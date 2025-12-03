@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Icon } from "@/components/ui/icons";
 import { Button } from "@/components/ui/button";
+import { ActiveSessionsModal } from "@/components/modals/ActiveSessionsModal";
+import { DeleteAccountModal } from "@/components/modals/DeleteAccountModal";
 import {
   usePreferencesStore,
   cityDisplayNames,
@@ -29,6 +31,10 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Security modals state
+  const [isSessionsModalOpen, setIsSessionsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   // Convex user and mutations
   const convexUser = useCurrentUser();
@@ -497,7 +503,7 @@ export default function SettingsPage() {
                         Manage devices where you're signed in
                       </p>
                     </div>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => setIsSessionsModalOpen(true)}>
                       View Sessions
                     </Button>
                   </div>
@@ -518,6 +524,7 @@ export default function SettingsPage() {
                         variant="outline"
                         size="sm"
                         className="border-red-500/50 text-red-400 hover:bg-red-500/10"
+                        onClick={() => setIsDeleteModalOpen(true)}
                       >
                         Delete Account
                       </Button>
@@ -652,6 +659,18 @@ export default function SettingsPage() {
           </div>
         </motion.div>
       </div>
+
+      {/* Security Modals */}
+      <ActiveSessionsModal
+        isOpen={isSessionsModalOpen}
+        onClose={() => setIsSessionsModalOpen(false)}
+      />
+
+      <DeleteAccountModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        userEmail={user?.primaryEmailAddress?.emailAddress}
+      />
     </div>
   );
 }

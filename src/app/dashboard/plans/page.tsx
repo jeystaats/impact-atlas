@@ -20,6 +20,7 @@ import { modules as fallbackModules } from "@/data/modules";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useUIStore } from "@/stores/useUIStore";
 import { ActionPlanModal } from "@/components/dashboard/ActionPlanModal";
+import { AISuggestionModal, defaultAISuggestion } from "@/components/modals/AISuggestionModal";
 
 // Types
 type PlanStatus = "draft" | "active" | "completed";
@@ -723,6 +724,10 @@ export default function ActionPlansPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editPlan, setEditPlan] = useState<EditPlanData | undefined>(undefined);
 
+  // AI Suggestion banner state
+  const [showAISuggestion, setShowAISuggestion] = useState(true);
+  const [isAISuggestionModalOpen, setIsAISuggestionModalOpen] = useState(false);
+
   useEffect(() => {
     setIsHydrated(true);
   }, []);
@@ -937,51 +942,65 @@ export default function ActionPlansPage() {
       )}
 
       {/* AI Suggestion Banner */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
-        className="mt-8 p-6 rounded-xl border border-[var(--border)] bg-gradient-to-r from-[var(--background-tertiary)] to-[var(--background-secondary)]"
-      >
-        <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-          <div className="flex items-center gap-3">
-            <motion.div
-              animate={{
-                boxShadow: [
-                  "0 0 20px var(--teal-glow)",
-                  "0 0 40px var(--teal-glow-strong)",
-                  "0 0 20px var(--teal-glow)",
-                ],
-              }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="w-12 h-12 rounded-xl bg-[var(--teal-glow-strong)] flex items-center justify-center"
-            >
-              <Sparkles className="w-6 h-6 text-[var(--accent)]" />
-            </motion.div>
-            <div>
-              <h3 className="font-semibold text-[var(--foreground)]">
-                AI Recommendation Available
-              </h3>
-              <p className="text-sm text-[var(--foreground-secondary)]">
-                Based on your quick wins, we suggest creating a "Green Corridor
-                Initiative" combining biodiversity and heat mitigation.
-              </p>
+      <AnimatePresence>
+        {showAISuggestion && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20, height: 0, marginTop: 0, padding: 0 }}
+            transition={{ delay: 0.6 }}
+            className="mt-8 p-6 rounded-xl border border-[var(--border)] bg-gradient-to-r from-[var(--background-tertiary)] to-[var(--background-secondary)]"
+          >
+            <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+              <div className="flex items-center gap-3">
+                <motion.div
+                  animate={{
+                    boxShadow: [
+                      "0 0 20px var(--teal-glow)",
+                      "0 0 40px var(--teal-glow-strong)",
+                      "0 0 20px var(--teal-glow)",
+                    ],
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="w-12 h-12 rounded-xl bg-[var(--teal-glow-strong)] flex items-center justify-center"
+                >
+                  <Sparkles className="w-6 h-6 text-[var(--accent)]" />
+                </motion.div>
+                <div>
+                  <h3 className="font-semibold text-[var(--foreground)]">
+                    AI Recommendation Available
+                  </h3>
+                  <p className="text-sm text-[var(--foreground-secondary)]">
+                    Based on your quick wins, we suggest creating a "Green Corridor
+                    Initiative" combining biodiversity and heat mitigation.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 lg:ml-auto">
+                <button
+                  onClick={() => {
+                    setShowAISuggestion(false);
+                    toast.success("Suggestion dismissed", {
+                      description: "You can find more suggestions in the AI insights panel.",
+                    });
+                  }}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--background-tertiary)] transition-colors"
+                >
+                  Dismiss
+                </button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setIsAISuggestionModalOpen(true)}
+                  className="px-4 py-2 rounded-lg text-sm font-medium bg-[var(--accent)] text-white"
+                >
+                  View Suggestion
+                </motion.button>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-3 lg:ml-auto">
-            <button className="px-4 py-2 rounded-lg text-sm font-medium text-[var(--foreground-secondary)] hover:text-[var(--foreground)] hover:bg-[var(--background-tertiary)] transition-colors">
-              Dismiss
-            </button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="px-4 py-2 rounded-lg text-sm font-medium bg-[var(--accent)] text-white"
-            >
-              View Suggestion
-            </motion.button>
-          </div>
-        </div>
-      </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Action Plan Modal */}
       <ActionPlanModal
@@ -991,6 +1010,20 @@ export default function ActionPlansPage() {
           setEditPlan(undefined);
         }}
         editPlan={editPlan}
+      />
+
+      {/* AI Suggestion Modal */}
+      <AISuggestionModal
+        isOpen={isAISuggestionModalOpen}
+        onClose={() => setIsAISuggestionModalOpen(false)}
+        suggestion={defaultAISuggestion}
+        onCreatePlan={() => {
+          // Close the AI suggestion modal and open the create plan modal pre-filled
+          setIsAISuggestionModalOpen(false);
+          setShowAISuggestion(false);
+          setEditPlan(undefined);
+          setIsModalOpen(true);
+        }}
       />
     </div>
   );

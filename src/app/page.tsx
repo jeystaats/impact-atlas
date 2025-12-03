@@ -8,7 +8,7 @@ import ImpactSection from "@/components/sections/ImpactSection";
 import CTASection from "@/components/sections/CTASection";
 
 export const metadata: Metadata = {
-  title: "Impact Atlas | AI-Powered Climate Intelligence for Cities",
+  title: "AI-Powered Climate Intelligence for Cities",
   description:
     "Discover your city's fastest, highest-impact climate wins across urban heat, air quality, coastal plastic, and biodiversity. AI-powered insights from satellite data help cities take action faster.",
   keywords: [
@@ -27,29 +27,13 @@ export const metadata: Metadata = {
     title: "Impact Atlas | AI-Powered Climate Intelligence for Cities",
     description:
       "AI-powered platform revealing climate hotspots and quick wins for cities worldwide.",
-    url: "https://impactatlas.earth",
-    siteName: "Impact Atlas",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Impact Atlas - Climate Intelligence Dashboard",
-      },
-    ],
-    locale: "en_US",
-    type: "website",
+    url: "https://impact.staats.dev",
   },
   twitter: {
     card: "summary_large_image",
     title: "Impact Atlas | Climate Intelligence for Cities",
     description:
       "AI-powered platform revealing climate hotspots and quick wins.",
-    images: ["/og-image.png"],
-  },
-  robots: {
-    index: true,
-    follow: true,
   },
 };
 

@@ -8,7 +8,7 @@ import FixathonFitSection from "@/components/sections/about/FixathonFitSection";
 import AboutCTASection from "@/components/sections/about/AboutCTASection";
 
 export const metadata: Metadata = {
-  title: "About Impact Atlas | Our Mission & Vision",
+  title: "About | Our Mission & Vision",
   description:
     "Learn how Impact Atlas combines satellite data, AI, and urban planning to help cities tackle climate challenges faster and smarter. Built at Norrsken Fixathon Barcelona.",
   keywords: [
@@ -24,29 +24,13 @@ export const metadata: Metadata = {
     title: "About Impact Atlas | Our Mission & Vision",
     description:
       "Combining satellite data, AI, and urban planning to help cities tackle climate challenges.",
-    url: "https://impactatlas.earth/about",
-    siteName: "Impact Atlas",
-    images: [
-      {
-        url: "/og-image-about.png",
-        width: 1200,
-        height: 630,
-        alt: "About Impact Atlas - Our Mission",
-      },
-    ],
-    locale: "en_US",
-    type: "website",
+    url: "https://impact.staats.dev/about",
   },
   twitter: {
     card: "summary_large_image",
     title: "About Impact Atlas | Our Mission & Vision",
     description:
       "Combining satellite data, AI, and urban planning for climate action.",
-    images: ["/og-image-about.png"],
-  },
-  robots: {
-    index: true,
-    follow: true,
   },
 };
 

@@ -35,7 +35,9 @@
       "WebFetch(domain:www.staats.dev)",
       "WebFetch(domain:www.linkedin.com)",
       "WebFetch(domain:events.norrsken.org)",
-      "WebFetch(domain:www.norrsken.org)"
+      "WebFetch(domain:www.norrsken.org)",
+      "Bash(xargs cat:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

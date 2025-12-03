@@ -5,7 +5,7 @@ import TeamMembersSection from "@/components/sections/team/TeamMembersSection";
 import TeamCTASection from "@/components/sections/team/TeamCTASection";
 
 export const metadata: Metadata = {
-  title: "Our Team | Impact Atlas",
+  title: "Our Team",
   description:
     "Meet the Impact Atlas team: sustainability experts, product leaders, and engineers building AI-powered climate intelligence for cities. Built at Norrsken Fixathon Barcelona 2025.",
   keywords: [
@@ -19,29 +19,13 @@ export const metadata: Metadata = {
     title: "Our Team | Impact Atlas",
     description:
       "Meet the team building AI-powered climate intelligence for cities.",
-    url: "https://impactatlas.earth/team",
-    siteName: "Impact Atlas",
-    images: [
-      {
-        url: "/og-image-team.png",
-        width: 1200,
-        height: 630,
-        alt: "Impact Atlas Team",
-      },
-    ],
-    locale: "en_US",
-    type: "website",
+    url: "https://impact.staats.dev/team",
   },
   twitter: {
     card: "summary_large_image",
     title: "Our Team | Impact Atlas",
     description:
       "Meet the team building AI-powered climate intelligence for cities.",
-    images: ["/og-image-team.png"],
-  },
-  robots: {
-    index: true,
-    follow: true,
   },
 };
 
