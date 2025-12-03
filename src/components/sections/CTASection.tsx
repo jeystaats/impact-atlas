@@ -190,7 +190,7 @@ export default function CTASection() {
               className="opacity-70 hover:opacity-100 transition-opacity"
             >
               <img
-                src="/logos/sponsors/lovable.png"
+                src="/logos/sponsors/lovable.svg"
                 alt="Lovable"
                 className="h-7 md:h-8 w-auto"
               />

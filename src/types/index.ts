@@ -1,13 +1,43 @@
 /**
  * Application Types
  *
- * This file provides type definitions for the application.
- * UI-specific types are defined here. For Convex database types,
- * import directly from "convex/_generated/dataModel".
+ * This file provides type definitions for the UI layer.
  *
- * Note: UI types use `id: string` while Convex uses `_id: Id<TableName>`.
- * Transform data when moving between layers.
+ * Architecture:
+ * - Database types: Import from "convex/_generated/dataModel" using Doc<"tableName">
+ * - UI types: Defined here, derived from Convex types where applicable
+ *
+ * Why separate UI types?
+ * - Convex uses `_id: Id<TableName>` while UI uses `id: string` for simplicity
+ * - UI types often include computed/derived fields not stored in DB
+ * - Components may need flattened structures vs nested DB documents
+ *
+ * Example usage:
+ * ```typescript
+ * // For database operations
+ * import { Doc, Id } from "@/convex/_generated/dataModel";
+ * type DbModule = Doc<"modules">;
+ *
+ * // For UI components
+ * import { Module, Hotspot } from "@/types";
+ * ```
  */
+
+import type { Doc } from "../../convex/_generated/dataModel";
+
+// ==============================================
+// Re-export Convex types for convenience
+// ==============================================
+
+/** Convex document types - use these for database operations */
+export type DbModule = Doc<"modules">;
+export type DbCity = Doc<"cities">;
+export type DbHotspot = Doc<"hotspots">;
+export type DbQuickWin = Doc<"quickWins">;
+export type DbAiInsight = Doc<"aiInsights">;
+export type DbActionPlan = Doc<"actionPlans">;
+export type DbUser = Doc<"users">;
+export type DbDataSource = Doc<"dataSources">;
 
 // ==============================================
 // UI Types
@@ -15,6 +45,7 @@
 
 /**
  * Simplified City type for UI components
+ * Derived from DbCity with flattened structure
  */
 export interface City {
   id: string;
@@ -29,6 +60,7 @@ export interface City {
 
 /**
  * Simplified Module type for UI components
+ * Includes computed metrics not stored in DB
  */
 export interface Module {
   id: string;
@@ -51,6 +83,7 @@ export interface ModuleMetric {
 
 /**
  * Simplified Hotspot type for UI components
+ * Includes nested AI insights and actions
  */
 export interface Hotspot {
   id: string;
@@ -60,7 +93,7 @@ export interface Hotspot {
     lng: number;
     name: string;
   };
-  severity: "low" | "medium" | "high" | "critical";
+  severity: Severity;
   title: string;
   description: string;
   aiInsights: AIInsight[];
@@ -81,8 +114,8 @@ export interface QuickWin {
   moduleId: string;
   title: string;
   description: string;
-  impact: "low" | "medium" | "high";
-  effort: "low" | "medium" | "high";
+  impact: ImpactLevel;
+  effort: ImpactLevel;
   estimatedCost?: string;
   estimatedBenefit?: string;
   priority: number;
@@ -127,3 +160,65 @@ export type TrendDirection = "up" | "down" | "neutral";
 export type ApiResponse<T> =
   | { success: true; data: T }
   | { success: false; error: string };
+
+// ==============================================
+// Type conversion helpers
+// ==============================================
+
+/**
+ * Convert a Convex module document to UI Module type
+ */
+export function toUiModule(doc: DbModule, quickWinsCount: number = 0): Module {
+  return {
+    id: doc.slug,
+    title: doc.name,
+    description: doc.description,
+    icon: doc.icon,
+    color: doc.color,
+    metrics: doc.metrics.map((m) => ({
+      label: m.label,
+      value: 0, // Would be computed from actual data
+      unit: m.unit,
+    })),
+    quickWinsCount,
+    status: doc.status,
+  };
+}
+
+/**
+ * Convert a Convex city document to UI City type
+ */
+export function toUiCity(doc: DbCity): City {
+  return {
+    id: doc.slug,
+    name: doc.name,
+    country: doc.country,
+    population: doc.population,
+    coordinates: doc.coordinates,
+  };
+}
+
+/**
+ * Convert a Convex hotspot document to UI Hotspot type
+ */
+export function toUiHotspot(
+  doc: DbHotspot,
+  moduleSlug: string,
+  aiInsights: AIInsight[] = [],
+  actions: QuickWin[] = []
+): Hotspot {
+  return {
+    id: doc._id,
+    moduleId: moduleSlug,
+    location: {
+      lat: doc.coordinates.lat,
+      lng: doc.coordinates.lng,
+      name: doc.address || doc.neighborhood || "Unknown location",
+    },
+    severity: doc.severity,
+    title: doc.name,
+    description: doc.description,
+    aiInsights,
+    actions,
+  };
+}
