@@ -14,3 +14,7 @@ export {
   useVisibilityTracking,
   useTrackedClick,
 } from "./useAnalytics";
+export {
+  useKeyboardShortcuts,
+  getKeyboardShortcuts,
+} from "./useKeyboardShortcuts";

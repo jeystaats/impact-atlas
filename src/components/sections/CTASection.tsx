@@ -138,7 +138,7 @@ export default function CTASection() {
               className="opacity-70 hover:opacity-100 transition-opacity"
             >
               <img
-                src="https://cdn.prod.website-files.com/65e76a14af207274f46c7f0e/67173f63ef1d60bc1e3bfc89_Spotify_Full_Logo_RGB_Green.png"
+                src="/logos/sponsors/spotify.png"
                 alt="Spotify"
                 className="h-7 md:h-8 w-auto"
               />
@@ -151,7 +151,7 @@ export default function CTASection() {
               className="opacity-70 hover:opacity-100 transition-opacity"
             >
               <img
-                src="https://cdn.prod.website-files.com/65e76a14af207274f46c7f0e/6915f27bb862932c92c34a92_google-white-logo.png"
+                src="/logos/sponsors/google.png"
                 alt="Google"
                 className="h-7 md:h-8 w-auto"
               />
@@ -164,7 +164,7 @@ export default function CTASection() {
               className="opacity-70 hover:opacity-100 transition-opacity"
             >
               <img
-                src="https://cdn.prod.website-files.com/65e76a14af207274f46c7f0e/69025376dc6af1cbf11839c9_NVIDIA_logo%201.svg"
+                src="/logos/sponsors/nvidia.svg"
                 alt="NVIDIA"
                 className="h-7 md:h-8 w-auto"
               />
@@ -177,7 +177,7 @@ export default function CTASection() {
               className="opacity-70 hover:opacity-100 transition-opacity"
             >
               <img
-                src="https://cdn.prod.website-files.com/65e76a14af207274f46c7f0e/6904afe11a4e5107d10b480f_logo-riksbanken%206.svg"
+                src="/logos/sponsors/riksbanken.svg"
                 alt="Riksbanken"
                 className="h-7 md:h-8 w-auto"
               />
@@ -190,7 +190,7 @@ export default function CTASection() {
               className="opacity-70 hover:opacity-100 transition-opacity"
             >
               <img
-                src="https://cdn.prod.website-files.com/65e76a14af207274f46c7f0e/690a008c310eaea23af7f328_00ee2279-3113-4d7f-b1bc-aa951404e869.png"
+                src="/logos/sponsors/lovable.png"
                 alt="Lovable"
                 className="h-7 md:h-8 w-auto"
               />
