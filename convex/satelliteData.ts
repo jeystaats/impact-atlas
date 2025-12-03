@@ -7,6 +7,7 @@ import {
   internalAction,
 } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { requireAdmin } from "./model/auth";
 
 // ============================================
 // WHO Air Quality Guidelines (2021) for NO2
@@ -648,6 +649,9 @@ export const triggerFetch = mutation({
     daysBack: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    // Require admin to trigger data fetch
+    await requireAdmin(ctx);
+
     // Schedule the action to run
     await ctx.scheduler.runAfter(0, internal.satelliteData.fetchSentinel5PNO2, {
       citySlug: args.citySlug,
@@ -669,6 +673,9 @@ export const triggerFetchAll = mutation({
     daysBack: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    // Require admin to trigger data fetch
+    await requireAdmin(ctx);
+
     // Schedule the action to run
     await ctx.scheduler.runAfter(
       0,

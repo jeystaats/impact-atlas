@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
+import { requireAdmin } from "./model/auth";
 
 /**
  * Get onboarding progress for a city
@@ -50,6 +51,8 @@ export const isComplete = query({
 export const remove = mutation({
   args: { onboardingId: v.id("cityOnboarding") },
   handler: async (ctx, args) => {
+    // Require admin to remove onboarding records
+    await requireAdmin(ctx);
     await ctx.db.delete(args.onboardingId);
   },
 });

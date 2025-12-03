@@ -6,12 +6,15 @@
  */
 
 import { HotspotData } from "@/data/hotspots";
+import { Severity } from "@/types";
+
+// Re-export Severity for backwards compatibility
+export type { Severity } from "@/types";
 
 // =============================================================================
 // FILTER TYPES
 // =============================================================================
 
-export type Severity = "low" | "medium" | "high" | "critical";
 export type Trend = "up" | "down" | "stable";
 export type DateRangePreset = "7d" | "30d" | "90d" | "custom";
 

@@ -1,6 +1,6 @@
 export * from "./types";
 export * from "./constants";
-export { ProgressRing } from "./ProgressRing";
+export { ProgressRing } from "@/components/ui/ProgressRing";
 export { StatusDropdown } from "./StatusDropdown";
 export { ActionPlanCard } from "./ActionPlanCard";
 export { CreatePlanCard } from "./CreatePlanCard";

@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation, internalMutation, internalQuery } from "./_generated/server";
+import { requireAdmin } from "./model/auth";
 
 /**
  * List all cities
@@ -136,6 +137,9 @@ export const create = mutation({
     description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    // Require admin to create cities
+    await requireAdmin(ctx);
+
     // Check if slug already exists
     const existing = await ctx.db
       .query("cities")

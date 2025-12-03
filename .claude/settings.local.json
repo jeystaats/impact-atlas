@@ -42,7 +42,8 @@
       "WebSearch",
       "Bash(wc:*)",
       "Bash(ls:*)",
-      "Bash(npm run test:run:*)"
+      "Bash(npm run test:run:*)",
+      "WebFetch(domain:www.storyblok.com)"
     ],
     "deny": [],
     "ask": []

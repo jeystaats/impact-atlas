@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
-import { requireCurrentUser, getCurrentUser } from "./model/auth";
+import { requireCurrentUser, getCurrentUser, requireAdmin } from "./model/auth";
 
 /**
  * List quick wins for a city
@@ -330,6 +330,8 @@ export const create = mutation({
     sortOrder: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    // Require admin to create quick wins
+    await requireAdmin(ctx);
     const now = Date.now();
 
     const quickWinId = await ctx.db.insert("quickWins", {
@@ -364,6 +366,8 @@ export const createFromAI = mutation({
     cityId: v.optional(v.id("cities")),
   },
   handler: async (ctx, args) => {
+    // Require authenticated user to create quick wins from AI
+    await requireCurrentUser(ctx);
     const now = Date.now();
 
     // Extract title from content (first line or first sentence)

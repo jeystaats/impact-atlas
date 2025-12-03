@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation, internalQuery } from "./_generated/server";
+import { requireAdmin } from "./model/auth";
 
 /**
  * List all modules
@@ -154,6 +155,9 @@ export const create = mutation({
     sortOrder: v.number(),
   },
   handler: async (ctx, args) => {
+    // Require admin to create modules
+    await requireAdmin(ctx);
+
     // Check if slug already exists
     const existing = await ctx.db
       .query("modules")

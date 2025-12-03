@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
+import { requireCurrentUser, requireAdmin } from "./model/auth";
 
 /**
  * List hotspots for a city
@@ -206,6 +207,8 @@ export const create = mutation({
     imageUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    // Require admin to create hotspots
+    await requireAdmin(ctx);
     const now = Date.now();
 
     const hotspotId = await ctx.db.insert("hotspots", {
@@ -243,6 +246,8 @@ export const updateStatus = mutation({
     ),
   },
   handler: async (ctx, args) => {
+    // Require admin to update hotspot status
+    await requireAdmin(ctx);
     await ctx.db.patch(args.hotspotId, {
       status: args.status,
       lastUpdated: Date.now(),
@@ -266,6 +271,8 @@ export const updateSeverity = mutation({
     ),
   },
   handler: async (ctx, args) => {
+    // Require admin to update hotspot severity
+    await requireAdmin(ctx);
     await ctx.db.patch(args.hotspotId, {
       severity: args.severity,
       lastUpdated: Date.now(),

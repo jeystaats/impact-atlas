@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation, internalMutation } from "./_generated/server";
+import { requireAdmin } from "./model/auth";
 
 /**
  * List AI insights for a hotspot
@@ -129,6 +130,8 @@ export const create = mutation({
     expiresAt: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    // Require admin to create AI insights
+    await requireAdmin(ctx);
     const now = Date.now();
 
     const insightId = await ctx.db.insert("aiInsights", {
@@ -158,6 +161,8 @@ export const deactivate = mutation({
     insightId: v.id("aiInsights"),
   },
   handler: async (ctx, args) => {
+    // Require admin to deactivate insights
+    await requireAdmin(ctx);
     await ctx.db.patch(args.insightId, {
       isActive: false,
     });

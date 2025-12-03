@@ -1,5 +1,6 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText, convertToModelMessages } from "ai";
+import { auth } from "@clerk/nextjs/server";
 import {
   CLIMATE_DIRECTOR_SYSTEM_PROMPT,
   createCityContext,
@@ -70,13 +71,20 @@ function sanitizeUserInput(text: string): string {
 
 export async function POST(req: Request) {
   try {
-    // Get client IP for rate limiting
-    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-               req.headers.get("x-real-ip") ||
-               "unknown";
+    // Verify authentication (defense-in-depth, middleware also checks)
+    const { userId } = await auth();
+    if (!userId) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    // Use userId for rate limiting (more reliable than IP for authenticated users)
+    const rateLimitKey = userId;
 
     // Check rate limit
-    if (!checkRateLimit(ip)) {
+    if (!checkRateLimit(rateLimitKey)) {
       return new Response(
         JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
         { status: 429, headers: { "Content-Type": "application/json" } }

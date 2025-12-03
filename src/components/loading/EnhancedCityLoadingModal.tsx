@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Icon, IconName } from "@/components/ui/icons";
 import { ModuleLoadingCard } from "./ModuleLoadingCard";
 import { DataStreamAnimation } from "./DataStreamAnimation";
-import { ProgressRing } from "./ProgressRing";
+import { ProgressRing } from "@/components/ui/ProgressRing";
 import { AIActivityIndicator } from "./AIActivityIndicator";
 import { useNotifications } from "@/components/notifications/useNotifications";
 import { cn } from "@/lib/utils";
@@ -316,6 +316,7 @@ export function EnhancedCityLoadingModal({
                   progress={progress?.progress || 0}
                   size={72}
                   color={currentStageInfo.color}
+                  animatePercentage
                 />
 
                 <div className="text-left">

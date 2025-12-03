@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Calendar, ChevronRight, Layers } from "lucide-react";
 import { Icon, ModuleIcon } from "@/components/ui/icons";
-import { ProgressRing } from "./ProgressRing";
+import { ProgressRing } from "@/components/ui/ProgressRing";
 import { StatusDropdown } from "./StatusDropdown";
 import { statusConfig, priorityColors, itemVariants } from "./constants";
 import type { NormalizedActionPlan, PlanStatus } from "./types";
