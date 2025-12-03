@@ -68,6 +68,8 @@ function FloatingParticle({
   isOrdered,
   orderedPosition,
   prefersReducedMotion,
+  randomX,
+  randomY,
 }: {
   delay: number;
   duration: number;
@@ -76,9 +78,9 @@ function FloatingParticle({
   isOrdered: boolean;
   orderedPosition: { x: number; y: number };
   prefersReducedMotion: boolean;
+  randomX: number;
+  randomY: number;
 }) {
-  const randomX = Math.random() * 100;
-  const randomY = Math.random() * 100;
 
   // For reduced motion, show static particles
   if (prefersReducedMotion) {
@@ -198,16 +200,20 @@ function ConnectionLines({ showOrdered, prefersReducedMotion }: { showOrdered: b
 
 // The main visualization showing transformation
 function TransformationVisualization({ isInView, showOrdered, prefersReducedMotion }: { isInView: boolean; showOrdered: boolean; prefersReducedMotion: boolean }) {
-  const particles = Array.from({ length: 24 }, (_, i) => ({
-    delay: i * 0.2,
-    duration: 4 + Math.random() * 3,
-    size: 4 + Math.random() * 6,
-    color: moduleIcons[i % moduleIcons.length].color,
-    orderedPosition: {
-      x: 20 + (i % 6) * 12,
-      y: 30 + Math.floor(i / 6) * 15,
-    },
-  }));
+  const [particles] = useState(() =>
+    Array.from({ length: 24 }, (_, i) => ({
+      delay: i * 0.2,
+      duration: 4 + Math.random() * 3,
+      size: 4 + Math.random() * 6,
+      color: moduleIcons[i % moduleIcons.length].color,
+      orderedPosition: {
+        x: 20 + (i % 6) * 12,
+        y: 30 + Math.floor(i / 6) * 15,
+      },
+      randomX: Math.random() * 100,
+      randomY: Math.random() * 100,
+    }))
+  );
 
   return (
     <div className="relative w-full h-48 md:h-64 overflow-hidden rounded-2xl" style={{ background: "var(--ld-navy-mid)" }}>
@@ -284,6 +290,9 @@ function TransformationVisualization({ isInView, showOrdered, prefersReducedMoti
         const radius = showOrdered ? 35 : 40;
         const x = 50 + Math.cos(angle) * radius;
         const y = 50 + Math.sin(angle) * radius;
+        // Pre-compute random offsets to avoid Math.random() in render
+        const randomXOffset = particles[i]?.randomX ? (particles[i].randomX - 50) / 5 : 0;
+        const randomYOffset = particles[i]?.randomY ? (particles[i].randomY - 50) / 5 : 0;
 
         return (
           <motion.div
@@ -306,8 +315,8 @@ function TransformationVisualization({ isInView, showOrdered, prefersReducedMoti
             } : {
               opacity: [0.4, 0.8, 0.4],
               scale: [0.8, 1, 0.8],
-              x: [0, Math.random() * 20 - 10, 0],
-              y: [0, Math.random() * 20 - 10, 0],
+              x: [0, randomXOffset, 0],
+              y: [0, randomYOffset, 0],
             }}
             transition={prefersReducedMotion ? { duration: 0.01 } : showOrdered ? {
               duration: 0.8,

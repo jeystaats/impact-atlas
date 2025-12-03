@@ -26,12 +26,10 @@ export { moduleHotspots, moduleInsights } from "../hotspots";
 
 // Helper function to get hotspots for a specific module
 export function getModuleHotspots(moduleId: string) {
-  const { moduleHotspots } = require("../hotspots");
   return moduleHotspots[moduleId] || [];
 }
 
 // Helper function to get insights for a specific module
 export function getModuleInsights(moduleId: string) {
-  const { moduleInsights } = require("../hotspots");
   return moduleInsights[moduleId] || [];
 }

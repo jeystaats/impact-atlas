@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useMemo } from "react";
+import { useState } from "react";
 
 interface DataStreamAnimationProps {
   color?: string;
@@ -9,23 +9,25 @@ interface DataStreamAnimationProps {
   active?: boolean;
 }
 
+// Generate particles outside render to avoid Math.random() during render
+function generateParticles(count: number) {
+  return Array.from({ length: count }, (_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+    size: Math.random() * 3 + 1,
+    duration: Math.random() * 3 + 2,
+    delay: Math.random() * 2,
+    xOffset: Math.random() * 20 - 10,
+  }));
+}
+
 export function DataStreamAnimation({
   color = "var(--accent)",
   particleCount = 30,
   active = true,
 }: DataStreamAnimationProps) {
-  const particles = useMemo(
-    () =>
-      Array.from({ length: particleCount }, (_, i) => ({
-        id: i,
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        size: Math.random() * 3 + 1,
-        duration: Math.random() * 3 + 2,
-        delay: Math.random() * 2,
-      })),
-    [particleCount]
-  );
+  const [particles] = useState(() => generateParticles(particleCount));
 
   if (!active) return null;
 
@@ -53,7 +55,7 @@ export function DataStreamAnimation({
           }}
           animate={{
             y: [0, -40, 0],
-            x: [0, Math.random() * 20 - 10, 0],
+            x: [0, particle.xOffset, 0],
             opacity: [0.1, 0.6, 0.1],
             scale: [1, 1.5, 1],
           }}

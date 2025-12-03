@@ -65,10 +65,13 @@ const modules = [
 export default function ModulesSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
-  const [scanAngle, setScanAngle] = useState(0);
-  const [scannedModules, setScannedModules] = useState<Set<string>>(new Set());
-  const [hoveredModule, setHoveredModule] = useState<string | null>(null);
   const prefersReducedMotion = useReducedMotion();
+  const [scanAngle, setScanAngle] = useState(0);
+  // Initialize with all modules if reduced motion is preferred
+  const [scannedModules, setScannedModules] = useState<Set<string>>(() =>
+    prefersReducedMotion ? new Set(modules.map(m => m.id)) : new Set()
+  );
+  const [hoveredModule, setHoveredModule] = useState<string | null>(null);
 
   // Larger radar
   const radarRadius = 140;
@@ -81,13 +84,7 @@ export default function ModulesSection() {
 
   // Animate radar sweep - skip for reduced motion
   useEffect(() => {
-    if (!isInView) return;
-
-    // For reduced motion, immediately show all modules as scanned
-    if (prefersReducedMotion) {
-      setScannedModules(new Set(modules.map(m => m.id)));
-      return;
-    }
+    if (!isInView || prefersReducedMotion) return;
 
     const interval = setInterval(() => {
       setScanAngle((prev) => {

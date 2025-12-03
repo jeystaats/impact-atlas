@@ -122,11 +122,11 @@ export function useQuickWins(options?: {
 }) {
   const { cityId, moduleId, ...filters } = options ?? {};
 
-  if (moduleId) {
-    return useQuery(api.quickWins.listByModule, { moduleId, ...filters });
-  }
+  // Call both hooks unconditionally, but skip one based on condition
+  const byModule = useQuery(api.quickWins.listByModule, moduleId ? { moduleId, ...filters } : "skip");
+  const byCity = useQuery(api.quickWins.listByCity, !moduleId ? { cityId, ...filters } : "skip");
 
-  return useQuery(api.quickWins.listByCity, { cityId, ...filters });
+  return moduleId ? byModule : byCity;
 }
 
 /**
