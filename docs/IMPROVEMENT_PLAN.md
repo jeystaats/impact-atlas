@@ -592,6 +592,49 @@ export const trackEvent = (name: string, data?: object) => {
 
 ---
 
+### Norrsken Fixathon Integration
+
+**Status:** Link integration needed
+
+The project was developed during the Norrsken Fixathon. All mentions of "Fixathon" should link to the official event page.
+
+#### Required Changes
+
+| Location | Action |
+|----------|--------|
+| Landing page | Add "Built at Norrsken Fixathon" badge with link |
+| About page | Link Fixathon mentions to https://www.norrsken.org/fixathon |
+| Footer | Add Fixathon attribution link |
+| README.md | Add Fixathon badge/attribution |
+
+#### Implementation
+
+```typescript
+// src/components/ui/FixathonBadge.tsx
+export function FixathonBadge() {
+  return (
+    <a
+      href="https://www.norrsken.org/fixathon"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#1a1a2e] border border-[#2d2d44] hover:border-[var(--accent)] transition-colors"
+    >
+      <span className="text-xs text-[var(--foreground-muted)]">Built at</span>
+      <span className="text-xs font-semibold text-[var(--foreground)]">Norrsken Fixathon</span>
+    </a>
+  );
+}
+```
+
+#### Implementation Priority
+
+1. **Update About page** - Link Fixathon mentions
+2. **Add FixathonBadge component** - Reusable component with proper styling
+3. **Update landing page footer** - Add attribution
+4. **Update README** - Add Fixathon badge
+
+---
+
 ### Convex Backend
 
 #### Strengths
