@@ -658,27 +658,27 @@ export function FixathonBadge() {
 ## Implementation Timeline
 
 ### Week 1 (Critical)
-- [ ] Split `plans/page.tsx` into 5 components
-- [ ] Split `quick-wins/page.tsx` into 4 components
-- [ ] Add SEO metadata to landing page
-- [ ] Add SEO metadata to about/team pages
-- [ ] Fix touch targets (44px minimum)
+- [x] Split `plans/page.tsx` into 5 components ✅
+- [x] Split `quick-wins/page.tsx` into 4 components ✅
+- [x] Add SEO metadata to landing page ✅
+- [x] Add SEO metadata to about/team pages ✅
+- [x] Fix touch targets (44px minimum) ✅
 
 ### Week 2 (High Priority)
 - [ ] Create BaseMap system
 - [ ] Refactor AirQualityMap to use BaseMap
 - [ ] Remove type duplication (use Convex types)
 - [ ] Convert landing page to Server Component
-- [ ] Create OG images
+- [x] Create OG images ✅
 
 ### Week 3 (Medium Priority)
 - [ ] Create unified Chart system
 - [ ] Create UniversalCard component
-- [ ] Add structured data (JSON-LD)
-- [ ] Create sitemap.ts and robots.ts
-- [ ] Add horizontal scroll for mobile stats
-- [ ] Set up Umami analytics utility with event tracking
-- [ ] Add CSP headers for Umami
+- [x] Add structured data (JSON-LD) ✅
+- [x] Create sitemap.ts and robots.ts ✅
+- [x] Add horizontal scroll for mobile stats ✅
+- [x] Set up Umami analytics utility with event tracking ✅
+- [x] Add CSP headers for Umami ✅
 
 ### Week 4 (Polish)
 - [ ] Refactor remaining map components

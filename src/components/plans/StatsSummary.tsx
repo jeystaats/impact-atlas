@@ -43,7 +43,7 @@ export function StatsSummary({ plans }: StatsSummaryProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.15 }}
-      className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
+      className="flex lg:grid lg:grid-cols-4 gap-4 mb-8 overflow-x-auto pb-2 lg:pb-0 snap-x snap-mandatory scrollbar-hide"
     >
       {stats.map((stat, index) => (
         <motion.div
@@ -52,7 +52,7 @@ export function StatsSummary({ plans }: StatsSummaryProps) {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 + index * 0.05 }}
           whileHover={{ scale: 1.02, y: -2 }}
-          className="p-4 lg:p-5 rounded-xl bg-[var(--background-tertiary)] border border-[var(--border)] transition-colors hover:border-[var(--stone)]"
+          className="min-w-[160px] lg:min-w-0 snap-start p-4 lg:p-5 rounded-xl bg-[var(--background-tertiary)] border border-[var(--border)] transition-colors hover:border-[var(--stone)]"
         >
           <div className="flex items-center gap-3">
             <div

@@ -224,10 +224,12 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      {/* Stats row - horizontal scroll on mobile, grid on desktop */}
+      <div className="flex lg:grid lg:grid-cols-4 gap-4 mb-8 overflow-x-auto pb-2 lg:pb-0 snap-x snap-mandatory scrollbar-hide">
         {stats.map((stat, index) => (
-          <StatCard key={stat.label} stat={stat} index={index} />
+          <div key={stat.label} className="min-w-[160px] lg:min-w-0 snap-start">
+            <StatCard stat={stat} index={index} />
+          </div>
         ))}
       </div>
 
