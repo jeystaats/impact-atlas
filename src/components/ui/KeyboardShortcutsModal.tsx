@@ -80,7 +80,8 @@ export function KeyboardShortcutsModal() {
               </h2>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1 rounded-lg transition-colors"
+                aria-label="Close keyboard shortcuts"
+                className="p-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
                 style={{ color: "var(--ld-white-50)" }}
               >
                 <svg

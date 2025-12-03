@@ -240,7 +240,8 @@ export function ActiveSessionsModal({ isOpen, onClose }: ActiveSessionsModalProp
               </div>
               <button
                 onClick={onClose}
-                className="p-2 rounded-lg hover:bg-[var(--background-tertiary)] transition-colors"
+                aria-label="Close active sessions modal"
+                className="p-2 rounded-lg hover:bg-[var(--background-tertiary)] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
               >
                 <Icon name="x" className="w-5 h-5 text-[var(--foreground-muted)]" />
               </button>
@@ -320,7 +321,8 @@ export function ActiveSessionsModal({ isOpen, onClose }: ActiveSessionsModalProp
                             <button
                               onClick={() => handleRevokeSession(session.id)}
                               disabled={isRevoking}
-                              className="p-2 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50"
+                              aria-label={`Sign out ${session.device}`}
+                              className="p-2 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-50 min-w-[44px] min-h-[44px] flex items-center justify-center"
                             >
                               {isRevoking ? (
                                 <motion.div

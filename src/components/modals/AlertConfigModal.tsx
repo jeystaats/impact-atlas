@@ -193,7 +193,8 @@ export function AlertConfigModal({
               </div>
               <button
                 onClick={onClose}
-                className="p-2 rounded-lg hover:bg-[var(--background-tertiary)] transition-colors"
+                aria-label="Close alert configuration"
+                className="p-2 rounded-lg hover:bg-[var(--background-tertiary)] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
               >
                 <Icon name="x" className="w-5 h-5 text-[var(--foreground-muted)]" />
               </button>

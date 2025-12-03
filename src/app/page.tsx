@@ -97,12 +97,14 @@ export default function LandingPage() {
       />
 
       <FloatingNav />
-      <HeroSection />
-      <VisionSection />
-      <ModulesSection />
-      <ProcessSection />
-      <ImpactSection />
-      <CTASection />
+      <main id="main-content">
+        <HeroSection />
+        <VisionSection />
+        <ModulesSection />
+        <ProcessSection />
+        <ImpactSection />
+        <CTASection />
+      </main>
       <LandingScrollTracker />
     </div>
   );

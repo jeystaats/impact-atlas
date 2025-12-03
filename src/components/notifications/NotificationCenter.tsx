@@ -26,8 +26,10 @@ export function NotificationCenter() {
             markAllAsRead();
           }
         }}
+        aria-label={`Notifications${count > 0 ? `, ${count} unread` : ""}`}
+        aria-expanded={isOpen}
         className={cn(
-          "relative p-2 rounded-lg transition-colors",
+          "relative p-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center",
           "hover:bg-[var(--background-secondary)]",
           isOpen && "bg-[var(--background-secondary)]"
         )}

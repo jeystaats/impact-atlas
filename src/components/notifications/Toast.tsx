@@ -159,7 +159,8 @@ export function Toast({ notification, onDismiss }: ToastProps) {
         {/* Dismiss button */}
         <button
           onClick={onDismiss}
-          className="flex-shrink-0 p-1 rounded-lg text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--background-secondary)] transition-colors"
+          aria-label="Dismiss notification"
+          className="flex-shrink-0 p-1 rounded-lg text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:bg-[var(--background-secondary)] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
         >
           <Icon name="x" className="w-4 h-4" />
         </button>

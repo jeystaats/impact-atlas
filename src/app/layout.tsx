@@ -102,6 +102,13 @@ export default function RootLayout({
         <body
           className={`${spaceGrotesk.variable} ${inter.variable} antialiased bg-ink`}
         >
+          {/* Skip to main content link for keyboard navigation */}
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[var(--accent)] focus:text-white focus:outline-none"
+          >
+            Skip to main content
+          </a>
           <ConvexClientProvider>
             <KeyboardShortcutsProvider>{children}</KeyboardShortcutsProvider>
           </ConvexClientProvider>

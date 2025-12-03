@@ -34,7 +34,8 @@ export function DemoVideoModal({ isOpen, onClose }: DemoVideoModalProps) {
               {/* Close button */}
               <button
                 onClick={onClose}
-                className="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
+                aria-label="Close video"
+                className="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
               >
                 <Icon name="x" className="w-5 h-5 text-white" />
               </button>

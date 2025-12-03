@@ -68,7 +68,8 @@ export function ScheduleDemoModal({ isOpen, onClose }: ScheduleDemoModalProps) {
               {/* Close button */}
               <button
                 onClick={onClose}
-                className="absolute top-4 right-4 z-10 p-2 rounded-full hover:bg-[var(--background-secondary)] transition-colors"
+                aria-label="Close dialog"
+                className="absolute top-4 right-4 z-10 p-2 rounded-full hover:bg-[var(--background-secondary)] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
               >
                 <Icon name="x" className="w-5 h-5 text-[var(--foreground-muted)]" />
               </button>

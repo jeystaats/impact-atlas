@@ -122,7 +122,8 @@ export function Sidebar({ onCopilotOpen }: SidebarProps) {
               {!collapsed && <NotificationCenter />}
               <button
                 onClick={toggleSidebar}
-                className="p-1.5 rounded-lg hover:bg-[var(--background-secondary)] transition-colors"
+                aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+                className="p-1.5 rounded-lg hover:bg-[var(--background-secondary)] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
               >
                 <Icon
                   name="chevronRight"

@@ -126,7 +126,8 @@ export function DeleteAccountModal({ isOpen, onClose, userEmail }: DeleteAccount
               </div>
               <button
                 onClick={handleClose}
-                className="p-2 rounded-lg hover:bg-[var(--background-tertiary)] transition-colors"
+                aria-label="Close delete account modal"
+                className="p-2 rounded-lg hover:bg-[var(--background-tertiary)] transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
               >
                 <X className="w-5 h-5 text-[var(--foreground-muted)]" />
               </button>
