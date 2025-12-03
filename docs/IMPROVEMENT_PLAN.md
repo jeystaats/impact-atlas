@@ -681,8 +681,8 @@ export function FixathonBadge() {
 - [x] Add CSP headers for Umami ✅
 
 ### Week 4 (Polish)
-- [ ] Refactor remaining map components
-- [ ] Add widescreen breakpoints
+- [x] Refactor remaining map components ✅
+- [x] Add widescreen breakpoints ✅
 - [x] Add keyboard shortcuts ✅
 - [x] Implement reduced motion in components ✅
 - [ ] Complete accessibility audit

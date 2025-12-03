@@ -22,22 +22,22 @@ export function DashboardSkeleton() {
         <SkeletonBox className="h-16 w-64 rounded-xl" />
       </div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      {/* Stats row - responsive grid with widescreen support */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 3xl:grid-cols-6 gap-4 mb-8">
         {[1, 2, 3, 4].map((i) => (
           <SkeletonBox key={i} className="h-28 rounded-xl" />
         ))}
       </div>
 
-      {/* Main content grid */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Modules grid */}
-        <div className="lg:col-span-2">
+      {/* Main content grid - 3 cols on lg, 4 cols on widescreen */}
+      <div className="grid lg:grid-cols-3 3xl:grid-cols-4 gap-6">
+        {/* Modules grid - takes 2 cols on lg, 3 on widescreen */}
+        <div className="lg:col-span-2 3xl:col-span-3">
           <div className="flex items-center justify-between mb-4">
             <SkeletonBox className="h-6 w-24" />
             <SkeletonBox className="h-4 w-16" />
           </div>
-          <div className="grid sm:grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-2 3xl:grid-cols-3 gap-4">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <SkeletonBox key={i} className="h-48 rounded-xl" />
             ))}

@@ -60,6 +60,7 @@
 }
 
 @theme inline {
+  /* Colors */
   --color-background: var(--background);
   --color-background-secondary: var(--background-secondary);
   --color-background-tertiary: var(--background-tertiary);
@@ -78,8 +79,15 @@
   --color-info: var(--info);
   --color-border: var(--border);
   --color-border-muted: var(--border-muted);
+
+  /* Fonts */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Widescreen Breakpoints */
+  --breakpoint-3xl: 1920px;
+  --breakpoint-4xl: 2560px;
+  --breakpoint-ultrawide: 3440px;
 }
 
 /* ==========================================

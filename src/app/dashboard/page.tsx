@@ -224,8 +224,8 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Stats row - horizontal scroll on mobile, grid on desktop */}
-      <div className="flex lg:grid lg:grid-cols-4 gap-4 mb-8 overflow-x-auto pb-2 lg:pb-0 snap-x snap-mandatory scrollbar-hide">
+      {/* Stats row - horizontal scroll on mobile, responsive grid on desktop/widescreen */}
+      <div className="flex lg:grid lg:grid-cols-4 3xl:grid-cols-6 gap-4 mb-8 overflow-x-auto pb-2 lg:pb-0 snap-x snap-mandatory scrollbar-hide">
         {stats.map((stat, index) => (
           <div key={stat.label} className="min-w-[160px] lg:min-w-0 snap-start">
             <StatCard stat={stat} index={index} />
@@ -233,17 +233,17 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Main content grid */}
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Modules grid - takes 2 columns */}
-        <div className="lg:col-span-2">
+      {/* Main content grid - 3 cols on lg, 4 cols on 3xl (widescreen) */}
+      <div className="grid lg:grid-cols-3 3xl:grid-cols-4 gap-6">
+        {/* Modules grid - takes 2 columns on lg, 3 on widescreen */}
+        <div className="lg:col-span-2 3xl:col-span-3">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-[var(--foreground)]">Modules</h2>
             <Link href="/dashboard/quick-wins" className="text-sm text-[var(--accent)] hover:underline">
               View all
             </Link>
           </div>
-          <div className="grid sm:grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-2 3xl:grid-cols-3 gap-4">
             {modules.map((module: typeof modules[number], index: number) => (
               <ModuleCard key={module.id} module={module} index={index} />
             ))}

@@ -46,7 +46,7 @@ export function QuickWinStats({ stats }: QuickWinStatsProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className="flex lg:grid lg:grid-cols-4 gap-4 mb-8 overflow-x-auto pb-2 lg:pb-0 snap-x snap-mandatory scrollbar-hide"
+      className="flex lg:grid lg:grid-cols-4 3xl:grid-cols-6 gap-4 mb-8 overflow-x-auto pb-2 lg:pb-0 snap-x snap-mandatory scrollbar-hide"
     >
       {statItems.map((stat, index) => (
         <motion.div
