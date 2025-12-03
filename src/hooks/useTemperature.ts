@@ -1,18 +1,15 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { usePreferencesStore, type TemperatureUnit } from "@/stores/usePreferencesStore";
+import { useCallback } from "react";
+import { usePreferencesStore } from "@/stores/usePreferencesStore";
+import { useHydration } from "./useHydration";
 
 /**
  * Hook for temperature formatting based on user preferences
  */
 export function useTemperature() {
   const { temperatureUnit } = usePreferencesStore();
-  const [isHydrated, setIsHydrated] = useState(false);
-
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
+  const isHydrated = useHydration();
 
   // Default to celsius during SSR
   const unit = isHydrated ? temperatureUnit : "celsius";

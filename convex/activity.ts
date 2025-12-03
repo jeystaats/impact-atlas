@@ -43,17 +43,17 @@ async function fetchActivityEvents(
     .take(20);
 
   for (const hotspot of recentHotspots) {
-    const module = await ctx.db.get(hotspot.moduleId);
+    const moduleDoc = await ctx.db.get(hotspot.moduleId);
     const city = await ctx.db.get(hotspot.cityId);
 
-    if (module) {
+    if (moduleDoc) {
       // Hotspot detected
       activities.push({
         id: `hotspot-${hotspot._id}`,
         type: "hotspot_detected",
-        action: `New ${hotspot.severity} ${module.name.toLowerCase()} hotspot detected`,
-        module: module.name,
-        moduleSlug: module.slug,
+        action: `New ${hotspot.severity} ${moduleDoc.name.toLowerCase()} hotspot detected`,
+        module: moduleDoc.name,
+        moduleSlug: moduleDoc.slug,
         city: city?.name,
         timestamp: hotspot.detectedAt,
         severity: hotspot.severity,
@@ -69,9 +69,9 @@ async function fetchActivityEvents(
         activities.push({
           id: `hotspot-resolved-${hotspot._id}`,
           type: "hotspot_resolved",
-          action: `${module.name} hotspot resolved`,
-          module: module.name,
-          moduleSlug: module.slug,
+          action: `${moduleDoc.name} hotspot resolved`,
+          module: moduleDoc.name,
+          moduleSlug: moduleDoc.slug,
           city: city?.name,
           timestamp: hotspot.lastUpdated,
           metadata: {
@@ -92,16 +92,16 @@ async function fetchActivityEvents(
   for (const completion of recentCompletions) {
     const quickWin = await ctx.db.get(completion.quickWinId);
     if (quickWin) {
-      const module = await ctx.db.get(quickWin.moduleId);
+      const moduleDoc = await ctx.db.get(quickWin.moduleId);
       const city = quickWin.cityId ? await ctx.db.get(quickWin.cityId) : null;
 
-      if (module) {
+      if (moduleDoc) {
         activities.push({
           id: `completion-${completion._id}`,
           type: "quick_win_completed",
           action: `Quick win completed: ${quickWin.title}`,
-          module: module.name,
-          moduleSlug: module.slug,
+          module: moduleDoc.name,
+          moduleSlug: moduleDoc.slug,
           city: city?.name,
           timestamp: completion.completedAt,
           metadata: {
@@ -123,16 +123,16 @@ async function fetchActivityEvents(
   for (const insight of recentInsights) {
     const hotspot = await ctx.db.get(insight.hotspotId);
     if (hotspot) {
-      const module = await ctx.db.get(hotspot.moduleId);
+      const moduleDoc = await ctx.db.get(hotspot.moduleId);
       const city = await ctx.db.get(hotspot.cityId);
 
-      if (module) {
+      if (moduleDoc) {
         activities.push({
           id: `insight-${insight._id}`,
           type: "ai_insight_generated",
           action: `AI ${insight.type}: ${insight.title}`,
-          module: module.name,
-          moduleSlug: module.slug,
+          module: moduleDoc.name,
+          moduleSlug: moduleDoc.slug,
           city: city?.name,
           timestamp: insight.generatedAt,
           metadata: {

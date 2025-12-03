@@ -230,9 +230,9 @@ export const addQuickWin = mutation({
       throw new Error("Quick win not found");
     }
 
-    const module = await ctx.db.get(quickWin.moduleId);
-    const updatedModuleIds = module && !plan.moduleIds.includes(module.slug)
-      ? [...plan.moduleIds, module.slug]
+    const moduleDoc = await ctx.db.get(quickWin.moduleId);
+    const updatedModuleIds = moduleDoc && !plan.moduleIds.includes(moduleDoc.slug)
+      ? [...plan.moduleIds, moduleDoc.slug]
       : plan.moduleIds;
 
     await ctx.db.patch(args.planId, {

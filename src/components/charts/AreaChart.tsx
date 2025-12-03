@@ -503,7 +503,7 @@ export function AreaChart({
           const points = s.points.map((p) => ({ x: p.x, y: p.y }));
 
           // For stacked charts, use previous series as base
-          let stackedBaseY = baseY;
+          const stackedBaseY = baseY;
           if (stacked && i > 0) {
             // Get the previous series points as base
             const prevSeries = processedSeries[i - 1];

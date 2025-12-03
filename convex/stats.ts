@@ -98,8 +98,8 @@ export const getModuleStats = query({
     moduleId: v.id("modules"),
   },
   handler: async (ctx, args) => {
-    const module = await ctx.db.get(args.moduleId);
-    if (!module) return null;
+    const moduleDoc = await ctx.db.get(args.moduleId);
+    if (!moduleDoc) return null;
 
     // Get hotspots for this module in this city
     const hotspots = await ctx.db
@@ -128,7 +128,7 @@ export const getModuleStats = query({
     const insights = insightsArrays.flat();
 
     return {
-      module,
+      module: moduleDoc,
       stats: {
         totalHotspots: hotspots.length,
         criticalHotspots: hotspots.filter((h) => h.severity === "critical")

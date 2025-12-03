@@ -59,28 +59,28 @@ export const seedModules = internalMutation({
     const now = Date.now();
     const moduleIds: Record<string, string> = {};
 
-    for (const module of modulesSeedData) {
+    for (const moduleSeed of modulesSeedData) {
       // Check if module already exists
       const existing = await ctx.db
         .query("modules")
-        .withIndex("by_slug", (q) => q.eq("slug", module.slug))
+        .withIndex("by_slug", (q) => q.eq("slug", moduleSeed.slug))
         .unique();
 
       if (existing) {
-        moduleIds[module.slug] = existing._id;
-        console.log(`Module ${module.name} already exists, skipping...`);
+        moduleIds[moduleSeed.slug] = existing._id;
+        console.log(`Module ${moduleSeed.name} already exists, skipping...`);
         continue;
       }
 
       const moduleId = await ctx.db.insert("modules", {
-        ...module,
-        isActive: module.status === "active",
+        ...moduleSeed,
+        isActive: moduleSeed.status === "active",
         createdAt: now,
         updatedAt: now,
       });
 
-      moduleIds[module.slug] = moduleId;
-      console.log(`Seeded module: ${module.name}`);
+      moduleIds[moduleSeed.slug] = moduleId;
+      console.log(`Seeded module: ${moduleSeed.name}`);
     }
 
     return moduleIds;
@@ -97,10 +97,10 @@ export const seedQuickWins = internalMutation({
     const now = Date.now();
 
     // Get all modules to map slugs to IDs
-    const modules = await ctx.db.query("modules").collect();
+    const allModules = await ctx.db.query("modules").collect();
     const moduleSlugToId: Record<string, string> = {};
-    for (const module of modules) {
-      moduleSlugToId[module.slug] = module._id;
+    for (const mod of allModules) {
+      moduleSlugToId[mod.slug] = mod._id;
     }
 
     let seededCount = 0;
@@ -164,10 +164,10 @@ export const seedHotspots = internalMutation({
     }
 
     // Get modules
-    const modules = await ctx.db.query("modules").collect();
+    const allModules = await ctx.db.query("modules").collect();
     const moduleSlugToId: Record<string, string> = {};
-    for (const module of modules) {
-      moduleSlugToId[module.slug] = module._id;
+    for (const mod of allModules) {
+      moduleSlugToId[mod.slug] = mod._id;
     }
 
     // Sample hotspots for urban-heat module
@@ -409,10 +409,10 @@ export const seedBarcelonaComplete = internalMutation({
     }
 
     // Get all modules
-    const modules = await ctx.db.query("modules").collect();
+    const allModules = await ctx.db.query("modules").collect();
     const moduleSlugToId: Record<string, string> = {};
-    for (const module of modules) {
-      moduleSlugToId[module.slug] = module._id;
+    for (const mod of allModules) {
+      moduleSlugToId[mod.slug] = mod._id;
     }
 
     let hotspotsSeeded = 0;

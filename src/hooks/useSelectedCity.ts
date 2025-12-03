@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { usePreferencesStore, type City } from "@/stores/usePreferencesStore";
+import { useHydration } from "./useHydration";
 
 /**
  * Hook to manage the selected city
@@ -12,15 +13,10 @@ import { usePreferencesStore, type City } from "@/stores/usePreferencesStore";
  */
 export function useSelectedCity() {
   const { defaultCity, setDefaultCity } = usePreferencesStore();
-  const [isHydrated, setIsHydrated] = useState(false);
+  const isHydrated = useHydration();
 
   // Try to get cities from Convex (include all, not just active, so newly created cities show up)
   const cities = useQuery(api.cities.list, {});
-
-  // Hydrate on mount
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
 
   // Determine the selected city slug from preferences store
   const selectedCitySlug = isHydrated ? defaultCity : "barcelona";

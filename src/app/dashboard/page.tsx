@@ -213,7 +213,7 @@ export default function DashboardPage() {
             transition={{ delay: 0.1 }}
             className="text-[var(--foreground-secondary)] mt-1"
           >
-            Here's what's happening in {currentCity.name}
+            Here&apos;s what&apos;s happening in {currentCity.name}
           </motion.p>
         </div>
         <CitySearchInput

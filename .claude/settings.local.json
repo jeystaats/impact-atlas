@@ -39,7 +39,10 @@
       "Bash(xargs cat:*)",
       "Bash(find:*)",
       "Bash(grep:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(wc:*)",
+      "Bash(ls:*)",
+      "Bash(npm run test:run:*)"
     ],
     "deny": [],
     "ask": []

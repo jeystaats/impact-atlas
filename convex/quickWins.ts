@@ -132,7 +132,7 @@ export const listByModule = query({
         .withIndex("by_module", (q) => q.eq("moduleId", args.moduleId));
     }
 
-    let quickWins = await quickWinsQuery
+    const quickWins = await quickWinsQuery
       .filter((q) => q.eq(q.field("isActive"), true))
       .collect();
 
@@ -382,11 +382,11 @@ export const createFromAI = mutation({
     // Get module by slug or use a default
     let moduleId = null;
     if (args.moduleSlug) {
-      const module = await ctx.db
+      const moduleDoc = await ctx.db
         .query("modules")
         .withIndex("by_slug", (q) => q.eq("slug", args.moduleSlug!))
         .first();
-      moduleId = module?._id;
+      moduleId = moduleDoc?._id;
     }
 
     // If no module found, try to get the first active module

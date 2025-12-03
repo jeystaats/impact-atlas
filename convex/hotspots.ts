@@ -98,19 +98,19 @@ export const listByCityAndModuleSlug = query({
     }
 
     // Find the module by slug
-    const module = await ctx.db
+    const moduleDoc = await ctx.db
       .query("modules")
       .withIndex("by_slug", (q) => q.eq("slug", args.moduleSlug))
       .unique();
 
-    if (!module) {
+    if (!moduleDoc) {
       return [];
     }
 
     const hotspots = await ctx.db
       .query("hotspots")
       .withIndex("by_city_module", (q) =>
-        q.eq("cityId", args.cityId!).eq("moduleId", module._id)
+        q.eq("cityId", args.cityId!).eq("moduleId", moduleDoc._id)
       )
       .collect();
 

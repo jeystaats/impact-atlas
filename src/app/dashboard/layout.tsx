@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sidebar } from "@/components/dashboard/Sidebar";
@@ -13,6 +13,7 @@ import { Icon } from "@/components/ui/icons";
 import { cities, modules } from "@/data/modules";
 import { usePreferencesStore } from "@/stores/usePreferencesStore";
 import { useUIStore } from "@/stores/useUIStore";
+import { useHydration } from "@/hooks/useHydration";
 
 export default function DashboardLayout({
   children,
@@ -21,7 +22,6 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [pendingAIQuestion, setPendingAIQuestion] = useState<string | null>(null);
 
   // UI state from store
   const {
@@ -35,10 +35,7 @@ export default function DashboardLayout({
 
   // Get city from preferences store
   const { defaultCity } = usePreferencesStore();
-  const [isHydrated, setIsHydrated] = useState(false);
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
+  const isHydrated = useHydration();
   const selectedCity = cities.find(c => c.id === (isHydrated ? defaultCity : "barcelona")) || cities[0];
 
   // Extract current module from pathname
@@ -59,18 +56,10 @@ export default function DashboardLayout({
   }, [setCommandPaletteOpen]);
 
   // Handle AI question from command palette
-  const handleAskAI = (question: string) => {
-    setPendingAIQuestion(question);
+  const handleAskAI = (_question: string) => {
+    // Note: The question could be passed to the copilot component if needed
     setCopilotOpen(true);
   };
-
-  // Clear pending question when copilot opens
-  useEffect(() => {
-    if (copilotOpen && pendingAIQuestion) {
-      // The question will be handled by the copilot component
-      setPendingAIQuestion(null);
-    }
-  }, [copilotOpen, pendingAIQuestion]);
 
   return (
     <div className="min-h-screen bg-[var(--background)]">

@@ -500,11 +500,11 @@ export const generateCityData = action({
         });
 
         // Get module from database
-        const module = await ctx.runQuery(internal.aiDirector.getModuleBySlug, {
+        const moduleDoc = await ctx.runQuery(internal.aiDirector.getModuleBySlug, {
           slug: moduleSlug,
         });
 
-        if (!module) {
+        if (!moduleDoc) {
           console.error(`[AI Director] ERROR: Module "${moduleSlug}" not found in database!`);
           console.error(`[AI Director] Run 'npx convex run seed:seedModules' to seed modules.`);
           // Mark as failed with clear message
@@ -537,7 +537,7 @@ export const generateCityData = action({
           if (hotspots.length > 0) {
             await ctx.runMutation(internal.aiDirector.insertHotspots, {
               cityId: args.cityId,
-              moduleId: module._id,
+              moduleId: moduleDoc._id,
               hotspots: hotspots.map((h) => ({
                 name: h.name,
                 description: h.description,
@@ -567,7 +567,7 @@ export const generateCityData = action({
           if (quickWins.length > 0) {
             await ctx.runMutation(internal.aiDirector.insertQuickWins, {
               cityId: args.cityId,
-              moduleId: module._id,
+              moduleId: moduleDoc._id,
               quickWins: quickWins.map((qw) => ({
                 title: qw.title,
                 description: qw.description,

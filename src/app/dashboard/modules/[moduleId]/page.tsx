@@ -5,15 +5,10 @@ import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { useQuery } from "convex/react";
+import dynamic from "next/dynamic";
 import { api } from "../../../../../convex/_generated/api";
 import { useSelectedCity } from "@/hooks/useSelectedCity";
 import { ModuleLayout } from "@/components/modules/ModuleLayout";
-import { MapVisualization } from "@/components/modules/MapVisualization";
-import { HeatmapOverlay } from "@/components/modules/HeatmapOverlay";
-import { ShipTracker } from "@/components/modules/ShipTracker";
-import { PlasticFlowMap } from "@/components/modules/PlasticFlowMap";
-import { OceanDebrisMap } from "@/components/modules/OceanDebrisMap";
-import { AirQualityMap } from "@/components/modules/AirQualityMap";
 import { HotspotDetailDrawer } from "@/components/modules/HotspotDetailDrawer";
 import { ActionCard } from "@/components/modules/ActionCard";
 import { Icon } from "@/components/ui/icons";
@@ -25,6 +20,47 @@ import { ModuleActionBar } from "@/components/modules/ModuleActionBar";
 import { FilterPanel } from "@/components/modules/FilterPanel";
 import { SearchBar } from "@/components/modules/SearchBar";
 import { FilterChipsContainer, filterStateToChips, handleChipRemoval } from "@/components/modules/FilterChip";
+import { MapErrorBoundary } from "@/components/ui/ErrorBoundary";
+
+// Dynamic imports for heavy map components - reduces initial bundle size
+const MapVisualization = dynamic(
+  () => import("@/components/modules/MapVisualization").then(mod => ({ default: mod.MapVisualization })),
+  { ssr: false, loading: () => <MapLoadingSkeleton /> }
+);
+
+const HeatmapOverlay = dynamic(
+  () => import("@/components/modules/HeatmapOverlay").then(mod => ({ default: mod.HeatmapOverlay })),
+  { ssr: false }
+);
+
+const ShipTracker = dynamic(
+  () => import("@/components/modules/ShipTracker").then(mod => ({ default: mod.ShipTracker })),
+  { ssr: false }
+);
+
+const PlasticFlowMap = dynamic(
+  () => import("@/components/modules/PlasticFlowMap").then(mod => ({ default: mod.PlasticFlowMap })),
+  { ssr: false }
+);
+
+const OceanDebrisMap = dynamic(
+  () => import("@/components/modules/OceanDebrisMap").then(mod => ({ default: mod.OceanDebrisMap })),
+  { ssr: false }
+);
+
+const AirQualityMap = dynamic(
+  () => import("@/components/modules/AirQualityMap").then(mod => ({ default: mod.AirQualityMap })),
+  { ssr: false }
+);
+
+// Simple loading skeleton for map components
+function MapLoadingSkeleton() {
+  return (
+    <div className="w-full h-full min-h-[400px] bg-[var(--background-secondary)] rounded-xl animate-pulse flex items-center justify-center">
+      <div className="text-[var(--foreground-secondary)]">Loading map...</div>
+    </div>
+  );
+}
 import {
   FilterState,
   DEFAULT_FILTER_STATE,
@@ -117,8 +153,8 @@ export default function ModuleDetailPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdated] = useState(new Date());
 
-  // Find module (used in useMemo hooks below)
-  const module = modules.find((m) => m.id === moduleId);
+  // Find module config (used in useMemo hooks below)
+  const moduleConfig = modules.find((m) => m.id === moduleId);
 
   // Use Convex data if available, fallback to static data
   const fallbackHotspots = moduleHotspots[moduleId] || [];
@@ -250,7 +286,7 @@ export default function ModuleDetailPage() {
   }, []);
 
   // Early returns after all hooks have been called
-  if (!module) {
+  if (!moduleConfig) {
     notFound();
   }
 
@@ -263,10 +299,10 @@ export default function ModuleDetailPage() {
   }
 
   return (
-    <ModuleLayout module={module}>
+    <ModuleLayout module={moduleConfig}>
       {/* Module Action Bar */}
       <ModuleActionBar
-        module={module as Module}
+        module={moduleConfig as Module}
         hotspots={exportableHotspots}
         cityId={selectedCityId || "barcelona"}
         cityName={selectedCity?.name || "Barcelona"}
@@ -285,7 +321,7 @@ export default function ModuleDetailPage() {
         <SearchBar
           value={filters.search}
           onChange={handleSearchChange}
-          placeholder={`Search ${module.title.toLowerCase()} hotspots...`}
+          placeholder={`Search ${moduleConfig.title.toLowerCase()} hotspots...`}
           resultsCount={filteredHotspots.length}
           totalCount={allHotspots.length}
         />
@@ -554,7 +590,7 @@ export default function ModuleDetailPage() {
         isOpen={isAlertModalOpen}
         onClose={() => setIsAlertModalOpen(false)}
         moduleId={moduleId}
-        moduleName={module.title}
+        moduleName={moduleConfig.title}
       />
 
       {/* AI Copilot Drawer */}
@@ -562,7 +598,7 @@ export default function ModuleDetailPage() {
         isOpen={isAICopilotOpen}
         onClose={() => setIsAICopilotOpen(false)}
         moduleId={moduleId}
-        moduleName={module.title}
+        moduleName={moduleConfig.title}
         context={{
           hotspotCount: filteredHotspots.length,
           cityName: selectedCity?.name || "Selected Area",

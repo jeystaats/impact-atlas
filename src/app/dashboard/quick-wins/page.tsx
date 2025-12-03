@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { Icon } from "@/components/ui/icons";
 import { isAIGenerated } from "@/components/ui/AIGeneratedBadge";
 import { modules as fallbackModules } from "@/data/modules";
 import { useSelectedCity } from "@/hooks/useSelectedCity";
+import { useHydration } from "@/hooks/useHydration";
 import {
   useQuickWins,
   useModules,
@@ -51,11 +52,7 @@ export default function QuickWinsPage() {
   // UI store for persisted filters
   const { quickWinsFilters, setQuickWinsFilters, resetQuickWinsFilters } =
     useUIStore();
-  const [isStoreHydrated, setIsStoreHydrated] = useState(false);
-
-  useEffect(() => {
-    setIsStoreHydrated(true);
-  }, []);
+  const isStoreHydrated = useHydration();
 
   // Use persisted filters after hydration
   const selectedModule = isStoreHydrated
@@ -110,7 +107,7 @@ export default function QuickWinsPage() {
           estimatedDays?: number;
           tags: string[];
         }) => {
-          const module = convexModules?.find(
+          const matchedModule = convexModules?.find(
             (m: { _id: Id<"modules">; slug: string }) => m._id === qw.moduleId
           );
           return {
@@ -118,7 +115,7 @@ export default function QuickWinsPage() {
             convexId: qw._id,
             title: qw.title,
             description: qw.description,
-            moduleId: module?.slug ?? "unknown",
+            moduleId: matchedModule?.slug ?? "unknown",
             impact: qw.impact,
             effort: qw.effort,
             estimatedDays: qw.estimatedDays ?? 7,

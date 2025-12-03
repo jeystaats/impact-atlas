@@ -81,6 +81,13 @@ export default function ActionPlansPage() {
     }
   };
 
+  // Default due date (30 days from now) - use state to compute once on mount
+  const [defaultDueDate] = useState(() => {
+    return new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0];
+  });
+
   // Normalize Convex plans to component format
   const plans: NormalizedActionPlan[] = useMemo(() => {
     if (convexPlans && convexPlans.length > 0) {
@@ -128,9 +135,7 @@ export default function ActionPlansPage() {
             progress: plan.progress,
             dueDate: plan.targetDate
               ? new Date(plan.targetDate).toISOString().split("T")[0]
-              : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-                  .toISOString()
-                  .split("T")[0],
+              : defaultDueDate,
             linkedModules,
             quickWinsCount: plan.quickWinIds?.length || 0,
             createdAt: new Date(plan.createdAt).toISOString().split("T")[0],
@@ -140,7 +145,7 @@ export default function ActionPlansPage() {
       );
     }
     return localPlans;
-  }, [convexPlans, localPlans]);
+  }, [convexPlans, localPlans, defaultDueDate]);
 
   const handleStatusChange = async (
     id: string,
@@ -329,8 +334,8 @@ export default function ActionPlansPage() {
                     AI Recommendation Available
                   </h3>
                   <p className="text-sm text-[var(--foreground-secondary)]">
-                    Based on your quick wins, we suggest creating a "Green
-                    Corridor Initiative" combining biodiversity and heat
+                    Based on your quick wins, we suggest creating a &quot;Green
+                    Corridor Initiative&quot; combining biodiversity and heat
                     mitigation.
                   </p>
                 </div>
