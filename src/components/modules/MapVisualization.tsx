@@ -12,7 +12,7 @@
  * Refactored to use BaseMap for common map functionality.
  */
 
-import { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BaseMap, Source, Layer, Marker, Popup } from "@/components/maps";
 import type { BaseMapRef, Coordinates } from "@/components/maps";
@@ -108,7 +108,7 @@ interface HotspotMarkerProps {
   onHover: (hotspot: HotspotData | null) => void;
 }
 
-function HotspotMarker({ hotspot, isSelected, isHovered, onSelect, onHover }: HotspotMarkerProps) {
+const HotspotMarker = memo(function HotspotMarker({ hotspot, isSelected, isHovered, onSelect, onHover }: HotspotMarkerProps) {
   const color = SEVERITY_COLORS[hotspot.severity];
 
   return (
@@ -170,7 +170,7 @@ function HotspotMarker({ hotspot, isSelected, isHovered, onSelect, onHover }: Ho
       </motion.div>
     </Marker>
   );
-}
+});
 
 // =============================================================================
 // LAYER STYLE CONFIGURATIONS

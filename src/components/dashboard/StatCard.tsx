@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { motion } from "framer-motion";
 import { Icon, IconName } from "@/components/ui/icons";
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
@@ -21,7 +22,7 @@ interface StatCardProps {
   index?: number;
 }
 
-export function StatCard({ stat, index = 0 }: StatCardProps) {
+export const StatCard = memo(function StatCard({ stat, index = 0 }: StatCardProps) {
   const trendColors = {
     up: "text-emerald-600",
     down: "text-red-500",
@@ -113,4 +114,4 @@ export function StatCard({ stat, index = 0 }: StatCardProps) {
       </div>
     </motion.div>
   );
-}
+});

@@ -1,5 +1,6 @@
 "use client";
 
+import { memo, useCallback } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -13,10 +14,10 @@ interface ModuleCardProps {
   index: number;
 }
 
-export function ModuleCard({ module, index }: ModuleCardProps) {
-  const handleClick = () => {
+export const ModuleCard = memo(function ModuleCard({ module, index }: ModuleCardProps) {
+  const handleClick = useCallback(() => {
     trackModuleView(module.id);
-  };
+  }, [module.id]);
 
   return (
     <motion.div
@@ -94,4 +95,4 @@ export function ModuleCard({ module, index }: ModuleCardProps) {
       </Link>
     </motion.div>
   );
-}
+});
