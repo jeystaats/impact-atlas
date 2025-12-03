@@ -2,18 +2,35 @@
 
 import { useRef } from "react";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export default function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.3 });
+  const prefersReducedMotion = useReducedMotion();
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
   });
 
-  const backgroundY = useTransform(scrollYProgress, [0, 1], [0, 150]);
-  const splitProgress = useTransform(scrollYProgress, [0, 0.5], [50, 80]);
+  // Disable parallax effects for reduced motion
+  const backgroundY = useTransform(
+    scrollYProgress,
+    [0, 1],
+    prefersReducedMotion ? [0, 0] : [0, 150]
+  );
+  const splitProgress = useTransform(
+    scrollYProgress,
+    [0, 0.5],
+    prefersReducedMotion ? [50, 50] : [50, 80]
+  );
+
+  // Simplified transition for reduced motion
+  const getTransition = (delay: number) =>
+    prefersReducedMotion
+      ? { duration: 0.01 }
+      : { duration: 0.6, delay };
 
   return (
     <section
@@ -66,9 +83,9 @@ export default function HeroSection() {
         <div className="max-w-4xl">
           {/* Eyebrow */}
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={getTransition(0.2)}
             className="ld-caption mb-6"
           >
             Climate Intelligence Platform
@@ -76,9 +93,9 @@ export default function HeroSection() {
 
           {/* Main Headline */}
           <motion.h1
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8, delay: 0.3 }}
+            transition={getTransition(0.3)}
             className="ld-display-xl mb-6"
           >
             Cities are blind to their{" "}
@@ -87,9 +104,9 @@ export default function HeroSection() {
 
           {/* Subheadline */}
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.5 }}
+            transition={getTransition(0.5)}
             className="ld-body-lg max-w-2xl mb-10"
           >
             While urban leaders debate long-term strategies, high-impact
@@ -100,7 +117,7 @@ export default function HeroSection() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={isInView ? { opacity: 1 } : {}}
-            transition={{ duration: 0.6, delay: 0.7 }}
+            transition={getTransition(0.7)}
             className="flex flex-wrap gap-6 mb-12"
           >
             {[
@@ -110,9 +127,9 @@ export default function HeroSection() {
             ].map((text, i) => (
               <motion.div
                 key={text}
-                initial={{ opacity: 0, x: -20 }}
+                initial={{ opacity: 0, x: prefersReducedMotion ? 0 : -20 }}
                 animate={isInView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.4, delay: 0.8 + i * 0.1 }}
+                transition={prefersReducedMotion ? { duration: 0.01 } : { duration: 0.4, delay: 0.8 + i * 0.1 }}
                 className="flex items-center gap-3"
               >
                 <span
@@ -126,9 +143,9 @@ export default function HeroSection() {
 
           {/* CTAs */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 1 }}
+            transition={getTransition(1)}
             className="flex flex-wrap gap-4"
           >
             <a href="#vision" className="ld-btn-primary">
@@ -148,13 +165,13 @@ export default function HeroSection() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={isInView ? { opacity: 1 } : {}}
-        transition={{ duration: 0.6, delay: 1.2 }}
+        transition={getTransition(1.2)}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
       >
         <span className="text-xs uppercase tracking-widest" style={{ color: "var(--ld-white-50)" }}>Scroll</span>
         <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          animate={prefersReducedMotion ? {} : { y: [0, 8, 0] }}
+          transition={prefersReducedMotion ? {} : { duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
         >
           <svg className="w-5 h-5" style={{ color: "var(--ld-white-50)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />

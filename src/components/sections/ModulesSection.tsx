@@ -3,6 +3,7 @@
 import { useRef, useState, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 import Image from "next/image";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const modules = [
   {
@@ -67,13 +68,26 @@ export default function ModulesSection() {
   const [scanAngle, setScanAngle] = useState(0);
   const [scannedModules, setScannedModules] = useState<Set<string>>(new Set());
   const [hoveredModule, setHoveredModule] = useState<string | null>(null);
+  const prefersReducedMotion = useReducedMotion();
 
   // Larger radar
   const radarRadius = 140;
 
-  // Animate radar sweep
+  // Simplified transition for reduced motion
+  const getTransition = (delay: number) =>
+    prefersReducedMotion
+      ? { duration: 0.01 }
+      : { duration: 0.6, delay };
+
+  // Animate radar sweep - skip for reduced motion
   useEffect(() => {
     if (!isInView) return;
+
+    // For reduced motion, immediately show all modules as scanned
+    if (prefersReducedMotion) {
+      setScannedModules(new Set(modules.map(m => m.id)));
+      return;
+    }
 
     const interval = setInterval(() => {
       setScanAngle((prev) => {
@@ -91,7 +105,7 @@ export default function ModulesSection() {
     }, 30);
 
     return () => clearInterval(interval);
-  }, [isInView]);
+  }, [isInView, prefersReducedMotion]);
 
   return (
     <section
@@ -118,9 +132,9 @@ export default function ModulesSection() {
 
           {/* Left: Radar - Bigger */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: prefersReducedMotion ? 1 : 0.9 }}
             animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ duration: 0.8, delay: 0.3 }}
+            transition={getTransition(0.3)}
             className="relative mx-auto lg:mx-0 order-2 lg:order-1"
             style={{ width: radarRadius * 2 + 60, height: radarRadius * 2 + 60 }}
           >
@@ -147,15 +161,17 @@ export default function ModulesSection() {
               style={{ background: "var(--ld-white-10)", width: radarRadius * 2 }}
             />
 
-            {/* Radar sweep */}
-            <div
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
-              style={{
-                width: radarRadius * 2,
-                height: radarRadius * 2,
-                background: `conic-gradient(from ${scanAngle}deg, transparent 0deg, rgba(45, 212, 191, 0.2) 3deg, rgba(45, 212, 191, 0.05) 25deg, transparent 50deg)`,
-              }}
-            />
+            {/* Radar sweep - hidden for reduced motion */}
+            {!prefersReducedMotion && (
+              <div
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
+                style={{
+                  width: radarRadius * 2,
+                  height: radarRadius * 2,
+                  background: `conic-gradient(from ${scanAngle}deg, transparent 0deg, rgba(45, 212, 191, 0.2) 3deg, rgba(45, 212, 191, 0.05) 25deg, transparent 50deg)`,
+                }}
+              />
+            )}
 
             {/* Center dot */}
             <div
@@ -191,7 +207,7 @@ export default function ModulesSection() {
                   animate={{
                     scale: isHovered ? 1.8 : isScanned ? 1.2 : 0.7,
                   }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  transition={prefersReducedMotion ? { duration: 0.01 } : { type: "spring", stiffness: 300, damping: 20 }}
                 >
                   <div
                     className="w-3 h-3 rounded-full transition-all duration-300"
@@ -221,16 +237,16 @@ export default function ModulesSection() {
             <motion.p
               initial={{ opacity: 0 }}
               animate={isInView ? { opacity: 1 } : {}}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              transition={getTransition(0.2)}
               className="ld-caption mb-3"
             >
               Six Modules
             </motion.p>
 
             <motion.h2
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.8, delay: 0.3 }}
+              transition={getTransition(0.3)}
               className="ld-display-lg mb-4"
             >
               Scanning for{" "}
@@ -240,7 +256,7 @@ export default function ModulesSection() {
             <motion.p
               initial={{ opacity: 0 }}
               animate={isInView ? { opacity: 1 } : {}}
-              transition={{ duration: 0.6, delay: 0.5 }}
+              transition={getTransition(0.5)}
               className="ld-body-lg mb-6"
             >
               Our AI monitors six environmental domains, identifying high-impact interventions in real-time.
@@ -250,9 +266,9 @@ export default function ModulesSection() {
 
         {/* Module Cards Grid - Modern design with gradient borders */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.6 }}
+          transition={getTransition(0.6)}
           className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-16"
         >
           {modules.map((module, i) => {
@@ -262,9 +278,9 @@ export default function ModulesSection() {
             return (
               <motion.div
                 key={module.id}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.4, delay: 0.7 + i * 0.08 }}
+                transition={prefersReducedMotion ? { duration: 0.01 } : { duration: 0.4, delay: 0.7 + i * 0.08 }}
                 onMouseEnter={() => setHoveredModule(module.id)}
                 onMouseLeave={() => setHoveredModule(null)}
                 className="group relative cursor-pointer"

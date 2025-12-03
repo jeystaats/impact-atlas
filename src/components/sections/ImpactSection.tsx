@@ -3,6 +3,7 @@
 import { useRef, useState, useEffect } from "react";
 import { motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 // Module icons for the floating visualization
 const moduleIcons = [
@@ -66,6 +67,7 @@ function FloatingParticle({
   color,
   isOrdered,
   orderedPosition,
+  prefersReducedMotion,
 }: {
   delay: number;
   duration: number;
@@ -73,9 +75,28 @@ function FloatingParticle({
   color: string;
   isOrdered: boolean;
   orderedPosition: { x: number; y: number };
+  prefersReducedMotion: boolean;
 }) {
   const randomX = Math.random() * 100;
   const randomY = Math.random() * 100;
+
+  // For reduced motion, show static particles
+  if (prefersReducedMotion) {
+    return (
+      <div
+        className="absolute rounded-full"
+        style={{
+          width: size,
+          height: size,
+          background: `var(${color})`,
+          boxShadow: `0 0 ${size * 2}px var(${color})`,
+          left: isOrdered ? `${orderedPosition.x}%` : `${randomX}%`,
+          top: isOrdered ? `${orderedPosition.y}%` : `${randomY}%`,
+          opacity: 0.6,
+        }}
+      />
+    );
+  }
 
   return (
     <motion.div
@@ -118,7 +139,7 @@ function FloatingParticle({
 }
 
 // Connection lines SVG component - connects to the module icon positions
-function ConnectionLines({ showOrdered }: { showOrdered: boolean }) {
+function ConnectionLines({ showOrdered, prefersReducedMotion }: { showOrdered: boolean; prefersReducedMotion: boolean }) {
   // Create connections between module icons (forming a hexagonal network)
   const connections = [
     { from: 0, to: 1 }, { from: 1, to: 2 }, { from: 2, to: 3 },
@@ -155,15 +176,15 @@ function ConnectionLines({ showOrdered }: { showOrdered: boolean }) {
             stroke="var(--ld-teal)"
             strokeWidth={1.5}
             strokeLinecap="round"
-            initial={{ opacity: 0, pathLength: 0 }}
+            initial={{ opacity: 0, pathLength: prefersReducedMotion ? 1 : 0 }}
             animate={showOrdered ? {
               opacity: 0.5,
               pathLength: 1,
             } : {
               opacity: 0,
-              pathLength: 0,
+              pathLength: prefersReducedMotion ? 1 : 0,
             }}
-            transition={{
+            transition={prefersReducedMotion ? { duration: 0.01 } : {
               duration: 0.6,
               delay: showOrdered ? 0.5 + i * 0.06 : 0,
               ease: "easeOut",
@@ -176,7 +197,7 @@ function ConnectionLines({ showOrdered }: { showOrdered: boolean }) {
 }
 
 // The main visualization showing transformation
-function TransformationVisualization({ isInView, showOrdered }: { isInView: boolean; showOrdered: boolean }) {
+function TransformationVisualization({ isInView, showOrdered, prefersReducedMotion }: { isInView: boolean; showOrdered: boolean; prefersReducedMotion: boolean }) {
   const particles = Array.from({ length: 24 }, (_, i) => ({
     delay: i * 0.2,
     duration: 4 + Math.random() * 3,
@@ -200,21 +221,21 @@ function TransformationVisualization({ isInView, showOrdered }: { isInView: bool
 
       {/* Floating particles */}
       {isInView && particles.map((p, i) => (
-        <FloatingParticle key={i} {...p} isOrdered={showOrdered} />
+        <FloatingParticle key={i} {...p} isOrdered={showOrdered} prefersReducedMotion={prefersReducedMotion} />
       ))}
 
       {/* Connection lines between icons when ordered */}
-      {isInView && <ConnectionLines showOrdered={showOrdered} />}
+      {isInView && <ConnectionLines showOrdered={showOrdered} prefersReducedMotion={prefersReducedMotion} />}
 
       {/* Center icon showing state */}
       <AnimatePresence mode="wait">
         <motion.div
           key={showOrdered ? "ordered" : "chaos"}
           className="absolute inset-0 flex items-center justify-center"
-          initial={{ opacity: 0, scale: 0.8 }}
+          initial={{ opacity: 0, scale: prefersReducedMotion ? 1 : 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
-          transition={{ duration: 0.5 }}
+          exit={{ opacity: 0, scale: prefersReducedMotion ? 1 : 0.8 }}
+          transition={prefersReducedMotion ? { duration: 0.01 } : { duration: 0.5 }}
         >
           {showOrdered ? (
             <div className="flex flex-col items-center gap-2">
@@ -223,11 +244,12 @@ function TransformationVisualization({ isInView, showOrdered }: { isInView: bool
                 style={{
                   background: "var(--ld-teal-subtle)",
                   border: "1px solid var(--ld-teal)",
+                  boxShadow: "0 0 20px var(--ld-teal-glow)",
                 }}
-                animate={{
+                animate={prefersReducedMotion ? {} : {
                   boxShadow: ["0 0 20px var(--ld-teal-glow)", "0 0 40px var(--ld-teal-glow)", "0 0 20px var(--ld-teal-glow)"],
                 }}
-                transition={{ duration: 2, repeat: Infinity }}
+                transition={prefersReducedMotion ? {} : { duration: 2, repeat: Infinity }}
               >
                 <svg className="w-7 h-7" style={{ color: "var(--ld-teal)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -243,8 +265,8 @@ function TransformationVisualization({ isInView, showOrdered }: { isInView: bool
                   background: "var(--ld-white-5)",
                   border: "1px solid var(--ld-white-10)",
                 }}
-                animate={{ rotate: [0, 5, -5, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
+                animate={prefersReducedMotion ? {} : { rotate: [0, 5, -5, 0] }}
+                transition={prefersReducedMotion ? {} : { duration: 2, repeat: Infinity }}
               >
                 <svg className="w-7 h-7" style={{ color: "var(--ld-white-50)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
@@ -272,8 +294,11 @@ function TransformationVisualization({ isInView, showOrdered }: { isInView: bool
               top: `${y}%`,
               transform: "translate(-50%, -50%)",
             }}
-            initial={{ opacity: 0, scale: 0 }}
-            animate={showOrdered ? {
+            initial={{ opacity: prefersReducedMotion ? 1 : 0, scale: prefersReducedMotion ? 1 : 0 }}
+            animate={prefersReducedMotion ? {
+              opacity: 1,
+              scale: 1,
+            } : showOrdered ? {
               opacity: 1,
               scale: 1,
               x: 0,
@@ -284,7 +309,7 @@ function TransformationVisualization({ isInView, showOrdered }: { isInView: bool
               x: [0, Math.random() * 20 - 10, 0],
               y: [0, Math.random() * 20 - 10, 0],
             }}
-            transition={showOrdered ? {
+            transition={prefersReducedMotion ? { duration: 0.01 } : showOrdered ? {
               duration: 0.8,
               delay: i * 0.1,
               ease: [0.34, 1.56, 0.64, 1],
@@ -308,7 +333,7 @@ function TransformationVisualization({ isInView, showOrdered }: { isInView: bool
 }
 
 // Progress indicator for the transformation
-function TransformationProgress({ currentStage, onStageClick }: { currentStage: number; onStageClick: (stage: number) => void }) {
+function TransformationProgress({ currentStage, onStageClick, prefersReducedMotion }: { currentStage: number; onStageClick: (stage: number) => void; prefersReducedMotion: boolean }) {
   return (
     <div className="flex items-center justify-center gap-2 md:gap-4 flex-wrap">
       {transformationStages.map((stage, i) => (
@@ -323,8 +348,8 @@ function TransformationProgress({ currentStage, onStageClick }: { currentStage: 
         >
           <motion.div
             style={{ color: currentStage >= i ? "var(--ld-teal)" : "var(--ld-white-50)" }}
-            animate={currentStage === i ? { scale: [1, 1.1, 1] } : {}}
-            transition={{ duration: 0.5, repeat: currentStage === i ? Infinity : 0, repeatDelay: 1 }}
+            animate={!prefersReducedMotion && currentStage === i ? { scale: [1, 1.1, 1] } : {}}
+            transition={prefersReducedMotion ? {} : { duration: 0.5, repeat: currentStage === i ? Infinity : 0, repeatDelay: 1 }}
           >
             {stage.icon}
           </motion.div>
@@ -341,7 +366,7 @@ function TransformationProgress({ currentStage, onStageClick }: { currentStage: 
 }
 
 // The value pillars component
-function ValuePillars({ isInView }: { isInView: boolean }) {
+function ValuePillars({ isInView, prefersReducedMotion }: { isInView: boolean; prefersReducedMotion: boolean }) {
   const pillars = [
     {
       title: "Clarity",
@@ -378,9 +403,9 @@ function ValuePillars({ isInView }: { isInView: boolean }) {
       {pillars.map((pillar, i) => (
         <motion.div
           key={pillar.title}
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.8 + i * 0.15 }}
+          transition={prefersReducedMotion ? { duration: 0.01 } : { duration: 0.6, delay: 0.8 + i * 0.15 }}
           className="group"
         >
           <div className="ld-card p-5 md:p-6 h-full text-center relative overflow-hidden transition-all duration-300 hover:border-[var(--ld-teal)]">
@@ -398,8 +423,8 @@ function ValuePillars({ isInView }: { isInView: boolean }) {
                 background: "var(--ld-teal-subtle)",
                 color: "var(--ld-teal)",
               }}
-              whileHover={{ scale: 1.1, rotate: 5 }}
-              transition={{ type: "spring", stiffness: 300 }}
+              whileHover={prefersReducedMotion ? {} : { scale: 1.1, rotate: 5 }}
+              transition={prefersReducedMotion ? {} : { type: "spring", stiffness: 300 }}
             >
               {pillar.icon}
             </motion.div>
@@ -414,7 +439,7 @@ function ValuePillars({ isInView }: { isInView: boolean }) {
 }
 
 // Trust signals component
-function TrustSignals({ isInView }: { isInView: boolean }) {
+function TrustSignals({ isInView, prefersReducedMotion }: { isInView: boolean; prefersReducedMotion: boolean }) {
   const signals = [
     { label: "Satellite Data", source: "Copernicus, Landsat" },
     { label: "Climate Models", source: "IPCC, NOAA" },
@@ -424,9 +449,9 @@ function TrustSignals({ isInView }: { isInView: boolean }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, delay: 1.2 }}
+      transition={prefersReducedMotion ? { duration: 0.01 } : { duration: 0.6, delay: 1.2 }}
       className="mt-10 text-center"
     >
       <p className="ld-body-sm mb-4">Built on trusted data foundations</p>
@@ -434,9 +459,9 @@ function TrustSignals({ isInView }: { isInView: boolean }) {
         {signals.map((signal, i) => (
           <motion.div
             key={signal.label}
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: prefersReducedMotion ? 1 : 0.9 }}
             animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ duration: 0.4, delay: 1.3 + i * 0.1 }}
+            transition={prefersReducedMotion ? { duration: 0.01 } : { duration: 0.4, delay: 1.3 + i * 0.1 }}
             className="flex items-center gap-2 px-4 py-2 rounded-full"
             style={{
               background: "var(--ld-white-5)",
@@ -462,17 +487,24 @@ export default function ImpactSection() {
   const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
   const [currentStage, setCurrentStage] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const prefersReducedMotion = useReducedMotion();
 
-  // Auto-advance through stages
+  // Simplified transition for reduced motion
+  const getTransition = (delay: number) =>
+    prefersReducedMotion
+      ? { duration: 0.01 }
+      : { duration: 0.6, delay };
+
+  // Auto-advance through stages - skip for reduced motion
   useEffect(() => {
-    if (!isInView || !isAutoPlaying) return;
+    if (!isInView || !isAutoPlaying || prefersReducedMotion) return;
 
     const interval = setInterval(() => {
       setCurrentStage((prev) => (prev + 1) % transformationStages.length);
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [isInView, isAutoPlaying]);
+  }, [isInView, isAutoPlaying, prefersReducedMotion]);
 
   const handleStageClick = (stage: number) => {
     setCurrentStage(stage);
@@ -486,7 +518,7 @@ export default function ImpactSection() {
     offset: ["start end", "end start"],
   });
 
-  const backgroundY = useTransform(scrollYProgress, [0, 1], [0, 100]);
+  const backgroundY = useTransform(scrollYProgress, [0, 1], prefersReducedMotion ? [0, 0] : [0, 100]);
 
   return (
     <section
@@ -520,16 +552,16 @@ export default function ImpactSection() {
           <motion.p
             initial={{ opacity: 0 }}
             animate={isInView ? { opacity: 1 } : {}}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={getTransition(0.2)}
             className="ld-caption mb-3"
           >
             The Transformation
           </motion.p>
 
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8, delay: 0.3 }}
+            transition={getTransition(0.3)}
             className="ld-display-lg mb-3"
           >
             From data chaos to{" "}
@@ -539,7 +571,7 @@ export default function ImpactSection() {
           <motion.p
             initial={{ opacity: 0 }}
             animate={isInView ? { opacity: 1 } : {}}
-            transition={{ duration: 0.6, delay: 0.5 }}
+            transition={getTransition(0.5)}
             className="ld-body max-w-2xl mx-auto"
           >
             Watch how Impact Atlas transforms scattered environmental data
@@ -549,27 +581,29 @@ export default function ImpactSection() {
 
         {/* Transformation Visualization */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.6 }}
+          transition={getTransition(0.6)}
           className="mb-6"
         >
           <TransformationVisualization
             isInView={isInView}
             showOrdered={currentStage >= 2}
+            prefersReducedMotion={prefersReducedMotion}
           />
         </motion.div>
 
         {/* Stage Progress */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.7 }}
+          transition={getTransition(0.7)}
           className="mb-4"
         >
           <TransformationProgress
             currentStage={currentStage}
             onStageClick={handleStageClick}
+            prefersReducedMotion={prefersReducedMotion}
           />
         </motion.div>
 
@@ -577,10 +611,10 @@ export default function ImpactSection() {
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStage}
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
+            exit={{ opacity: 0, y: prefersReducedMotion ? 0 : -10 }}
+            transition={prefersReducedMotion ? { duration: 0.01 } : { duration: 0.3 }}
             className="text-center max-w-lg mx-auto"
           >
             <p className="ld-body-sm" style={{ color: "var(--ld-white-70)" }}>
@@ -590,10 +624,10 @@ export default function ImpactSection() {
         </AnimatePresence>
 
         {/* Value Pillars */}
-        <ValuePillars isInView={isInView} />
+        <ValuePillars isInView={isInView} prefersReducedMotion={prefersReducedMotion} />
 
         {/* Trust Signals */}
-        <TrustSignals isInView={isInView} />
+        <TrustSignals isInView={isInView} prefersReducedMotion={prefersReducedMotion} />
       </div>
     </section>
   );

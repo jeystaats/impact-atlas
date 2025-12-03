@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 // Positions as percentages within the map container (keep within 15-85% range)
 const cities = [
@@ -15,6 +16,13 @@ const cities = [
 export default function VisionSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.3 });
+  const prefersReducedMotion = useReducedMotion();
+
+  // Simplified transition for reduced motion
+  const getTransition = (delay: number) =>
+    prefersReducedMotion
+      ? { duration: 0.01 }
+      : { duration: 0.6, delay };
 
   return (
     <section
@@ -35,16 +43,16 @@ export default function VisionSection() {
             <motion.p
               initial={{ opacity: 0 }}
               animate={isInView ? { opacity: 1 } : {}}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              transition={getTransition(0.2)}
               className="ld-caption mb-4"
             >
               The Vision
             </motion.p>
 
             <motion.h2
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.8, delay: 0.3 }}
+              transition={getTransition(0.3)}
               className="ld-display-lg mb-6"
             >
               Every city has{" "}
@@ -52,9 +60,9 @@ export default function VisionSection() {
             </motion.h2>
 
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: 0.5 }}
+              transition={getTransition(0.5)}
               className="ld-body-lg mb-8"
             >
               Impact Atlas is an <strong style={{ color: "var(--ld-teal)" }}>impact radar</strong> that
@@ -71,9 +79,9 @@ export default function VisionSection() {
               ].map((item, i) => (
                 <motion.div
                   key={item.text}
-                  initial={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, x: prefersReducedMotion ? 0 : -20 }}
                   animate={isInView ? { opacity: 1, x: 0 } : {}}
-                  transition={{ duration: 0.4, delay: 0.7 + i * 0.1 }}
+                  transition={prefersReducedMotion ? { duration: 0.01 } : { duration: 0.4, delay: 0.7 + i * 0.1 }}
                   className="flex items-center gap-3"
                 >
                   <span style={{ color: "var(--ld-teal)" }}>{item.icon}</span>
@@ -85,9 +93,9 @@ export default function VisionSection() {
 
           {/* Right: Map Visualization */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: prefersReducedMotion ? 1 : 0.95 }}
             animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ duration: 0.8, delay: 0.4 }}
+            transition={getTransition(0.4)}
             className="relative aspect-[4/3] rounded-2xl overflow-hidden"
             style={{ background: "var(--ld-navy-dark)", border: "1px solid var(--ld-white-10)" }}
           >
@@ -136,7 +144,7 @@ export default function VisionSection() {
                 key={city.name}
                 initial={{ scale: 0, opacity: 0 }}
                 animate={isInView ? { scale: 1, opacity: 1 } : {}}
-                transition={{ duration: 0.5, delay: city.delay }}
+                transition={prefersReducedMotion ? { duration: 0.01 } : { duration: 0.5, delay: city.delay }}
                 className="absolute"
                 style={{
                   left: `${city.x}%`,
@@ -144,50 +152,54 @@ export default function VisionSection() {
                   transform: "translate(-50%, -50%)",
                 }}
               >
-                {/* Pulse rings */}
-                <motion.div
-                  className="absolute rounded-full"
-                  style={{
-                    width: 20,
-                    height: 20,
-                    top: "50%",
-                    left: "50%",
-                    marginTop: -10,
-                    marginLeft: -10,
-                    border: `2px solid var(${city.color})`,
-                  }}
-                  animate={{
-                    scale: [1, 1.8, 1],
-                    opacity: [0.6, 0, 0.6],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeOut",
-                  }}
-                />
-                <motion.div
-                  className="absolute rounded-full"
-                  style={{
-                    width: 32,
-                    height: 32,
-                    top: "50%",
-                    left: "50%",
-                    marginTop: -16,
-                    marginLeft: -16,
-                    border: `1px solid var(${city.color})`,
-                  }}
-                  animate={{
-                    scale: [1, 1.5, 1],
-                    opacity: [0.3, 0, 0.3],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeOut",
-                    delay: 0.5,
-                  }}
-                />
+                {/* Pulse rings - disabled for reduced motion */}
+                {!prefersReducedMotion && (
+                  <>
+                    <motion.div
+                      className="absolute rounded-full"
+                      style={{
+                        width: 20,
+                        height: 20,
+                        top: "50%",
+                        left: "50%",
+                        marginTop: -10,
+                        marginLeft: -10,
+                        border: `2px solid var(${city.color})`,
+                      }}
+                      animate={{
+                        scale: [1, 1.8, 1],
+                        opacity: [0.6, 0, 0.6],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeOut",
+                      }}
+                    />
+                    <motion.div
+                      className="absolute rounded-full"
+                      style={{
+                        width: 32,
+                        height: 32,
+                        top: "50%",
+                        left: "50%",
+                        marginTop: -16,
+                        marginLeft: -16,
+                        border: `1px solid var(${city.color})`,
+                      }}
+                      animate={{
+                        scale: [1, 1.5, 1],
+                        opacity: [0.3, 0, 0.3],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeOut",
+                        delay: 0.5,
+                      }}
+                    />
+                  </>
+                )}
                 {/* Dot */}
                 <div
                   className="relative w-2.5 h-2.5 rounded-full"

@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import Image from "next/image";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const steps = [
   {
@@ -37,6 +38,13 @@ const partners = [
 export default function ProcessSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.3 });
+  const prefersReducedMotion = useReducedMotion();
+
+  // Simplified transition for reduced motion
+  const getTransition = (delay: number) =>
+    prefersReducedMotion
+      ? { duration: 0.01 }
+      : { duration: 0.6, delay };
 
   return (
     <section
@@ -57,16 +65,16 @@ export default function ProcessSection() {
           <motion.p
             initial={{ opacity: 0 }}
             animate={isInView ? { opacity: 1 } : {}}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={getTransition(0.2)}
             className="ld-caption mb-4"
           >
             How It Works
           </motion.p>
 
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8, delay: 0.3 }}
+            transition={getTransition(0.3)}
             className="ld-display-lg"
           >
             From data to decision{" "}
@@ -79,9 +87,9 @@ export default function ProcessSection() {
           {steps.map((step, i) => (
             <motion.div
               key={step.number}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: 0.4 + i * 0.15 }}
+              transition={prefersReducedMotion ? { duration: 0.01 } : { duration: 0.6, delay: 0.4 + i * 0.15 }}
               className="relative group"
             >
               {/* Connector line (not on last item) */}
@@ -106,8 +114,8 @@ export default function ProcessSection() {
                 {/* 3D Icon */}
                 <motion.div
                   className="relative w-20 h-20 mx-auto mb-6"
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                  transition={{ type: "spring", stiffness: 300 }}
+                  whileHover={prefersReducedMotion ? {} : { scale: 1.1, rotate: 5 }}
+                  transition={prefersReducedMotion ? {} : { type: "spring", stiffness: 300 }}
                 >
                   <Image
                     src={step.icon}
@@ -140,9 +148,9 @@ export default function ProcessSection() {
 
         {/* Partner logos */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.8 }}
+          transition={getTransition(0.8)}
           className="text-center"
         >
           <p className="ld-body-sm mb-8">Powered by trusted data sources</p>
@@ -152,8 +160,8 @@ export default function ProcessSection() {
                 key={partner.name}
                 initial={{ opacity: 0 }}
                 animate={isInView ? { opacity: 1 } : {}}
-                transition={{ duration: 0.4, delay: 0.9 + i * 0.05 }}
-                whileHover={{ scale: 1.08 }}
+                transition={prefersReducedMotion ? { duration: 0.01 } : { duration: 0.4, delay: 0.9 + i * 0.05 }}
+                whileHover={prefersReducedMotion ? {} : { scale: 1.08 }}
                 className="cursor-default transition-all duration-300 [filter:brightness(0)_invert(1)_opacity(0.5)] hover:[filter:none]"
               >
                 <Image

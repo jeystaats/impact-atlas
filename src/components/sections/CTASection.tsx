@@ -2,10 +2,18 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export default function CTASection() {
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.3 });
+  const prefersReducedMotion = useReducedMotion();
+
+  // Simplified transition for reduced motion
+  const getTransition = (delay: number) =>
+    prefersReducedMotion
+      ? { duration: 0.01 }
+      : { duration: 0.6, delay };
 
   return (
     <section
@@ -33,7 +41,7 @@ export default function CTASection() {
         <motion.p
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          transition={getTransition(0.2)}
           className="ld-caption mb-6"
         >
           Ready to See Your City?
@@ -41,9 +49,9 @@ export default function CTASection() {
 
         {/* Main headline */}
         <motion.h2
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.3 }}
+          transition={getTransition(0.3)}
           className="ld-display-xl mb-6"
         >
           Give your city an
@@ -55,7 +63,7 @@ export default function CTASection() {
         <motion.p
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.6, delay: 0.5 }}
+          transition={getTransition(0.5)}
           className="ld-body-lg max-w-xl mx-auto mb-10"
         >
           Built at the intersection of climate science, satellite data, and AI.
@@ -64,9 +72,9 @@ export default function CTASection() {
 
         {/* CTAs */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.7 }}
+          transition={getTransition(0.7)}
           className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
         >
           <a href="/dashboard" className="ld-btn-primary">
@@ -81,29 +89,29 @@ export default function CTASection() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.6, delay: 0.9 }}
+          transition={getTransition(0.9)}
         >
           <a
             href="https://www.norrsken.org/fixathon"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm hover:scale-105 transition-transform"
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm ${prefersReducedMotion ? "" : "hover:scale-105"} transition-transform`}
             style={{
               background: "var(--ld-white-5)",
               border: "1px solid var(--ld-white-10)",
               color: "var(--ld-white-50)",
             }}
           >
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <span className={`w-2 h-2 rounded-full bg-green-500 ${prefersReducedMotion ? "" : "animate-pulse"}`} />
             Built for Norrsken Fixathon Barcelona 2025
           </a>
         </motion.div>
 
         {/* Sponsors */}
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 10 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 1.0 }}
+          transition={getTransition(1.0)}
           className="mt-12"
         >
           <p className="text-xs uppercase tracking-widest mb-6" style={{ color: "var(--ld-white-30)" }}>
@@ -182,7 +190,7 @@ export default function CTASection() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
-          transition={{ duration: 0.6, delay: 1.2 }}
+          transition={getTransition(1.2)}
           className="absolute bottom-8 left-0 right-0 flex items-center justify-center gap-8"
           style={{ color: "var(--ld-white-30)" }}
         >
