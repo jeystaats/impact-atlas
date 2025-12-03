@@ -71,6 +71,9 @@ export function AISuggestionModal({
 
           {/* Modal */}
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ai-suggestion-title"
             variants={modalVariants}
             initial="hidden"
             animate="visible"
@@ -100,7 +103,7 @@ export function AISuggestionModal({
                         AI Recommendation
                       </span>
                     </div>
-                    <h2 className="text-xl font-semibold text-[var(--foreground)]">
+                    <h2 id="ai-suggestion-title" className="text-xl font-semibold text-[var(--foreground)]">
                       {suggestion.title}
                     </h2>
                   </div>

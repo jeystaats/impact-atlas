@@ -1,41 +1,13 @@
-export interface HotspotData {
-  id: string;
-  lat: number;
-  lng: number;
-  severity: "low" | "medium" | "high" | "critical";
-  label: string;
-  value?: string;
-  description: string;
-  location: string;
-  recommendations: string[];
-  // Enhanced fields for rich popup display
-  trend?: "up" | "down" | "stable";
-  trendValue?: string;
-  lastUpdated?: string;
-  dataPoints?: number;
-}
+// Types are defined in ./hotspots/types.ts
+// Re-export for backward compatibility
+export type {
+  HotspotData,
+  GeoJSONFeature,
+  GeoJSONData,
+  ModuleInsight,
+} from "./hotspots/types";
 
-// GeoJSON types for polygon/area data layers
-export interface GeoJSONFeature {
-  type: "Feature";
-  properties: {
-    id: string;
-    name: string;
-    severity?: "low" | "medium" | "high" | "critical";
-    value?: string | number;
-    description?: string;
-    [key: string]: unknown;
-  };
-  geometry: {
-    type: "Polygon" | "MultiPolygon";
-    coordinates: number[][][] | number[][][][];
-  };
-}
-
-export interface GeoJSONData {
-  type: "FeatureCollection";
-  features: GeoJSONFeature[];
-}
+import type { HotspotData, ModuleInsight } from "./hotspots/types";
 
 // Barcelona-centered hotspots (default city)
 // Barcelona coordinates: 41.3851, 2.1734
@@ -758,14 +730,7 @@ export const moduleHotspots: Record<string, HotspotData[]> = {
   ],
 };
 
-export const moduleInsights: Record<string, Array<{
-  type: "insight" | "recommendation" | "warning";
-  title: string;
-  description: string;
-  confidence?: number;
-  impact?: "low" | "medium" | "high";
-  effort?: "low" | "medium" | "high";
-}>> = {
+export const moduleInsights: Record<string, ModuleInsight[]> = {
   "urban-heat": [
     {
       type: "insight",

@@ -174,6 +174,9 @@ export function AICopilotDrawer({
 
           {/* Drawer */}
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ai-copilot-title"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
@@ -197,7 +200,7 @@ export function AICopilotDrawer({
                   <Sparkles className="w-5 h-5 text-[var(--accent)]" />
                 </motion.div>
                 <div>
-                  <h2 className="font-semibold text-[var(--foreground)]">AI Copilot</h2>
+                  <h2 id="ai-copilot-title" className="font-semibold text-[var(--foreground)]">AI Copilot</h2>
                   <div className="flex items-center gap-1.5 text-xs text-[var(--foreground-muted)]">
                     <ModuleIcon moduleId={moduleId} className="w-3 h-3" />
                     {moduleName}

@@ -199,6 +199,9 @@ export function ActiveSessionsModal({ isOpen, onClose }: ActiveSessionsModalProp
 
           {/* Modal */}
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="active-sessions-title"
             variants={modalVariants}
             initial="hidden"
             animate="visible"
@@ -212,7 +215,7 @@ export function ActiveSessionsModal({ isOpen, onClose }: ActiveSessionsModalProp
                   <Shield className="w-5 h-5 text-[var(--accent)]" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-[var(--foreground)]">Active Sessions</h2>
+                  <h2 id="active-sessions-title" className="text-lg font-semibold text-[var(--foreground)]">Active Sessions</h2>
                   <p className="text-xs text-[var(--foreground-muted)]">
                     {sessions.length} device{sessions.length !== 1 ? "s" : ""} signed in
                   </p>

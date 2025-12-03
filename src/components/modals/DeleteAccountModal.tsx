@@ -87,6 +87,9 @@ export function DeleteAccountModal({ isOpen, onClose, userEmail }: DeleteAccount
 
           {/* Modal */}
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-account-title"
             variants={modalVariants}
             initial="hidden"
             animate="visible"
@@ -100,7 +103,7 @@ export function DeleteAccountModal({ isOpen, onClose, userEmail }: DeleteAccount
                   <AlertTriangle className="w-5 h-5 text-red-400" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-[var(--foreground)]">Delete Account</h2>
+                  <h2 id="delete-account-title" className="text-lg font-semibold text-[var(--foreground)]">Delete Account</h2>
                   <p className="text-xs text-red-400">This action cannot be undone</p>
                 </div>
               </div>

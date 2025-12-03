@@ -154,6 +154,9 @@ export function AlertConfigModal({
 
           {/* Modal */}
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="alert-config-title"
             variants={modalVariants}
             initial="hidden"
             animate="visible"
@@ -167,7 +170,7 @@ export function AlertConfigModal({
                   <Bell className="w-5 h-5 text-[var(--accent)]" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-[var(--foreground)]">Set Alert</h2>
+                  <h2 id="alert-config-title" className="text-lg font-semibold text-[var(--foreground)]">Set Alert</h2>
                   <p className="text-xs text-[var(--foreground-muted)]">{moduleName}</p>
                 </div>
               </div>
