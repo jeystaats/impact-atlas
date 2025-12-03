@@ -43,7 +43,8 @@
       "Bash(wc:*)",
       "Bash(ls:*)",
       "Bash(npm run test:run:*)",
-      "WebFetch(domain:www.storyblok.com)"
+      "WebFetch(domain:www.storyblok.com)",
+      "WebFetch(domain:focusreactive.com)"
     ],
     "deny": [],
     "ask": []
