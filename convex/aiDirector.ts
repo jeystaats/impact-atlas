@@ -147,7 +147,8 @@ Focus on sites where visible improvement is possible within 6 months.`,
 };
 
 // Generate structured JSON schema for hotspots
-const HOTSPOT_SCHEMA = {
+// Note: These schemas are defined for future use with structured output APIs
+const _HOTSPOT_SCHEMA = {
   type: "object",
   properties: {
     hotspots: {
@@ -184,7 +185,7 @@ const HOTSPOT_SCHEMA = {
   required: ["hotspots"],
 };
 
-const QUICK_WIN_SCHEMA = {
+const _QUICK_WIN_SCHEMA = {
   type: "object",
   properties: {
     quickWins: {

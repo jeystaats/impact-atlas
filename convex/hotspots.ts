@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
-import { requireCurrentUser, requireAdmin } from "./model/auth";
+import { requireAdmin } from "./model/auth";
 
 /**
  * List hotspots for a city

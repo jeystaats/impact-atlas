@@ -56,8 +56,8 @@ export default function DashboardLayout({
   }, [setCommandPaletteOpen]);
 
   // Handle AI question from command palette
-  const handleAskAI = (_question: string) => {
-    // Note: The question could be passed to the copilot component if needed
+  const handleAskAI = () => {
+    // Opens the copilot panel when user asks a question
     setCopilotOpen(true);
   };
 

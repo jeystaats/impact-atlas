@@ -2,6 +2,10 @@
 
 import { useEffect } from "react";
 
+// Note: global-error.tsx renders when the app is broken, so we can't use Next.js Link
+// which requires the router context. Using plain <a> tags is intentional here.
+/* eslint-disable @next/next/no-html-link-for-pages */
+
 // Inline styles - global-error cannot use external CSS reliably
 const styles = {
   html: {

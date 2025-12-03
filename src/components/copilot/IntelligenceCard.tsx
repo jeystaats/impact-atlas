@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon, IconName } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";

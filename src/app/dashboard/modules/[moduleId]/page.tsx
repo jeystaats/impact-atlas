@@ -20,7 +20,6 @@ import { ModuleActionBar } from "@/components/modules/ModuleActionBar";
 import { FilterPanel } from "@/components/modules/FilterPanel";
 import { SearchBar } from "@/components/modules/SearchBar";
 import { FilterChipsContainer, filterStateToChips, handleChipRemoval } from "@/components/modules/FilterChip";
-import { MapErrorBoundary } from "@/components/ui/ErrorBoundary";
 
 // Dynamic imports for heavy map components - reduces initial bundle size
 const MapVisualization = dynamic(
@@ -66,7 +65,6 @@ import {
   DEFAULT_FILTER_STATE,
   applyFilters,
   countActiveFilters,
-  getFilterSummary,
 } from "@/lib/filters";
 import {
   exportToCSV,
@@ -157,7 +155,6 @@ export default function ModuleDetailPage() {
   const moduleConfig = modules.find((m) => m.id === moduleId);
 
   // Use Convex data if available, fallback to static data
-  const fallbackHotspots = moduleHotspots[moduleId] || [];
   const insights = moduleInsights[moduleId] || [];
 
   // Convert Convex hotspots to HotspotData format for compatibility
@@ -178,8 +175,9 @@ export default function ModuleDetailPage() {
         recommendations: [], // AI insights would come from separate query
       }));
     }
-    return fallbackHotspots;
-  }, [convexHotspots, fallbackHotspots]);
+    // Fallback to static data
+    return moduleHotspots[moduleId] || [];
+  }, [convexHotspots, moduleId]);
 
   // Apply filters to hotspots
   const filteredHotspots = useMemo(
@@ -193,9 +191,8 @@ export default function ModuleDetailPage() {
     [filteredHotspots, moduleId]
   );
 
-  // Active filter count and summaries
+  // Active filter count
   const activeFilterCount = useMemo(() => countActiveFilters(filters), [filters]);
-  const filterSummaries = useMemo(() => getFilterSummary(filters), [filters]);
 
   const selectedHotspotData = filteredHotspots.find((h) => h.id === selectedHotspot);
 
@@ -262,18 +259,6 @@ export default function ModuleDetailPage() {
 
   const handleSearchChange = useCallback((query: string) => {
     setFilters((prev) => ({ ...prev, search: query }));
-  }, []);
-
-  const handleClearFilter = useCallback((filterType: string) => {
-    setFilters((prev) => {
-      const updated = { ...prev };
-      if (filterType === "search") updated.search = "";
-      if (filterType === "severities") updated.severities = [];
-      if (filterType === "trends") updated.trends = [];
-      if (filterType === "dateRange") updated.dateRange = { preset: "30d" };
-      if (filterType === "valueRange") updated.valueRange = null;
-      return updated;
-    });
   }, []);
 
   const handleRefresh = useCallback(() => {

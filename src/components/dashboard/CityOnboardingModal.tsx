@@ -91,9 +91,10 @@ export function CityOnboardingModal({
   onClose,
   onEnterDashboard,
 }: CityOnboardingModalProps) {
-  const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; delay: number }>>([]);
+  const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; delay: number; duration: number }>>([]);
 
-  // Generate floating particles
+  // Generate floating particles with pre-computed random values
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: initialize particles when modal opens
   useEffect(() => {
     if (isOpen) {
       const newParticles = Array.from({ length: 20 }, (_, i) => ({
@@ -101,6 +102,7 @@ export function CityOnboardingModal({
         x: Math.random() * 100,
         y: Math.random() * 100,
         delay: Math.random() * 2,
+        duration: 3 + Math.random() * 2, // Pre-compute random duration
       }));
       setParticles(newParticles);
     }
@@ -149,7 +151,7 @@ export function CityOnboardingModal({
                   scale: [1, 1.5, 1],
                 }}
                 transition={{
-                  duration: 3 + Math.random() * 2,
+                  duration: particle.duration,
                   repeat: Infinity,
                   delay: particle.delay,
                   ease: "easeInOut",

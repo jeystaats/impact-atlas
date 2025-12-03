@@ -60,7 +60,8 @@ export interface AreaChartProps {
   stacked?: boolean;
 }
 
-interface ChartDimensions {
+// Note: ChartDimensions interface kept for documentation/future use
+interface _ChartDimensions {
   width: number;
   height: number;
   chartWidth: number;

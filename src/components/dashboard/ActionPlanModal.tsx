@@ -131,16 +131,16 @@ export function ActionPlanModal({ isOpen, onClose, editPlan }: ActionPlanModalPr
     const grouped: Record<string, { module: { slug: string; name: string; color: string }; wins: typeof quickWins }> = {};
 
     for (const win of quickWins) {
-      const module = modules.find((m: { _id: Id<"modules"> }) => m._id === win.moduleId);
-      if (!module) continue;
+      const winModule = modules.find((m: { _id: Id<"modules"> }) => m._id === win.moduleId);
+      if (!winModule) continue;
 
-      if (!grouped[module.slug]) {
-        grouped[module.slug] = {
-          module: { slug: module.slug, name: module.name, color: module.color },
+      if (!grouped[winModule.slug]) {
+        grouped[winModule.slug] = {
+          module: { slug: winModule.slug, name: winModule.name, color: winModule.color },
           wins: [],
         };
       }
-      grouped[module.slug].wins.push(win);
+      grouped[winModule.slug].wins.push(win);
     }
 
     return grouped;

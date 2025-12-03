@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useSyncExternalStore, useMemo } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 
 interface Particle {
@@ -34,12 +34,49 @@ const stats: StatItem[] = [
   { value: "12%", label: "Average Impact", delay: 0.4 },
 ];
 
+// Reduced motion detection using useSyncExternalStore
+function subscribeToReducedMotion(callback: () => void) {
+  const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+  mediaQuery.addEventListener("change", callback);
+  return () => mediaQuery.removeEventListener("change", callback);
+}
+
+function getReducedMotionSnapshot() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function getReducedMotionServerSnapshot() {
+  return false; // Default to animations enabled on server
+}
+
+// Generate initial particles
+function generateInitialParticles(): Particle[] {
+  const particles: Particle[] = [];
+  for (let i = 0; i < 60; i++) {
+    particles.push({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 3 + 1,
+      opacity: Math.random() * 0.5 + 0.2,
+      speed: Math.random() * 0.3 + 0.1,
+      angle: Math.random() * Math.PI * 2,
+    });
+  }
+  return particles;
+}
+
 export default function AuthBackground() {
   const containerRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | undefined>(undefined);
-  const [particles, setParticles] = useState<Particle[]>([]);
-  const [connections, setConnections] = useState<ConnectionLine[]>([]);
-  const [isReducedMotion, setIsReducedMotion] = useState(false);
+  // Use lazy initialization to avoid setState in useEffect
+  const [particles, setParticles] = useState<Particle[]>(generateInitialParticles);
+  // Use useSyncExternalStore for reduced motion preference
+  const isReducedMotion = useSyncExternalStore(
+    subscribeToReducedMotion,
+    getReducedMotionSnapshot,
+    getReducedMotionServerSnapshot
+  );
   const [activeStatIndex, setActiveStatIndex] = useState(0);
 
   // Mouse tracking for parallax
@@ -55,34 +92,8 @@ export default function AuthBackground() {
   const particleFieldX = useTransform(smoothMouseX, [-500, 500], [10, -10]);
   const particleFieldY = useTransform(smoothMouseY, [-500, 500], [10, -10]);
 
-  // Check for reduced motion preference
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setIsReducedMotion(mediaQuery.matches);
-    const handler = (e: MediaQueryListEvent) => setIsReducedMotion(e.matches);
-    mediaQuery.addEventListener("change", handler);
-    return () => mediaQuery.removeEventListener("change", handler);
-  }, []);
-
-  // Initialize particles
-  useEffect(() => {
-    const newParticles: Particle[] = [];
-    for (let i = 0; i < 60; i++) {
-      newParticles.push({
-        id: i,
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        size: Math.random() * 3 + 1,
-        opacity: Math.random() * 0.5 + 0.2,
-        speed: Math.random() * 0.3 + 0.1,
-        angle: Math.random() * Math.PI * 2,
-      });
-    }
-    setParticles(newParticles);
-  }, []);
-
-  // Generate connection lines between nearby particles
-  useEffect(() => {
+  // Generate connection lines between nearby particles using useMemo
+  const connections = useMemo(() => {
     const newConnections: ConnectionLine[] = [];
     let connectionId = 0;
     for (let i = 0; i < particles.length; i++) {
@@ -102,7 +113,7 @@ export default function AuthBackground() {
         }
       }
     }
-    setConnections(newConnections);
+    return newConnections;
   }, [particles]);
 
   // Animate particles

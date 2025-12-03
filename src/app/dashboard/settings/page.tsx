@@ -500,7 +500,7 @@ export default function SettingsPage() {
                     <div>
                       <h3 className="font-medium text-[var(--foreground)]">Active Sessions</h3>
                       <p className="text-sm text-[var(--foreground-muted)] mt-1">
-                        Manage devices where you're signed in
+                        Manage devices where you&apos;re signed in
                       </p>
                     </div>
                     <Button variant="outline" size="sm" onClick={() => setIsSessionsModalOpen(true)}>

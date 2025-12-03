@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useClerk } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Icon } from "@/components/ui/icons";
@@ -10,7 +9,6 @@ import AuthBackground from "@/components/auth/AuthBackground";
 
 export default function SignOutPage() {
   const { signOut } = useClerk();
-  const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(true);
   const [isSignedOut, setIsSignedOut] = useState(false);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useCallback, useState } from "react";
+import { useRef, useLayoutEffect, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -114,7 +114,9 @@ export function ChartTooltip({
   const [adjustedPosition, setAdjustedPosition] = useState({ x, y });
 
   // Adjust position to keep tooltip within bounds
-  useEffect(() => {
+  // Using useLayoutEffect to measure DOM synchronously before paint
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: sync position when visibility changes
+  useLayoutEffect(() => {
     if (!visible || !tooltipRef.current) {
       setAdjustedPosition({ x, y });
       return;

@@ -28,7 +28,6 @@ export default function DashboardPage() {
     selectedCity,
     selectedCityId,
     cities,
-    isLoading: citiesLoading,
     isHydrated,
     setCity
   } = useSelectedCity();
@@ -36,13 +35,11 @@ export default function DashboardPage() {
   // City onboarding hook for new cities
   const {
     isOnboarding,
-    cityId: onboardingCityId,
     cityName: onboardingCityName,
     country: onboardingCountry,
     progress: onboardingProgress,
     startOnboarding,
     closeOnboarding,
-    isComplete: onboardingComplete,
   } = useCityOnboarding();
 
   // Fetch modules with city-specific stats from Convex

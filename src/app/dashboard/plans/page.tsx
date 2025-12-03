@@ -1,18 +1,19 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { Plus, Sparkles } from "lucide-react";
 import { useMyActionPlans, useUpdateActionPlanStatus } from "@/hooks/useConvex";
 import { useSelectedCity } from "@/hooks/useSelectedCity";
 import { useUIStore } from "@/stores/useUIStore";
+import { useHydration } from "@/hooks/useHydration";
 import { ActionPlanModal } from "@/components/dashboard/ActionPlanModal";
 import {
   AISuggestionModal,
   defaultAISuggestion,
 } from "@/components/modals/AISuggestionModal";
-import { trackEvent, trackPlanCreate, AnalyticsEvents } from "@/lib/analytics";
+import { trackEvent, AnalyticsEvents } from "@/lib/analytics";
 import {
   ActionPlanCard,
   CreatePlanCard,
@@ -34,7 +35,7 @@ import { Id } from "../../../../convex/_generated/dataModel";
 export default function ActionPlansPage() {
   const { selectedCityId } = useSelectedCity();
   const { actionPlansFilters, setActionPlansFilter } = useUIStore();
-  const [isHydrated, setIsHydrated] = useState(false);
+  const isHydrated = useHydration();
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -43,10 +44,6 @@ export default function ActionPlansPage() {
   // AI Suggestion banner state
   const [showAISuggestion, setShowAISuggestion] = useState(true);
   const [isAISuggestionModalOpen, setIsAISuggestionModalOpen] = useState(false);
-
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
 
   // Use persisted filter after hydration, default to "all" during SSR
   const activeFilter = isHydrated ? actionPlansFilters.statusFilter : "all";

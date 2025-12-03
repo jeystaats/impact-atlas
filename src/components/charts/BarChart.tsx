@@ -164,7 +164,6 @@ export function BarChart({
 
     // Calculate bar dimensions
     const barCount = data.length;
-    const totalPadding = barPadding * barCount;
     const barGroupWidth = isHorizontal
       ? chartHeight / barCount
       : chartWidth / barCount;

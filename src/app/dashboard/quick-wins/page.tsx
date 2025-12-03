@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { Icon } from "@/components/ui/icons";
@@ -94,36 +94,38 @@ export default function QuickWinsPage() {
         })
       );
 
-  // Normalize quick wins
-  const quickWinsData: NormalizedQuickWin[] = convexQuickWins
-    ? convexQuickWins.map(
-        (qw: {
-          _id: Id<"quickWins">;
-          moduleId: Id<"modules">;
-          title: string;
-          description: string;
-          impact: ImpactLevel;
-          effort: "low" | "medium" | "high";
-          estimatedDays?: number;
-          tags: string[];
-        }) => {
-          const matchedModule = convexModules?.find(
-            (m: { _id: Id<"modules">; slug: string }) => m._id === qw.moduleId
-          );
-          return {
-            id: qw._id,
-            convexId: qw._id,
-            title: qw.title,
-            description: qw.description,
-            moduleId: matchedModule?.slug ?? "unknown",
-            impact: qw.impact,
-            effort: qw.effort,
-            estimatedDays: qw.estimatedDays ?? 7,
-            tags: qw.tags,
-          };
-        }
-      )
-    : fallbackQuickWinsData;
+  // Normalize quick wins - memoized to prevent unnecessary re-renders
+  const quickWinsData: NormalizedQuickWin[] = useMemo(() => {
+    if (!convexQuickWins) return fallbackQuickWinsData;
+
+    return convexQuickWins.map(
+      (qw: {
+        _id: Id<"quickWins">;
+        moduleId: Id<"modules">;
+        title: string;
+        description: string;
+        impact: ImpactLevel;
+        effort: "low" | "medium" | "high";
+        estimatedDays?: number;
+        tags: string[];
+      }) => {
+        const matchedModule = convexModules?.find(
+          (m: { _id: Id<"modules">; slug: string }) => m._id === qw.moduleId
+        );
+        return {
+          id: qw._id,
+          convexId: qw._id,
+          title: qw.title,
+          description: qw.description,
+          moduleId: matchedModule?.slug ?? "unknown",
+          impact: qw.impact,
+          effort: qw.effort,
+          estimatedDays: qw.estimatedDays ?? 7,
+          tags: qw.tags,
+        };
+      }
+    );
+  }, [convexQuickWins, convexModules]);
 
   // Calculate module quick win counts
   const modulesWithCounts = modules.map((m) => ({
@@ -344,14 +346,14 @@ export default function QuickWinsPage() {
       >
         <AnimatePresence mode="popLayout">
           {filteredWins.map((win) => {
-            const module = getModuleById(win.moduleId);
+            const winModule = getModuleById(win.moduleId);
             const isCompleted = completedWinIds.has(win.id);
 
             return (
               <QuickWinCard
                 key={win.id}
                 win={win}
-                module={module}
+                module={winModule}
                 isCompleted={isCompleted}
                 onToggleComplete={handleToggleComplete}
               />

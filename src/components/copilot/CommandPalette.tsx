@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { Icon, IconName, ModuleIcon } from "@/components/ui/icons";
@@ -117,14 +117,18 @@ export function CommandPalette({ isOpen, onClose, onAskAI, onNavigate }: Command
       )
     : commands;
 
-  // Group by category
-  const groupedCommands = {
-    ai: filteredCommands.filter((c) => c.category === "ai"),
-    navigation: filteredCommands.filter((c) => c.category === "navigation"),
-    action: filteredCommands.filter((c) => c.category === "action"),
-  };
-
-  const allFiltered = [...groupedCommands.ai, ...groupedCommands.navigation, ...groupedCommands.action];
+  // Group by category - memoized to prevent recreation on each render
+  const { groupedCommands, allFiltered } = useMemo(() => {
+    const grouped = {
+      ai: filteredCommands.filter((c) => c.category === "ai"),
+      navigation: filteredCommands.filter((c) => c.category === "navigation"),
+      action: filteredCommands.filter((c) => c.category === "action"),
+    };
+    return {
+      groupedCommands: grouped,
+      allFiltered: [...grouped.ai, ...grouped.navigation, ...grouped.action],
+    };
+  }, [filteredCommands]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -160,14 +164,21 @@ export function CommandPalette({ isOpen, onClose, onAskAI, onNavigate }: Command
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, selectedIndex, allFiltered, search, onAskAI, onClose]);
 
-  // Focus input when opened
+  // Reset state when modal opens
+  const resetState = useCallback(() => {
+    setSearch("");
+    setSelectedIndex(0);
+  }, []);
+
+  // Focus input when opened and reset state
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- Intentional: reset state when modal opens
   useEffect(() => {
     if (isOpen) {
-      setSearch("");
-      setSelectedIndex(0);
+      // Reset state when modal opens - this is intentional to clear previous searches
+      resetState();
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [isOpen]);
+  }, [isOpen, resetState]);
 
   if (!isOpen) return null;
 
@@ -219,7 +230,7 @@ export function CommandPalette({ isOpen, onClose, onAskAI, onNavigate }: Command
                   <p className="px-3 py-2 text-xs font-medium text-[var(--foreground-muted)] uppercase tracking-wider">
                     Recent
                   </p>
-                  {recentQuestions.map((q, i) => (
+                  {recentQuestions.map((q) => (
                     <button
                       key={q}
                       onClick={() => {
@@ -315,7 +326,7 @@ export function CommandPalette({ isOpen, onClose, onAskAI, onNavigate }: Command
                 <div className="py-8 text-center">
                   <p className="text-[var(--foreground-muted)]">No commands found</p>
                   <p className="text-sm text-[var(--accent)] mt-2">
-                    Press Enter to ask the AI: "{search}"
+                    Press Enter to ask the AI: &quot;{search}&quot;
                   </p>
                 </div>
               )}
@@ -358,7 +369,7 @@ function CommandItem({
   isModule?: boolean;
   moduleId?: string;
 }) {
-  const module = isModule ? modules.find((m) => m.id === moduleId) : null;
+  const matchedModule = isModule ? modules.find((m) => m.id === moduleId) : null;
 
   return (
     <button
@@ -373,9 +384,9 @@ function CommandItem({
       {isModule && moduleId ? (
         <div
           className="w-6 h-6 rounded-md flex items-center justify-center"
-          style={{ backgroundColor: module?.color + "20" }}
+          style={{ backgroundColor: matchedModule?.color + "20" }}
         >
-          <ModuleIcon moduleId={moduleId} className="w-3.5 h-3.5" style={{ color: module?.color }} />
+          <ModuleIcon moduleId={moduleId} className="w-3.5 h-3.5" style={{ color: matchedModule?.color }} />
         </div>
       ) : (
         <Icon name={command.icon} className="w-5 h-5 opacity-70" />

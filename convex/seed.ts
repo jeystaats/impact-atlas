@@ -5,6 +5,7 @@ import { citiesSeedData } from "./seed/cities";
 import { modulesSeedData } from "./seed/modules";
 import { quickWinsSeedData } from "./seed/quickWins";
 import { barcelonaHotspots, barcelonaQuickWins } from "./seed/barcelonaData";
+import type { Id } from "./_generated/dataModel";
 
 /**
  * Seed cities into the database
@@ -116,7 +117,7 @@ export const seedQuickWins = internalMutation({
       // Check if quick win with same title already exists for this module
       const existing = await ctx.db
         .query("quickWins")
-        .withIndex("by_module", (q) => q.eq("moduleId", moduleId as any))
+        .withIndex("by_module", (q) => q.eq("moduleId", moduleId as Id<"modules">))
         .filter((q) => q.eq(q.field("title"), quickWin.title))
         .first();
 
@@ -125,11 +126,11 @@ export const seedQuickWins = internalMutation({
         continue;
       }
 
-      const { moduleSlug, ...quickWinData } = quickWin;
+      const { moduleSlug: _moduleSlug, ...quickWinData } = quickWin;
 
       await ctx.db.insert("quickWins", {
         ...quickWinData,
-        moduleId: moduleId as any,
+        moduleId: moduleId as Id<"modules">,
         isActive: true,
         createdAt: now,
         updatedAt: now,
@@ -207,7 +208,7 @@ export const seedHotspots = internalMutation({
       const existing = await ctx.db
         .query("hotspots")
         .withIndex("by_city_module", (q) =>
-          q.eq("cityId", city._id).eq("moduleId", moduleId as any)
+          q.eq("cityId", city._id).eq("moduleId", moduleId as Id<"modules">)
         )
         .filter((q) => q.eq(q.field("name"), hotspot.name))
         .first();
@@ -218,7 +219,7 @@ export const seedHotspots = internalMutation({
 
       await ctx.db.insert("hotspots", {
         cityId: city._id,
-        moduleId: moduleId as any,
+        moduleId: moduleId as Id<"modules">,
         name: hotspot.name,
         description: hotspot.description,
         coordinates: {
@@ -431,7 +432,7 @@ export const seedBarcelonaComplete = internalMutation({
         const existing = await ctx.db
           .query("hotspots")
           .withIndex("by_city_module", (q) =>
-            q.eq("cityId", city._id).eq("moduleId", moduleId as any)
+            q.eq("cityId", city._id).eq("moduleId", moduleId as Id<"modules">)
           )
           .filter((q) => q.eq(q.field("name"), hotspot.name))
           .first();
@@ -442,7 +443,7 @@ export const seedBarcelonaComplete = internalMutation({
 
         await ctx.db.insert("hotspots", {
           cityId: city._id,
-          moduleId: moduleId as any,
+          moduleId: moduleId as Id<"modules">,
           name: hotspot.name,
           description: hotspot.description,
           coordinates: {
@@ -487,7 +488,7 @@ export const seedBarcelonaComplete = internalMutation({
 
         await ctx.db.insert("quickWins", {
           cityId: city._id,
-          moduleId: moduleId as any,
+          moduleId: moduleId as Id<"modules">,
           title: quickWin.title,
           description: quickWin.description,
           impact: quickWin.impact,

@@ -41,15 +41,15 @@ export function CityOverviewMap({
   const allHotspots = useMemo(() => {
     const combined: CombinedHotspot[] = [];
 
-    Object.entries(moduleHotspots).forEach(([moduleId, hotspots]) => {
-      const module = modules.find((m) => m.id === moduleId);
-      if (module) {
+    Object.entries(moduleHotspots).forEach(([modId, hotspots]) => {
+      const matchedModule = modules.find((m) => m.id === modId);
+      if (matchedModule) {
         hotspots.forEach((hotspot) => {
           combined.push({
             ...hotspot,
-            moduleId,
-            moduleColor: module.color,
-            moduleName: module.title.split(" ").slice(0, 2).join(" "),
+            moduleId: modId,
+            moduleColor: matchedModule.color,
+            moduleName: matchedModule.title.split(" ").slice(0, 2).join(" "),
           });
         });
       }
