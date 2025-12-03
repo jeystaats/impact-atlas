@@ -665,8 +665,8 @@ export function FixathonBadge() {
 - [x] Fix touch targets (44px minimum) ✅
 
 ### Week 2 (High Priority)
-- [ ] Create BaseMap system
-- [ ] Refactor AirQualityMap to use BaseMap
+- [x] Create BaseMap system ✅
+- [x] Refactor AirQualityMap to use BaseMap ✅
 - [x] Remove type duplication (use Convex types) ✅
 - [ ] Convert landing page to Server Component
 - [x] Create OG images ✅

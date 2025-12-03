@@ -37,7 +37,8 @@
       "WebFetch(domain:events.norrsken.org)",
       "WebFetch(domain:www.norrsken.org)",
       "Bash(xargs cat:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []
