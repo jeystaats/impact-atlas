@@ -667,7 +667,7 @@ export function FixathonBadge() {
 ### Week 2 (High Priority)
 - [ ] Create BaseMap system
 - [ ] Refactor AirQualityMap to use BaseMap
-- [ ] Remove type duplication (use Convex types)
+- [x] Remove type duplication (use Convex types) ✅
 - [ ] Convert landing page to Server Component
 - [x] Create OG images ✅
 
@@ -683,8 +683,8 @@ export function FixathonBadge() {
 ### Week 4 (Polish)
 - [ ] Refactor remaining map components
 - [ ] Add widescreen breakpoints
-- [ ] Add keyboard shortcuts
-- [ ] Implement reduced motion in components
+- [x] Add keyboard shortcuts ✅
+- [x] Implement reduced motion in components ✅
 - [ ] Complete accessibility audit
 
 ---
