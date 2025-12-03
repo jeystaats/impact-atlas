@@ -90,7 +90,7 @@ export function HeatmapOverlay({
   showControls = true,
 }: HeatmapOverlayProps) {
   const [heatIntensity, setHeatIntensity] = useState(0.8);
-  const [_showLabels, _setShowLabels] = useState(true);
+  const [showLabels] = useState(true);
   const [timeOfDay, setTimeOfDay] = useState<"morning" | "afternoon" | "evening">("afternoon");
   const [animatedIntensity, setAnimatedIntensity] = useState(0);
   const mapRef = useRef<MapRef>(null);

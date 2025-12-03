@@ -24,6 +24,9 @@ export type {
 // In the future, this can be split per module for lazy loading
 export { moduleHotspots, moduleInsights } from "../hotspots";
 
+// Import for use in helper functions
+import { moduleHotspots, moduleInsights } from "../hotspots";
+
 // Helper function to get hotspots for a specific module
 export function getModuleHotspots(moduleId: string) {
   return moduleHotspots[moduleId] || [];
