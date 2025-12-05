@@ -31,18 +31,18 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      // Scripts: self, Umami, Clerk, inline for Next.js
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cloud.umami.is https://*.clerk.accounts.dev",
+      // Scripts: self, Umami, Clerk, Vercel Live, inline for Next.js
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cloud.umami.is https://*.clerk.accounts.dev https://vercel.live",
       // Styles: self, inline for Tailwind/Framer
       "style-src 'self' 'unsafe-inline'",
-      // Images: self, data URIs, Mapbox, Clerk, blob for dynamic images
-      "img-src 'self' data: blob: https://*.mapbox.com https://*.clerk.com https://img.clerk.com",
+      // Images: self, data URIs, Mapbox, Clerk, Unsplash, blob for dynamic images
+      "img-src 'self' data: blob: https://*.mapbox.com https://*.clerk.com https://img.clerk.com https://images.unsplash.com",
       // Fonts: self, Google Fonts
       "font-src 'self' https://fonts.gstatic.com",
-      // Connect: APIs, Mapbox, Convex, Clerk, Umami
-      "connect-src 'self' https://*.mapbox.com https://*.convex.cloud wss://*.convex.cloud https://*.clerk.accounts.dev https://cloud.umami.is",
+      // Connect: APIs, Mapbox, Convex, Clerk, Umami, Vercel Live
+      "connect-src 'self' https://*.mapbox.com https://*.convex.cloud wss://*.convex.cloud https://*.clerk.accounts.dev https://*.accounts.dev https://cloud.umami.is https://clerk-telemetry.com https://api-gateway.umami.dev https://vercel.live wss://vercel.live",
       // Frames: Clerk for auth
-      "frame-src 'self' https://*.clerk.accounts.dev",
+      "frame-src 'self' https://*.clerk.accounts.dev https://*.accounts.dev",
       // Workers: self and blob for Mapbox
       "worker-src 'self' blob:",
       // Child sources
