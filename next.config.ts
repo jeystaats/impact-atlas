@@ -42,7 +42,7 @@ const securityHeaders = [
       // Connect: APIs, Mapbox, Convex, Clerk, Umami, Vercel Live
       "connect-src 'self' https://*.mapbox.com https://*.convex.cloud wss://*.convex.cloud https://*.clerk.accounts.dev https://*.accounts.dev https://cloud.umami.is https://clerk-telemetry.com https://api-gateway.umami.dev https://vercel.live wss://vercel.live",
       // Frames: Clerk for auth
-      "frame-src 'self' https://*.clerk.accounts.dev https://*.accounts.dev",
+      "frame-src 'self' https://*.clerk.accounts.dev https://*.accounts.dev https://vercel.live",
       // Workers: self and blob for Mapbox
       "worker-src 'self' blob:",
       // Child sources
