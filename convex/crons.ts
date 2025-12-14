@@ -95,4 +95,36 @@ crons.hourly(
   {}
 );
 
+// ============================================
+// VEGETATION NDVI (Agromonitoring/Satellite)
+// ============================================
+
+/**
+ * Weekly vegetation health update
+ * Fetches NDVI data for green spaces and parks
+ * Runs every Wednesday at 5:00 AM UTC (vegetation changes slowly)
+ */
+crons.weekly(
+  "weekly-vegetation-update",
+  { hourUTC: 5, minuteUTC: 0, dayOfWeek: "wednesday" },
+  internal.vegetation.fetchVegetationAllCities,
+  {}
+);
+
+// ============================================
+// GLOBAL FOREST WATCH (Tree Cover)
+// ============================================
+
+/**
+ * Weekly forest monitoring update
+ * Fetches tree cover loss/gain data from Global Forest Watch
+ * Runs every Sunday at 2:00 AM UTC (forest data updates weekly)
+ */
+crons.weekly(
+  "weekly-forest-update",
+  { hourUTC: 2, minuteUTC: 0, dayOfWeek: "sunday" },
+  internal.globalForestWatch.fetchForestDataAllCities,
+  {}
+);
+
 export default crons;
