@@ -63,4 +63,36 @@ crons.hourly(
   {}
 );
 
+// ============================================
+// BIODIVERSITY (GBIF)
+// ============================================
+
+/**
+ * Daily biodiversity update
+ * Fetches species occurrence data from GBIF
+ * Runs at 4:00 AM UTC (species data doesn't change frequently)
+ */
+crons.daily(
+  "daily-biodiversity-update",
+  { hourUTC: 4, minuteUTC: 0 },
+  internal.biodiversity.fetchBiodiversityAllCities,
+  {}
+);
+
+// ============================================
+// COASTAL PLASTIC (Open-Meteo Marine)
+// ============================================
+
+/**
+ * Hourly coastal plastic update
+ * Fetches ocean current and wave data for plastic accumulation modeling
+ * Runs at :30 past each hour
+ */
+crons.hourly(
+  "hourly-coastal-plastic-update",
+  { minuteUTC: 30 },
+  internal.coastalPlastic.fetchCoastalAllCities,
+  {}
+);
+
 export default crons;
