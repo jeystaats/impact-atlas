@@ -556,7 +556,14 @@ export const fetchOpenAQData = internalAction({
 });
 
 /**
- * Fetch OpenAQ data for all active cities
+ * Helper to delay execution
+ */
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Fetch OpenAQ data for all active cities with rate limiting
  */
 export const fetchOpenAQAllCities = internalAction({
   args: {},
@@ -568,10 +575,19 @@ export const fetchOpenAQAllCities = internalAction({
     const results: Array<{ success: boolean; city: string; error?: string }> =
       [];
 
-    for (const city of cities as Array<{ slug: string }>) {
-      if (!CITY_CONFIG[city.slug]) {
-        console.log(`Skipping ${city.slug}: no OpenAQ config defined`);
-        continue;
+    // Filter to only cities with OpenAQ config
+    const configuredCities = (cities as Array<{ slug: string }>).filter(
+      (city) => CITY_CONFIG[city.slug]
+    );
+
+    for (let i = 0; i < configuredCities.length; i++) {
+      const city = configuredCities[i];
+
+      // Rate limiting: wait 2 seconds between cities to avoid 429 errors
+      // OpenAQ free tier allows ~100 requests/minute
+      if (i > 0) {
+        console.log(`Rate limiting: waiting 2s before fetching ${city.slug}...`);
+        await delay(2000);
       }
 
       try {
@@ -586,7 +602,26 @@ export const fetchOpenAQAllCities = internalAction({
           city: city.slug,
           error: error instanceof Error ? error.message : "Unknown error",
         });
+
+        // If rate limited, wait longer before next request
+        if (
+          error instanceof Error &&
+          error.message.includes("429")
+        ) {
+          console.log("Rate limited - waiting 10s before retry...");
+          await delay(10000);
+        }
       }
+    }
+
+    // Log skipped cities
+    const skippedCities = (cities as Array<{ slug: string }>).filter(
+      (city) => !CITY_CONFIG[city.slug]
+    );
+    if (skippedCities.length > 0) {
+      console.log(
+        `Skipped ${skippedCities.length} cities without OpenAQ config: ${skippedCities.map((c) => c.slug).join(", ")}`
+      );
     }
 
     return results;

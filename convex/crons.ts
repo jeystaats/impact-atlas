@@ -47,4 +47,20 @@ crons.hourly(
   {}
 );
 
+// ============================================
+// URBAN HEAT (Open-Meteo)
+// ============================================
+
+/**
+ * Hourly urban heat update
+ * Fetches temperature data and calculates heat anomalies
+ * Runs at :45 past each hour (offset from OpenAQ)
+ */
+crons.hourly(
+  "hourly-urban-heat-update",
+  { minuteUTC: 45 },
+  internal.urbanHeat.fetchUrbanHeatAllCities,
+  {}
+);
+
 export default crons;
